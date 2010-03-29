@@ -1,0 +1,521 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Perceiveit.Data.Query.DBAggregate" Collapsed="true">
+    <Position X="39" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAEAAIAAAAAABAAAQYAAAAAAAAAAAAAAAAQAEA=</HashCode>
+      <FileName>Query\DBAggregate.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBAggregateRef" Collapsed="true">
+    <Position X="39" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAABQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBAggregate.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBCalc" Collapsed="true">
+    <Position X="40.75" Y="8" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAQIAQAAAAAAAAAABACAAEQoACCCACAAAAAA=</HashCode>
+      <FileName>Query\DBCalc.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBCalcRef" Collapsed="true">
+    <Position X="40.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAABQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBCalc.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBToken">
+    <Position X="21" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBToken.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBClause" Collapsed="true">
+    <Position X="21" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAEIAAQAAAYgAEAAQAAAAADAAAAAAIAAAAAoAIAAAA=</HashCode>
+      <FileName>Query\DBClause.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBCalculableClause" Collapsed="true">
+    <Position X="41.25" Y="6.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAYAUBAAABACAAAAIAACAACAAQAAA=</HashCode>
+      <FileName>Query\DBCalculableClause.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBClauseList">
+    <Position X="24.75" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAgAAAAAA=</HashCode>
+      <FileName>Query\DBClauseList.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBClauseList&lt;T&gt;" Collapsed="true">
+    <Position X="24.75" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBClauseList.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBComparison" Collapsed="true">
+    <Position X="35.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAAACAAAAAAAABAAAEAgCA=</HashCode>
+      <FileName>Query\DBComparison.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBValueGroupRef" Collapsed="true">
+    <Position X="22.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAAAAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBValueGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBConst" Collapsed="true">
+    <Position X="42.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAAAIAAAQAQAgoAAAAAAACBAQAEQIgAAAQAAA=</HashCode>
+      <FileName>Query\DBConst.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBConstRef" Collapsed="true">
+    <Position X="42.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAAAAAAAAAAAAQAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBConst.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBExpressionSet" Collapsed="true">
+    <Position X="8.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAACAAAAAAA=</HashCode>
+      <FileName>Query\Internal\DBExpressionSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBCalculableExpressionSet" Collapsed="true">
+    <Position X="7.75" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAYAUBAAAAACAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Query\Internal\DBCalculableExpressionSet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBField" Collapsed="true">
+    <Position X="46.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAoACAIAAAAAAAAAAAQAQAAAAAQAAAAAAAAAAAgAA=</HashCode>
+      <FileName>Query\DBField.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBFieldRef" Collapsed="true">
+    <Position X="46" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAIAAABQIQAAAAAAAAAAAAAAAAQAAAAAAAAAAQAAA=</HashCode>
+      <FileName>Query\DBField.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBFieldAllRef" Collapsed="true">
+    <Position X="47.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAIAAAAQAQAAAAAAAAAAQAAAAAQAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBField.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBFieldList" Collapsed="true">
+    <Position X="25.5" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBField.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBFilterSet" Collapsed="true">
+    <Position X="11.25" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NAAAAAAAAQEAAAAAAIAAAAAAEAEAAAIgAACAAIAAAAA=</HashCode>
+      <FileName>Query\Internal\DBFilterSet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBFunction" Collapsed="true">
+    <Position X="15" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAMAAAAAARACABIEAEAAAAAIAIAAAAIQAAA=</HashCode>
+      <FileName>Query\DBFunction.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBJoin" Collapsed="true">
+    <Position X="16.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAEEAAggAIAQAAAAAAAAAQAAwAAgAAAAAAIA=</HashCode>
+      <FileName>Query\DBJoin.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBJoinRef" Collapsed="true">
+    <Position X="16.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBJoin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBJoinList" Collapsed="true">
+    <Position X="23.75" Y="14.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBJoin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBOrder" Collapsed="true">
+    <Position X="28" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIEAAAACAAAAAAAAAAgAAACAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBOrder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBOrderRef" Collapsed="true">
+    <Position X="28" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBOrder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBOrderSet" Collapsed="true">
+    <Position X="6" Y="9" Width="1.5" />
+    <InheritanceLine Type="Perceiveit.Data.Query.DBExpressionSet" ManuallyRouted="true" FixedFromPoint="true">
+      <Path>
+        <Point X="9.5" Y="7.38" />
+        <Point X="9.5" Y="8.625" />
+        <Point X="6.75" Y="8.625" />
+        <Point X="6.75" Y="9" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>NIAAAAAAAQEAAAQAAAAAAAAAAAAAAAIAAACAAAAAEAA=</HashCode>
+      <FileName>Query\Internal\DBOrderSet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBParam" Collapsed="true">
+    <Position X="19.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAIAAAgQgAwAAChAAAQIBAAgACIBAAAooAIAAAA=</HashCode>
+      <FileName>Query\DBParam.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBParamRef" Collapsed="true">
+    <Position X="18.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBParam.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBQuery">
+    <Position X="4" Y="8.25" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>ACRAEABoCCAAAAQAAAAAAAACAAAgEBCAAAAA0AAgCAA=</HashCode>
+      <FileName>Query\DBQuery.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBSelectQuery" Collapsed="true">
+    <Position X="5.75" Y="13.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>NoECYACGAYUWCAAgBAQgAQQFEAEIRAKCQCBGSACAoIQ=</HashCode>
+      <FileName>Query\DBSelectQuery.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBSelectSet" Collapsed="true">
+    <Position X="7" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NABAAAAEASQAAEAAAAAAAAAACCAAQAaAAACAQIAAAAA=</HashCode>
+      <FileName>Query\Internal\DBSelectSet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBStatementBuilder">
+    <Position X="0.75" Y="0.5" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Perceiveit.Data.Query.DBStatementBuilder.StatementParameter" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Query\DBStatementBuilder.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="Perceiveit.Data.Query.DBStatementBuilder.StatementParameterList" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Query\DBStatementBuilder.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>2dBNyAxESXPlblE0iVsGJFYFE4wCHajgE9SUJRe8VFE=</HashCode>
+      <FileName>Query\DBStatementBuilder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBTable" Collapsed="true">
+    <Position X="24.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAoACAAAIAAAiAAAQAQQQAAAAEQAAgAAAAAAAQAIA=</HashCode>
+      <FileName>Query\DBTable.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBTableRef" Collapsed="true">
+    <Position X="24.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBTable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBTableSet" Collapsed="true">
+    <Position X="9.5" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NgAAgAAAAQAQACAAAAQAAAAAAAAAQAIgBAAAAAAAAIA=</HashCode>
+      <FileName>Query\Internal\DBTableSet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBUpdateQuery" Collapsed="true">
+    <Position X="4" Y="13.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>HAEAAAAAAcAABgAAAAAAAAAAAIEAAAIAQACGAICAAKA=</HashCode>
+      <FileName>Query\DBUpdateQuery.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBInsertQuery" Collapsed="true">
+    <Position X="7.5" Y="13.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>FAAAAAAQAQAAAAAAAACAAAAgEAAAAAIgQAAiQEgAgCA=</HashCode>
+      <FileName>Query\DBInsertQuery.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBDeleteQuery" Collapsed="true">
+    <Position X="9.25" Y="13.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>NAEAAAAAAYAAAAAAAAAAAAABAAEAAAIAQCAGCCCCAIA=</HashCode>
+      <FileName>Query\DBDeleteQuery.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBScript" Collapsed="true">
+    <Position X="12.75" Y="13.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>FAIIAEAAAQAABAAAAQAAgAAAAAAAAQIAAAAAUAAAAAA=</HashCode>
+      <FileName>Query\DBScript.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBSubQuery" Collapsed="true">
+    <Position X="29.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAIABAAAIAgAgAAAQAAQAAAAAEQAAgAAAEAAAAAIA=</HashCode>
+      <FileName>Query\DBSubQuery.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBExecQuery" Collapsed="true">
+    <Position X="11" Y="13.75" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Properties" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>FAAAoQCAAQCQAACAAAAAABAAAAACAAIAAIAAAAIACAA=</HashCode>
+      <FileName>Query\DBExecQuery.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBValueGroup" Collapsed="true">
+    <Position X="22.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAEAAIAAAAAABAAAAAEAIAAAAAEAAA=</HashCode>
+      <FileName>Query\DBValueGroup.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBUnaryComparisonRef" Collapsed="true">
+    <Position X="33.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAEAAAAAAAAAAAQIAQAABAAAAAAA=</HashCode>
+      <FileName>Query\DBComparison.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBBinaryComparisonRef" Collapsed="true">
+    <Position X="35.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAgAAAAAAAAAAEQoACACAAAAAAAA=</HashCode>
+      <FileName>Query\DBComparison.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBTertiaryComparisonRef" Collapsed="true">
+    <Position X="37" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAAAAAAQAQAAwAIAAAAAAAAAAAEAICEABgAAAAAAA=</HashCode>
+      <FileName>Query\DBComparison.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBFunctionRef" Collapsed="true">
+    <Position X="15" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBFunction.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBDelegateParam" Collapsed="true">
+    <Position X="20.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAIAAAASAAAAEAAAgAAAAABAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>Query\DBParam.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBTop" Collapsed="true">
+    <Position X="31.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAEgAAAAAAAAIAAAAAQAACAAAAAE=</HashCode>
+      <FileName>Query\DBTop.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBTopRef" Collapsed="true">
+    <Position X="31.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAIAAAAQAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBTop.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBAssign" Collapsed="true">
+    <Position X="26.25" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAQAAAAABAgAAAAAAAAEABAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBAssign.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBAssignRef" Collapsed="true">
+    <Position X="26.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAAAAAAQAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBAssign.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBBooleanOp" Collapsed="true">
+    <Position X="44.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAEQgACADAAAAAIAA=</HashCode>
+      <FileName>Query\DBBooleanOp.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBBooleanOpRef" Collapsed="true">
+    <Position X="44.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>FAAAIAAAAQAQAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBBooleanOp.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBGroupBySet" Collapsed="true">
+    <Position X="13" Y="9" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NAAAAgKEAQAAAAAAAAAAAACAAAAAAAIAAASAAIAAAAA=</HashCode>
+      <FileName>Query\Internal\DBGroupBySet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBValueSet" Collapsed="true">
+    <Position X="8.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NIAAAAAAAQAAAAAAAAAAQAAAACAAAAIAAACgAIAAAEA=</HashCode>
+      <FileName>Query\Internal\DBValueSet.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Perceiveit.Data.Query.DBStatement" Collapsed="true">
+    <Position X="4" Y="6.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\DBStatement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Perceiveit.Data.Query.IDBValueSource">
+    <Position X="17.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAgAACAAAAQAAAAAACAAAAAgAAAAAAA=</HashCode>
+      <FileName>Query\_Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Perceiveit.Data.Query.IDBAlias">
+    <Position X="13.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\_Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Perceiveit.Data.Query.IDBBoolean">
+    <Position X="17.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>Query\_Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Perceiveit.Data.Query.IDBCalculable">
+    <Position X="13.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\_Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Perceiveit.Data.Query.IDBArregate">
+    <Position X="15.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Query\_Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Perceiveit.Data.Query.IDBComparable">
+    <Position X="15.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAA=</HashCode>
+      <FileName>Query\_Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

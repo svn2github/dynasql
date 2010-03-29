@@ -1,0 +1,200 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5A3E3137-F7D8-4416-B6A0-2F5902F5754D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Perceiveit.Data</RootNamespace>
+    <AssemblyName>Perceiveit.Data</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DBDatabase_DataSetMethods.cs" />
+    <Compile Include="DBHelper.cs" />
+    <Compile Include="Query\DBDeclaration.cs" />
+    <Compile Include="DBFactory.cs" />
+    <Compile Include="Query\DBReturn.cs" />
+    <Compile Include="Query\DBSet.cs" />
+    <Compile Include="Query\DBStatement.cs" />
+    <Compile Include="MySqlClient\DBMySqlFactory.cs" />
+    <Compile Include="MySqlClient\DBMySqlSchemaProvider.cs" />
+    <Compile Include="MySqlClient\DBMySqlStatementBuilder.cs" />
+    <Compile Include="OleDb\DBOleDbFactory.cs" />
+    <Compile Include="OleDb\DBOleDbSchemaProvider.cs" />
+    <Compile Include="OleDb\DBOleDbStatementBuilder.cs" />
+    <Compile Include="Schema\DBSchemaProvider_Table.cs" />
+    <Compile Include="Schema\DBSchemaProvider_View.cs" />
+    <Compile Include="Schema\DBSchemaTableColumn.cs" />
+    <Compile Include="Schema\DBSchemaViewColumn.cs" />
+    <Compile Include="Schema\_Exceptions.cs" />
+    <Compile Include="SqlClient\DBSqlClientFactory.cs" />
+    <Compile Include="SqlClient\DBSQLClientSchemaProvider.cs" />
+    <Compile Include="SqLite\DBSqLiteFactory.cs" />
+    <Compile Include="SqLite\DBSqLiteSchemaProvider.cs" />
+    <Compile Include="SqLite\DBStatementSQLiteBuilder.cs" />
+    <Compile Include="SupportedSchemaOptions.cs" />
+    <Compile Include="Query\DBCalculableClause.cs" />
+    <Compile Include="Schema\DBSchemaProvider.cs" />
+    <Compile Include="Query\DBToken.cs" />
+    <Compile Include="Query\Internal\DBCalculableExpressionSet.cs" />
+    <Compile Include="Query\DBAggregate.cs" />
+    <Compile Include="Query\DBAssign.cs" />
+    <Compile Include="Query\DBExecQuery.cs" />
+    <Compile Include="Query\DBValueGroup.cs" />
+    <Compile Include="Query\Internal\DBAssignSet.cs" />
+    <Compile Include="Query\DBBooleanOp.cs" />
+    <Compile Include="Query\DBCalc.cs" />
+    <Compile Include="DBDatabaseProperties.cs" />
+    <Compile Include="Query\DBDeleteQuery.cs" />
+    <Compile Include="Query\Internal\DBDisposerDataReader.cs" />
+    <Compile Include="Query\Internal\DBExpressionSet.cs" />
+    <Compile Include="Query\DBComparison.cs" />
+    <Compile Include="Query\DBConst.cs" />
+    <Compile Include="DBDatabase.cs" />
+    <Compile Include="Query\Internal\DBFilterSet.cs" />
+    <Compile Include="Query\DBFunction.cs" />
+    <Compile Include="Query\Internal\DBGroupBySet.cs" />
+    <Compile Include="Query\DBInsertQuery.cs" />
+    <Compile Include="Query\DBJoin.cs" />
+    <Compile Include="Query\DBScript.cs" />
+    <Compile Include="Query\DBOrder.cs" />
+    <Compile Include="Query\Internal\DBOrderSet.cs" />
+    <Compile Include="Query\DBParam.cs" />
+    <Compile Include="Query\DBQuery.cs" />
+    <Compile Include="Query\DBSelectQuery.cs" />
+    <Compile Include="Query\DBSubQuery.cs" />
+    <Compile Include="Query\DBTable.cs" />
+    <Compile Include="Query\Internal\DBTableSet.cs" />
+    <Compile Include="Query\DBTop.cs" />
+    <Compile Include="Query\DBUpdateQuery.cs" />
+    <Compile Include="Query\Internal\DBValueSet.cs" />
+    <Compile Include="Schema\DBSchemaColumn.cs" />
+    <Compile Include="Schema\DBSchemaFunction.cs" />
+    <Compile Include="Schema\DBSchemaIndex.cs" />
+    <Compile Include="Schema\DBSchemaIndexColumn.cs" />
+    <Compile Include="Schema\DBSchemaItem.cs" />
+    <Compile Include="Schema\DBSchemaItemCollection.cs" />
+    <Compile Include="Schema\DBSchemaItemRef.cs" />
+    <Compile Include="Schema\DBSchemaParameter.cs" />
+    <Compile Include="Schema\DBSchemaSproc.cs" />
+    <Compile Include="Schema\DBSchemaTable.cs" />
+    <Compile Include="Schema\DBSchemaView.cs" />
+    <Compile Include="_Delegates.cs" />
+    <Compile Include="Query\_Interfaces.cs" />
+    <Compile Include="Query\XmlHelper.cs" />
+    <Compile Include="Query\XmlFactory.cs" />
+    <Compile Include="Query\XmlReaderContext.cs" />
+    <Compile Include="Query\XmlWriterContext.cs" />
+    <Compile Include="_Enumerations.cs" />
+    <Compile Include="Query\DBClause.cs" />
+    <Compile Include="Query\DBClauseList.cs" />
+    <Compile Include="Query\DBField.cs" />
+    <Compile Include="Query\Internal\DBSelectSet.cs" />
+    <Compile Include="Query\DBStatementBuilder.cs" />
+    <Compile Include="SqlClient\DBSqlClientStatementBuilder.cs" />
+    <Compile Include="Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Content Include="COPYING.txt" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="Query\DynaSQL.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Errors.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

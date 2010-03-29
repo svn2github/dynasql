@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Perceiveit.Data.DBDatabase">
+    <Position X="1.25" Y="0.5" Width="3" />
+    <TypeIdentifier>
+      <FileName>DBDatabase.cs</FileName>
+      <HashCode>QAAAKAEBAAAAEAEgKAAEAEAAgAAAAFEBQCBCBEAQAgA=</HashCode>
+    </TypeIdentifier>
+    <Members>
+      <Field Name="_connectionStr" Hidden="true" />
+      <Field Name="_factory" Hidden="true" />
+      <Field Name="_properties" Hidden="true" />
+      <Field Name="_provname" Hidden="true" />
+    </Members>
+    <NestedTypes>
+      <Class Name="Perceiveit.Data.DBDatabase.DBOwningTransaction" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>DBDatabase.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+  </Class>
+</ClassDiagram>
