@@ -81,7 +81,9 @@ namespace Perceiveit.Data.Query
         //
 
         #region protected DBField()
-
+        /// <summary>
+        /// protected ctor
+        /// </summary>
         protected DBField()
         {
         }
@@ -93,7 +95,10 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBField Field()
-
+        /// <summary>
+        /// Creates a new empty DBField reference
+        /// </summary>
+        /// <returns></returns>
         public static DBField Field()
         {
             DBFieldRef fref = new DBFieldRef();
@@ -104,8 +109,15 @@ namespace Perceiveit.Data.Query
 
         #region public static DBField Field(string field)
 
+        /// <summary>
+        /// Creates a new DBField reference with the specified name - do not enclose in delimiters
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns></returns>
         public static DBField Field(string field)
         {
+            if (string.IsNullOrEmpty(field))
+                throw new ArgumentNullException("field");
             DBFieldRef fref = new DBFieldRef();
             fref.Name = field;
 
@@ -116,8 +128,18 @@ namespace Perceiveit.Data.Query
 
         #region public static DBField Field(string table, string field)
 
+        /// <summary>
+        /// Creates a new DBField reference with the specified table.field name - do not enclose in delimiters
+        /// </summary>
+        /// <param name="table">The table (or table alias) this field belongs to</param>
+        /// <param name="field">The name of the field</param>
+        /// <returns></returns>
         public static DBField Field(string table, string field)
         {
+            if (string.IsNullOrEmpty(field))
+                throw new ArgumentNullException("field");
+            //we can get away with table being empty or null.
+
             DBFieldRef fref = new DBFieldRef();
             fref.Name = field;
             fref.Table = table;
@@ -128,7 +150,13 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBField Field(string owner, string table, string field)
-
+        /// <summary>
+        /// Creates a new DBField reference with the specified owner.table.field name - do not enclose in delimiters
+        /// </summary>
+        /// <param name="table">The table (or table alias) this field belongs to</param>
+        /// <param name="field">The name of the field</param>
+        /// <param name="owner">The schema owner</param>
+        /// <returns></returns>
         public static DBField Field(string owner, string table, string field)
         {
             DBFieldRef fref = new DBFieldRef();
@@ -144,6 +172,10 @@ namespace Perceiveit.Data.Query
 
         #region public static DBField AllFields()
 
+        /// <summary>
+        /// Creates a new DBField reference to all fields
+        /// </summary>
+        /// <returns></returns>
         public static DBField AllFields()
         {
             DBFieldAllRef all = new DBFieldAllRef();
@@ -155,6 +187,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBField AllFields(string table)
 
+        /// <summary>
+        /// Creates a new DBField reference to all fields (*) in specified table - do not enclose in delimiters
+        /// </summary>
+        /// <param name="table">The table (or table alias) the fields belong to</param>
+        /// <returns></returns>
         public static DBField AllFields(string table)
         {
             DBFieldAllRef all = new DBFieldAllRef();
@@ -166,6 +203,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBField AllFields(string owner, string table)
 
+        /// <summary>
+        /// Creates a new DBField reference to all fields (*) with the specified owner.table - do not enclose in delimiters
+        /// </summary>
+        /// <param name="table">The table (or table alias) the fields belong to</param>
+        /// <param name="owner">The schema owner</param>
+        /// <returns></returns>
         public static DBField AllFields(string owner, string table)
         {
             DBFieldAllRef all = new DBFieldAllRef();
@@ -176,9 +219,20 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        /// <summary>
+        /// Sets the alias for this field reference - Inheritors must override
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <returns></returns>
         public abstract DBField As(string alias);
 
     }
+
+    //
+    // sub classes
+    //
+
+    #region internal class DBFieldRef : DBField, IDBAlias
 
     internal class DBFieldRef : DBField, IDBAlias
     {
@@ -307,6 +361,13 @@ namespace Perceiveit.Data.Query
         #endregion
     }
 
+    #endregion
+
+    #region public class DBFieldAllRef : DBField
+    
+    /// <summary>
+    /// Defines a reference to all fields e.g. SELECT * FROM ...
+    /// </summary>
     public class DBFieldAllRef : DBField
     {
 
@@ -330,7 +391,9 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region protected override string XmlElementName {get;}
-
+        /// <summary>
+        /// Gets the element name for this Field
+        /// </summary>
         protected override string XmlElementName
         {
             get { return XmlHelper.AllFields; }
@@ -338,16 +401,31 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public override DBField As(string alias) - Throws not supported exception
+
+        /// <summary>
+        /// IDBAlias override - NOT SUPPORTED (cannot alias all fields)
+        /// </summary>
+        /// <param name="alias"></param>
+        /// <returns></returns>
         public override DBField As(string alias)
         {
             throw new NotSupportedException("The Alias As method is not supported on an all field reference.");
         }
+
+        #endregion
+
         //
         // SQL Statement build methods
         //
 
         #region public override bool BuildStatement(DBStatementBuilder builder)
 
+        /// <summary>
+        /// Outputs the AllFields reference onto the statement builder
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.WriteAllFieldIdentifier(this.Owner, this.Table);
@@ -363,6 +441,12 @@ namespace Perceiveit.Data.Query
 
         #region protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
 
+        /// <summary>
+        /// Overrides  the default implementation to read specfic attributes for the all fields element
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {
             bool b;
@@ -386,7 +470,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
-
+        /// <summary>
+        /// Overrides the default behavior to write the attributes for the All fields element.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
             if (string.IsNullOrEmpty(this.Owner) == false)
@@ -402,7 +491,20 @@ namespace Perceiveit.Data.Query
 
     }
 
+    #endregion
+
+    //
+    // collection classes
+    //
+
+    #region internal class DBFieldList : DBClauseList<DBField>
+
+    /// <summary>
+    /// Defines a list of DBFields
+    /// </summary>
     internal class DBFieldList : DBClauseList<DBField>
     {
     }
+
+    #endregion
 }

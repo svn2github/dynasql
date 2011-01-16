@@ -22,60 +22,17 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
-    public class DBTokenList : List<DBToken>
-    {
-        public virtual string ClauseSeparator { get { return ", "; } }
-
-        public virtual string ListStart { get { return ""; } }
-        public virtual string ListEnd { get { return ""; } }
-
-        public virtual bool BuildStatement(DBStatementBuilder builder)
-        {
-            return this.BuildStatement(builder, false, false);
-        }
-
-        public virtual bool BuildStatement(DBStatementBuilder builder, bool eachOnNewLine, bool indent)
-        {
-            if (this.Count > 0)
-            {
-                bool outputSeparator = false;
-                int count = 0;
-
-                builder.WriteRaw(this.ListStart);
-
-                for (int i = 0; i < this.Count; i++)
-                {
-                    DBToken clause = this[i];
-
-                    if (outputSeparator)
-                    {
-                        builder.AppendReferenceSeparator();
-
-                        if (eachOnNewLine)
-                            builder.BeginNewLine();
-                        count++;
-                    }
-                    outputSeparator = clause.BuildStatement(builder);
-                }
-
-                builder.WriteRaw(this.ListEnd);
-
-                return count > 0;
-            }
-            else
-                return false;
-        }
-
-        
-    }
-
-    public class DBTokenList<T> : DBTokenList where T : DBToken
-    {
-        
-    }
-
+    /// <summary>
+    /// A list of clauses that supports statment building and xml generation
+    /// </summary>
     public class DBClauseList : DBTokenList<DBClause>
     {
+        /// <summary>
+        /// Outputs the XML for each element in the list
+        /// </summary>
+        /// <param name="xmlWriter"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public bool WriteXml(System.Xml.XmlWriter xmlWriter, XmlWriterContext context)
         {
             if (this.Count > 0)
@@ -90,7 +47,13 @@ namespace Perceiveit.Data.Query
                 return false;
         }
 
-
+        /// <summary>
+        /// Parses the XML data and generates the list of DBClauses from this.
+        /// </summary>
+        /// <param name="endElement"></param>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         public bool ReadXml(string endElement, System.Xml.XmlReader reader, XmlReaderContext context)
         {
             bool isEmpty = reader.IsEmptyElement && XmlHelper.IsElementMatch(endElement, reader, context);
@@ -119,6 +82,10 @@ namespace Perceiveit.Data.Query
         }
     }
 
+    /// <summary>
+    /// Generic version of the DBClauseList
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class DBClauseList<T> : DBClauseList where T : DBClause
     {
     }

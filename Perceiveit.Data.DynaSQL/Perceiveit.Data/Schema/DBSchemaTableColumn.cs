@@ -19,19 +19,20 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
-
+using xs = System.Xml.Serialization;
 namespace Perceiveit.Data.Schema
 {
+    /// <summary>
+    /// Defines the schema of a table column in a database
+    /// </summary>
     [Serializable()]
     public class DBSchemaTableColumn : DBSchemaColumn
     {
 
         #region ivars
 
-        private bool _hasDefault = false;
-        private string _default = string.Empty;
-        private bool _auto = false;
-        private bool _pk = false;
+        private string _default = null;
+        
 
         #endregion
 
@@ -44,10 +45,11 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets whether this column has a default value
         /// </summary>
+        [xs.XmlIgnore()]
         public bool HasDefault
         {
-            get { return this._hasDefault; }
-            set { this._hasDefault = value; }
+            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.HasDefault); }
+            set { this.SetColumnFlag(DBSchemaColumnFlags.HasDefault, value); }
         }
 
         #endregion
@@ -57,12 +59,14 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets the DbAssigned default value for this Table column
         /// </summary>
+        [xs.XmlElement("default")]
         public string DefaultValue
         {
             get { return this._default; }
             set 
             { 
                 this._default = value;
+                this.HasDefault = !string.IsNullOrEmpty(value);
             }
         }
 
@@ -74,10 +78,11 @@ namespace Perceiveit.Data.Schema
         /// Gets or Sets the flag that identifies 
         /// if this columns value is assigned by the database
         /// </summary>
+        [xs.XmlIgnore()]
         public bool AutoAssign
         {
-            get { return this._auto; }
-            set { this._auto = value; }
+            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.AutoAssign); }
+            set { this.SetColumnFlag(DBSchemaColumnFlags.AutoAssign,value); }
         }
 
 
@@ -89,10 +94,11 @@ namespace Perceiveit.Data.Schema
         /// Gets or Sets the flag that identifies
         /// if this column forms (part of) the primary key
         /// </summary>
+        [xs.XmlIgnore()]
         public bool PrimaryKey
         {
-            get { return this._pk; }
-            set { this._pk = value; }
+            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.PrimaryKey); }
+            set { this.SetColumnFlag(DBSchemaColumnFlags.PrimaryKey, value); }
         }
 
         #endregion
@@ -102,7 +108,9 @@ namespace Perceiveit.Data.Schema
         //
 
         #region public DBSchemaTableColumn()
-
+        /// <summary>
+        /// Creates a new empty DBschemaTableColumn definition
+        /// </summary>
         public DBSchemaTableColumn()
             : this(string.Empty)
         {
@@ -112,6 +120,10 @@ namespace Perceiveit.Data.Schema
 
         #region public DBSchemaTableColumn(string name)
 
+        /// <summary>
+        /// Creates a new DBSchemaTableColumn with the specified name
+        /// </summary>
+        /// <param name="name"></param>
         public DBSchemaTableColumn(string name)
             : base(name)
         {
@@ -123,6 +135,10 @@ namespace Perceiveit.Data.Schema
         // object overrides
         // 
 
+        /// <summary>
+        /// Returns a string representation of the table column
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("Column '{0}' {1} (Runtime Type: {10}, Size: {2}, Read Only:{3}, Auto Assign:{4}, Primary Key:{5}, Nullable:{6}, HasDefault:{8} ({7}), Ordinal:{9})",
@@ -137,12 +153,18 @@ namespace Perceiveit.Data.Schema
     [Serializable()]
     public class DBSchemaTableColumnCollection : KeyedCollection<string, DBSchemaTableColumn>
     {
-
+        /// <summary>
+        /// Creates a new collection
+        /// </summary>
         public DBSchemaTableColumnCollection()
             : base(StringComparer.InvariantCultureIgnoreCase)
         { }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         protected override string GetKeyForItem(DBSchemaTableColumn item)
         {
             string name = item.Name;
@@ -151,12 +173,33 @@ namespace Perceiveit.Data.Schema
 
             return name;
         }
-
+        
+        /// <summary>
+        /// Gets all the colums in this collection as an array
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<DBSchemaColumn> GetColumns()
         {
             DBSchemaTableColumn[] cols = new DBSchemaTableColumn[this.Count];
             this.CopyTo(cols, 0);
             return cols;
+        }
+
+        /// <summary>
+        /// attempts to get the column with the specified name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="tblcol"></param>
+        /// <returns></returns>
+        internal bool TryGetColumn(string name, out DBSchemaTableColumn tblcol)
+        {
+            if (this.Count == 0)
+            {
+                tblcol = null;
+                return false;
+            }
+            else
+                return this.Dictionary.TryGetValue(name, out tblcol);
         }
     }
 }

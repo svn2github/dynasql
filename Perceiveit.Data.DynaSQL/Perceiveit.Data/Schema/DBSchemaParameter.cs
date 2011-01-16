@@ -23,12 +23,16 @@ using System.Xml.Serialization;
 
 namespace Perceiveit.Data.Schema
 {
+    /// <summary>
+    /// Defines a existing parameter used when calling stored procedures
+    /// </summary>
     public class DBSchemaParameter
     {
 
         #region ivars
 
         private string _pname;
+        private string _invarname;
         private System.Data.DbType _pdbtype = System.Data.DbType.Object;
         private Type _pruntype = typeof(Object);
         private int _psize = -1;
@@ -46,16 +50,32 @@ namespace Perceiveit.Data.Schema
         #region public string Name {get;set;}
 
         /// <summary>
-        /// Gets or sets the name of the parameter
+        /// Gets or sets the native name of the parameter - specific to the provider
         /// </summary>
         [XmlAttribute("name")]
-        public string Name 
+        public string NativeName 
         {
             get { return this._pname; }
             set { this._pname = value; }
         }
 
         #endregion
+
+        #region public string Name {get;set;}
+
+        /// <summary>
+        /// Gets or sets the name of the parameter without any provider specific identifiers
+        /// </summary>
+        [XmlAttribute("invariant-name")]
+        public string InvariantName
+        {
+            get { return this._invarname; }
+            set { this._invarname = value; }
+        }
+
+        #endregion
+
+
 
         #region public DbType DbType {get;set;}
 
@@ -220,10 +240,13 @@ namespace Perceiveit.Data.Schema
         //
 
         #region public override string ToString()
-
+        /// <summary>
+        /// Returns a string representation of this parameter
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("Param: [{0}] (DbType: {1} ({5}), Direction : {2}, Position: {3}, Size: {4})", this.Name, this.DbType, this.Direction, this.ParameterIndex, this.ParameterSize, this.RuntimeType);
+            return string.Format("Param: [{0}] (DbType: {1} ({5}), Direction : {2}, Position: {3}, Size: {4})", this.InvariantName, this.DbType, this.Direction, this.ParameterIndex, this.ParameterSize, this.RuntimeType);
         }
 
         #endregion
@@ -237,7 +260,7 @@ namespace Perceiveit.Data.Schema
     /// Note: the string comparison is case INsensitive
     /// </summary>
     public class DBSchemaParameterCollection 
-        : System.Collections.ObjectModel.KeyedCollection<string, DBSchemaParameter>
+        : List<DBSchemaParameter>
     {
 
         //
@@ -250,35 +273,11 @@ namespace Perceiveit.Data.Schema
         /// Creates a new DBSchemaParameterCollection
         /// </summary>
         public DBSchemaParameterCollection()
-            : base(StringComparer.InvariantCultureIgnoreCase)
+            : base()
         {
         }
 
         #endregion
-
-        //
-        //protected overrides
-        //
-
-        #region protected override string GetKeyForItem(DBSchemaParameter item)
-
-        /// <summary>
-        /// Overrides the base abstract method to return the name of the parameter
-        /// </summary>
-        /// <param name="item">The item to return the name for</param>
-        /// <returns>The DbSchemaParameters name</returns>
-        protected override string GetKeyForItem(DBSchemaParameter item)
-        {
-            string name = item.Name;
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentNullException("item.Name");
-
-            return name;
-        }
-
-        #endregion
-
-        
 
     }
 

@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="Perceiveit"
+    targetNamespace="http://schemas.perceiveit.co.uk/Data/Configuration.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://schemas.perceiveit.co.uk/Data/Configuration.xsd"
+    xmlns:mstns="http://schemas.perceiveit.co.uk/Data/Configuration.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  
+  <!-- Root configuration schema for the Perceiveit.Data.DynaSQL library -->
+  
+  
+  <xs:element name="Perceiveit.Data" type="DataRootType" >
+  </xs:element>
+  
+  
+
+  <xs:complexType name="DataRootType" >
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element name="Profilers" type="DataProfilersType" maxOccurs="1" minOccurs="0"/>
+      <xs:element name="Implementations" type="DataImplementationsType" maxOccurs="1" minOccurs="0" />
+    </xs:sequence>
+    <xs:attribute name="wrap-exceptions" type="xs:boolean" />
+  </xs:complexType>
+  
+  <!-- Profilers Section:
+       A configuration element that defines any data profilers to automatically attach to any new
+       instances of the DBDatabase. The auto-start attribute specifys whether profiling will begin
+       straight away, or only after explictly calling the StartProfiling method of the DBDatabase.
+       
+       Each profiler can have its own settings for custom configuration. Consult the documentation
+       of the profiler to find out what these are.
+  -->
+  <!--
+  <Profilers>
+    <Clear />
+    <Attach name="customprofiler" type="type and assembly name" >
+      <Clear />
+      <Set key="name">[value]</Set>
+      <Remove key="name" />
+    </Attach>
+    <Detach name="perceiveit.data.customprovider" />
+  </Profilers>
+  -->
+  <xs:complexType name="DataProfilersType" >
+    <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+      <xs:choice>
+        <xs:element name="Clear" />
+        <xs:element name="Attach" type="AttachProfilerType" ></xs:element>
+        <xs:element name="Detach" >
+          <xs:complexType>
+            <xs:attribute name="name" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="auto-start" type="xs:boolean" use="optional" default="true"  />
+    
+  </xs:complexType>
+
+  <xs:complexType name="AttachProfilerType">
+    <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+      <xs:choice>
+        <xs:element name="Clear" />
+        <xs:element name="Remove" >
+          <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Set" >
+          <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required" />
+            <xs:attribute name="value" type="xs:string" use="required" />
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" />
+    <xs:attribute name="factory" type="xs:string" />
+  </xs:complexType>
+
+  <!-- Provider Implementations section: 
+       A configuration element that modifies the collection of defined implementations
+       used in the construction of DBDatabase instances and other provider dependant types.
+       The provider name must also be registered as a standard .NET data provider -->
+  
+  <!--
+  <Implementations>
+    <Clear />
+    <Register provider="perceiveit.data.customprovider" implementation-type="type and assembly name" />
+    <Remove provider="perceiveit.data.customprovider" />
+  </Implementations>
+  -->
+  
+  <xs:complexType name="DataImplementationsType" >
+    <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+      <xs:choice>
+        <xs:element name="Clear" />
+        <xs:element name="Register" >
+          <xs:complexType>
+            <xs:attribute name="provider" type="xs:string" />
+            <xs:attribute name="implementation-type" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Remove" >
+          <xs:complexType>
+            <xs:attribute name="provider" type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

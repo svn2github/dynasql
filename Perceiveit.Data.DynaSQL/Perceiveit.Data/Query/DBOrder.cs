@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a single order by clause
+    /// </summary>
     public abstract class DBOrder : DBClause
     {
         //
@@ -31,7 +34,9 @@ namespace Perceiveit.Data.Query
         #region public DBClause Clause {get;set;}
 
         private DBClause _clases;
-
+        /// <summary>
+        /// Gets or sets the order by XXX clause
+        /// </summary>
         public DBClause Clause
         {
             get { return _clases; }
@@ -43,7 +48,9 @@ namespace Perceiveit.Data.Query
         #region public Order Order {get;set;}
 
         private Order _order;
-
+        /// <summary>
+        /// Gets or sets the direction of sort
+        /// </summary>
         public Order Order
         {
             get { return _order; }
@@ -57,7 +64,12 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBOrder OrderBy(Order order, DBClause clause)
-
+        /// <summary>
+        /// Creates a new OrderBy clause
+        /// </summary>
+        /// <param name="order"></param>
+        /// <param name="clause"></param>
+        /// <returns></returns>
         public static DBOrder OrderBy(Order order, DBClause clause)
         {
             DBOrderRef orderC = new DBOrderRef();
@@ -69,7 +81,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region internal static DBClause OrderBy()
-
+        /// <summary>
+        /// Creates a new empty order by clause
+        /// </summary>
+        /// <returns></returns>
         internal static DBClause OrderBy()
         {
             return OrderBy(Order.Default, null);

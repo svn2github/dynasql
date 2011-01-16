@@ -22,12 +22,19 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a query included within an outer query. 
+    /// For example an inner select on a SELECT statement, or a SELECT for an insert
+    /// </summary>
     public abstract class DBSubQuery : DBClause, IDBAlias, IDBJoinable, IDBBoolean
     {
         #region public string Alias
 
         private string _name;
 
+        /// <summary>
+        /// Gets or sets the alias name of this subquery
+        /// </summary>
         public string Alias
         {
             get { return _name; }
@@ -40,6 +47,9 @@ namespace Perceiveit.Data.Query
 
         private DBQuery _innerq;
 
+        /// <summary>
+        /// Gets or sets the inner query in this sub query
+        /// </summary>
         public DBQuery InnerQuery
         {
             get { return _innerq; }
@@ -56,7 +66,9 @@ namespace Perceiveit.Data.Query
         #region public DBJoinList Joins {get;}
 
         private DBJoinList _joins;
-
+        /// <summary>
+        /// Gets or sets the list of joins between the outer query and this inner query (if any). 
+        /// </summary>
         internal DBJoinList Joins
         {
             get
@@ -69,8 +81,24 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public bool HasJoins
+
+        /// <summary>
+        /// Returns true if there are joins defined between the inner and outer queries
+        /// </summary>
+        public bool HasJoins
+        {
+            get { return this._joins != null && this._joins.Count > 0; }
+        }
+
+        #endregion
+
         #region IDBAlias Members
 
+        /// <summary>
+        /// Applies an alias name to this inner query
+        /// </summary>
+        /// <param name="aliasName"></param>
         public void As(string aliasName)
         {
             this._name = aliasName;
@@ -80,6 +108,14 @@ namespace Perceiveit.Data.Query
 
         #region public DBJoin InnerJoin(DBClause table) + 4 overloads
 
+        /// <summary>
+        /// Adds an INNER JOIN from the results of this sub query to a second table 
+        /// where this tables parent field matched the child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentfield"></param>
+        /// <param name="childfield"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(string table, string parentfield, string childfield)
         {
             DBTable tbl = DBTable.Table(table);
@@ -89,6 +125,14 @@ namespace Perceiveit.Data.Query
             return InnerJoin(tbl, parent, child);
         }
 
+        /// <summary>
+        /// Adds an INNER JOIN from the results of this sub query to a second table 
+        /// where this tables parent field matched the child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentField"></param>
+        /// <param name="childField"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(DBTable table, DBClause parentField, DBClause childField)
         {
             DBJoin join = DBJoin.InnerJoin(table, parentField, childField, Compare.Equals);
@@ -96,6 +140,13 @@ namespace Perceiveit.Data.Query
             return join;
         }
 
+        /// <summary>
+        /// Adds an INNER JOIN from the results of this sub query to a second foreign clause 
+        /// with the comparison
+        /// </summary>
+        /// <param name="foreign"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(DBClause foreign, DBComparison compare)
         {
             DBJoin join = DBJoin.InnerJoin(foreign, compare);
@@ -103,6 +154,48 @@ namespace Perceiveit.Data.Query
             return join;
         }
 
+        #endregion
+
+        //
+        // other joins
+        //
+
+        /// <summary>
+        /// Adds a LEFT OUTER JOIN from the results of this sub query to a second foreign clause 
+        /// with the comparison
+        /// </summary>
+        /// <param name="foreign"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public DBJoin LeftJoin(DBClause foreign, DBComparison compare)
+        {
+            DBJoin join = DBJoin.Join(foreign, JoinType.LeftOuter, compare);
+            this.Joins.Add(join);
+            return join;
+        }
+
+        /// <summary>
+        /// Adds a RIGHT OUTER JOIN from the results of this sub query to a second foreign clause 
+        /// with the comparison
+        /// </summary>
+        /// <param name="foreign"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public DBJoin RightJoin(DBClause foreign, DBComparison compare)
+        {
+            DBJoin join = DBJoin.Join(foreign, JoinType.RightOuter, compare);
+            this.Joins.Add(join);
+            return join;
+        }
+
+        /// <summary>
+        /// Adds a JOIN from the results of this sub query to a second foreign clause 
+        /// with the comparison
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="type"></param>
+        /// <param name="comp"></param>
+        /// <returns></returns>
         public DBJoin Join(DBClause table, JoinType type, DBComparison comp)
         {
             DBJoin join = DBJoin.Join(table, type, comp);
@@ -111,6 +204,12 @@ namespace Perceiveit.Data.Query
             return join;
         }
 
+        /// <summary>
+        /// Adds an INNER JOIN from the results of this sub query to a second foreign clause. 
+        /// Use the ON method to add restrictions
+        /// </summary>
+        /// <param name="table"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(DBClause table)
         {
             DBJoin join = DBJoin.Join(table, JoinType.InnerJoin);
@@ -119,12 +218,17 @@ namespace Perceiveit.Data.Query
             return join;
         }
 
-        #endregion
+        
 
 
 
         #region IDBJoinable Members
 
+        /// <summary>
+        /// Appends restrictions to the last joined clauses and this sub query
+        /// </summary>
+        /// <param name="compare"></param>
+        /// <returns></returns>
         public DBClause On(DBComparison compare)
         {
             IDBJoinable join = (IDBJoinable)this.Joins[this.Joins.Count - 1];
@@ -136,6 +240,11 @@ namespace Perceiveit.Data.Query
 
         #region IDBBoolean Members
 
+        /// <summary>
+        /// Appends an AND restriction to this Sub selects last JOIN statements
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public DBClause And(DBClause reference)
         {
             IDBBoolean join = (IDBBoolean)this.Joins[this.Joins.Count - 1];
@@ -143,6 +252,11 @@ namespace Perceiveit.Data.Query
             return (DBClause)join;
         }
 
+        /// <summary>
+        /// Appends an OR restriction to this sub selectes last JOIN statements
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public DBClause Or(DBClause reference)
         {
             IDBBoolean join = (IDBBoolean)this.Joins[this.Joins.Count - 1];
@@ -158,6 +272,11 @@ namespace Perceiveit.Data.Query
 
         #region internal static DBSubQuery SubSelect(DBQuery inner)
 
+        /// <summary>
+        /// Defines a new SubSelect with an inner query
+        /// </summary>
+        /// <param name="inner"></param>
+        /// <returns></returns>
         internal static DBSubQuery SubSelect(DBQuery inner)
         {
             DBSubQueryRef sub = new DBSubQueryRef();
@@ -170,6 +289,10 @@ namespace Perceiveit.Data.Query
 
         #region internal static DBSubQuery SubSelect()
 
+        /// <summary>
+        /// Defines a new empty sub select
+        /// </summary>
+        /// <returns></returns>
         internal static DBSubQuery SubSelect()
         {
             DBSubQueryRef subref = new DBSubQueryRef();
@@ -179,7 +302,7 @@ namespace Perceiveit.Data.Query
         #endregion
     }
 
-    public class DBSubQueryRef : DBSubQuery
+    internal class DBSubQueryRef : DBSubQuery
     {
 
         //
@@ -200,6 +323,10 @@ namespace Perceiveit.Data.Query
                 builder.EndIdentifier();
                 builder.EndAlias();
             }
+
+            if (this.HasJoins)
+                this.Joins.BuildStatement(builder);
+
             return true;
         }
 

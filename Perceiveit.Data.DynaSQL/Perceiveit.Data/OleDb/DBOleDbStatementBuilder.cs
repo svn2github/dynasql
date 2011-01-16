@@ -23,7 +23,10 @@ using Perceiveit.Data.Query;
 
 namespace Perceiveit.Data.OleDb
 {
-    internal class DBOleDbStatementBuilder : DBStatementBuilder
+    /// <summary>
+    /// Implements the DBStatementBuilder for the OleDb provider - specifically Ms Access
+    /// </summary>
+    public class DBOleDbStatementBuilder : DBStatementBuilder
     {
 
         public DBOleDbStatementBuilder(DBDatabase forDatabase, DBDatabaseProperties properties, System.IO.TextWriter tw, bool ownswriter)

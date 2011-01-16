@@ -183,4 +183,43 @@
   <data name="SchemaColumnCannotBeEmpty" xml:space="preserve">
     <value>The schema column '{0}' cannot have a null or empty value.</value>
   </data>
+  <data name="ProfilerAlreadyAttached" xml:space="preserve">
+    <value>A profiler is already attached to this DBDatabase. Only one profiler is currently supported on a DBDatabase instance.</value>
+  </data>
+  <data name="ProfilerCollectionChangedBetweenStartAndEnd" xml:space="preserve">
+    <value>The DBProfilerCollection has changed between a call to Begin and End execution. The profiler data cannot be validated</value>
+  </data>
+  <data name="ProfilerFactoryTypeCouldNotBeInstantiated" xml:space="preserve">
+    <value>The defined profiler factory with name '{0}' could not be created, or does not implement the IDBProfilerFactory interface</value>
+  </data>
+  <data name="ProfilerFactoryTypeNotFound" xml:space="preserve">
+    <value>The type of profiler factory with name '{0}' could not be found</value>
+  </data>
+  <data name="NoJoinLimits" xml:space="preserve">
+    <value>Join does not have any comparion limits.</value>
+  </data>
+  <data name="NoJoinRightReference" xml:space="preserve">
+    <value>Join does not have a reference to a right hand table or sub query</value>
+  </data>
+  <data name="ExecutionFailedAgainstDatabase" xml:space="preserve">
+    <value>The command could not be executed against the database. Please check the inner exception for more details.</value>
+  </data>
+  <data name="CannotAppendWhereClauseWithoutInitial" xml:space="preserve">
+    <value>A secondary where clause cannot be appended a no initial clause is present</value>
+  </data>
+  <data name="InvalidProviderNameForDBFactory" xml:space="preserve">
+    <value>The provider name '{0}' is not associated with a known Perceiveit.Data.DBProviderImplementation. Add a new configuration element within the Perceiveit.Data/Implementations element to 'Register' the provider name with a type.</value>
+  </data>
+  <data name="ConfigElementNotDBProfiler" xml:space="preserve">
+    <value>The returned configuration element was not the correct type - expecting DBProfilerConfigElement.</value>
+  </data>
+  <data name="NoProviderImplementationWithTheName" xml:space="preserve">
+    <value>There is no registered DBProviderImplementation for the name '{0}'.</value>
+  </data>
+  <data name="ProfilerNameNotSetInConfig" xml:space="preserve">
+    <value>A defined profiler in the configuration file does not have its name set. All profiers must have a non-empty name.</value>
+  </data>
+  <data name="ProviderNameNotSetInProviderImplementation" xml:space="preserve">
+    <value>The provider name for a configured implementation is not set, or is an emty value. Please check the configuration section 'Perceiveit.Data/Implementations'</value>
+  </data>
 </root>

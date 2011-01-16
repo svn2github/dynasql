@@ -25,7 +25,10 @@ using Perceiveit.Data.Query;
 
 namespace Perceiveit.Data.SqLite
 {
-    internal class DBSqLiteSchemaProvider : DBSchemaProvider
+    /// <summary>
+    /// Loads schema information for an SQLite database
+    /// </summary>
+    public class DBSqLiteSchemaProvider : DBSchemaProvider
     {
         //
         // .ctor
@@ -36,168 +39,164 @@ namespace Perceiveit.Data.SqLite
         {
         }
 
-        //
-        // DoGetSchemaItems + Support methods
-        //
-
-        #region protected override IEnumerable<DBSchemaItemRef> DoGetSchemaItems(DBSchemaTypes types)
-
-        protected override IEnumerable<DBSchemaItemRef> DoGetSchemaItems(DBSchemaTypes types)
-        {
-            List<DBSchemaItemRef> items = new List<DBSchemaItemRef>();
-            using (DbConnection con = this.Database.CreateConnection())
-            {
-                con.Open();
-                if (IsSchemaType(types, DBSchemaTypes.Table))
-                    this.LoadTableRefs(con, items);
-                if (IsSchemaType(types, DBSchemaTypes.View))
-                    this.LoadViewRefs(con, items);
-                if (IsSchemaType(types, DBSchemaTypes.Index))
-                    this.LoadIndexRefs(con, items);
-            }
-
-            return items;
-        }
-
-        #endregion
-
-        #region protected int LoadTableRefs(DbConnection con, List<DBSchemaItemRef> addtocollection)
+        #region protected virtual void LoadIndexRefs(DbConnection con, IList<DBSchemaItemRef> intoCollection) + 1 overload
 
         /// <summary>
-        /// Loads all the Tables for a specific Database connection
+        /// Loads all the indexes in this providers data connection
         /// </summary>
         /// <param name="con"></param>
-        /// <param name="addtocollection"></param>
-        /// <returns></returns>
-        protected int LoadTableRefs(DbConnection con, List<DBSchemaItemRef> addtocollection)
+        /// <param name="intoCollection"></param>
+        protected override void LoadIndexRefs(DbConnection con, IList<DBSchemaItemRef> intoCollection)
         {
-            int count = 0;
-            DataTable dt = con.GetSchema(SchemaTablesName);
-            DataColumn catalog = dt.Columns["TABLE_CATALOG"];
-            DataColumn schema = dt.Columns["TABLE_SCHEMA"];
-            DataColumn name = dt.Columns["TABLE_NAME"];
-            DataColumn type = dt.Columns["TABLE_TYPE"];
+            DBSchemaMetaDataCollection viewcollection =
+                this.AssertGetCollectionForType(DBMetaDataCollectionType.Indexes);
+            DataTable data = this.GetCollectionData(con, viewcollection);
 
-            foreach (DataRow row in dt.Rows)
-            {
-                if (row[type].ToString().ToUpper() == "TABLE")
-                {
-                    DBSchemaItemRef iref = new DBSchemaItemRef();
-                    iref.Catalog = row[catalog].ToString();
-                    iref.Schema = row[schema].ToString();
-                    iref.Name = row[name].ToString();
-                    iref.Type = DBSchemaTypes.Table;
+            DataColumn catalogcol = GetColumn(data, "index_catalog", false);
+            DataColumn schemacol = GetColumn(data, "index_schema", false);
+            DataColumn namecol = GetColumn(data, "index_name", true);
 
-                    addtocollection.Add(iref);
-                    count++;
-                }
-            }
+            DataColumn tablecatalogcol = GetColumn(data, "table_catalog", false);
+            DataColumn tableschemacol = GetColumn(data, "table_schema", false);
+            DataColumn tablenamecol = GetColumn(data, "table_name", true);
 
-            return count;
+            this.LoadItemRefsWithContainer(data, intoCollection,
+                    catalogcol, schemacol, namecol, DBSchemaTypes.Index,
+                    tablecatalogcol, tableschemacol, tablenamecol, DBSchemaTypes.Table);
         }
 
         #endregion
 
-        #region protected int LoadViewRefs(DbConnection con, List<DBSchemaItemRef> addtocollection)
 
         /// <summary>
-        /// Loads all the Views for a specific database
+        /// Loads all the indexes in this providers data connection for the specified table
         /// </summary>
         /// <param name="con"></param>
-        /// <param name="addtocollection"></param>
-        /// <returns></returns>
-        protected int LoadViewRefs(DbConnection con, List<DBSchemaItemRef> addtocollection)
+        /// <param name="fortable"></param>
+        /// <param name="intoCollection"></param>
+        protected override void LoadIndexRefs(DbConnection con, IList<DBSchemaItemRef> intoCollection, DBSchemaItemRef fortable)
         {
-            int count = 0;
-            DataTable dt = con.GetSchema(SchemaViewsName);
-            DataColumn catalog = dt.Columns["TABLE_CATALOG"];
-            DataColumn schema = dt.Columns["TABLE_SCHEMA"];
-            DataColumn name = dt.Columns["TABLE_NAME"];
-
-            foreach (DataRow row in dt.Rows)
+            IEnumerable<DBSchemaItemRef> ixs = this.GetAllIndexs();
+            foreach (DBSchemaItemRef ixref in ixs)
             {
-                DBSchemaItemRef iref = new DBSchemaItemRef();
-                iref.Catalog = row[catalog].ToString();
-                iref.Schema = row[schema].ToString();
-                iref.Name = row[name].ToString();
-                iref.Type = DBSchemaTypes.View;
-
-                addtocollection.Add(iref);
-                count++;
+                if (ixref.Container != null && ixref.Container.Equals(fortable))
+                    intoCollection.Add(ixref);
             }
-            return count;
         }
 
-        #endregion
-
-        #region protected int LoadIndexRefs(DbConnection con, List<DBSchemaItemRef> addtocollection)
-
-        /// <summary>
-        /// Loads all the indexes for a specific database connection
-        /// </summary>
-        /// <param name="con"></param>
-        /// <param name="addtocollection"></param>
-        /// <returns></returns>
-        protected int LoadIndexRefs(DbConnection con, List<DBSchemaItemRef> addtocollection)
+        protected override void FillIndexData(DBSchemaIndex anindex, DataRow dataRow)
         {
-            int count = 0;
-            DataTable dt = con.GetSchema(SchemaIndexesName);
-            DataColumn catalog = dt.Columns["INDEX_CATALOG"];
-            DataColumn schema = dt.Columns["INDEX_SCHEMA"];
-            DataColumn name = dt.Columns["INDEX_NAME"];
+            DataColumn catalog = GetColumn(dataRow.Table, "index_catalog", false);
+            DataColumn schema = GetColumn(dataRow.Table, "index_schema", false);
+            DataColumn name = GetColumn(dataRow.Table, "index_name", true);
+            //The SQLite Connection GetSchema() method may incorrectly report this as true 
+            DataColumn ixPK = GetColumn(dataRow.Table, "primary_key", false);
+            DataColumn unique = GetColumn(dataRow.Table, "unique", false);
 
-            foreach (DataRow row in dt.Rows)
+            DataColumn tblcatalog = GetColumn(dataRow.Table, "table_catalog", false);
+            DataColumn tblschema = GetColumn(dataRow.Table, "table_schema", false);
+            DataColumn tblname = GetColumn(dataRow.Table, "table_name", true);
+
+            anindex.Catalog = GetColumnStringValue(dataRow, catalog);
+            anindex.Schema = GetColumnStringValue(dataRow, schema);
+            anindex.Name = GetColumnStringValue(dataRow, name);
+
+            DBSchemaItemRef tblref = new DBSchemaItemRef(DBSchemaTypes.Table,
+                GetColumnStringValue(dataRow, tblcatalog), GetColumnStringValue(dataRow, tblschema), GetColumnStringValue(dataRow, tblname));
+            anindex.TableReference = tblref;
+
+            anindex.IsPrimaryKey = GetColumnBoolValue(dataRow, ixPK, false);
+            anindex.IsUnique = GetColumnBoolValue(dataRow, unique, false);
+
+        }
+
+
+        protected override DBSchemaForeignKey LoadAForeignKey(DbConnection con, DBSchemaItemRef fkref)
+        {
+            DataTable dtFK = GetForeignKeyData(con, fkref);
+            DBSchemaForeignKey anFk = null;
+
+            if (null != dtFK && dtFK.Rows.Count > 0)
             {
-                DBSchemaItemRef iref = new DBSchemaItemRef();
-                iref.Catalog = row[catalog].ToString();
-                iref.Schema = row[schema].ToString();
-                iref.Name = row[name].ToString();
-                iref.Type = DBSchemaTypes.Index;
+                anFk = new DBSchemaForeignKey();
+                this.FillForeignKeyData(anFk, dtFK.Rows[0]);
 
-                addtocollection.Add(iref);
-                count++;
+                
             }
-            return count;
+            return anFk;
         }
 
-        #endregion
-
-
-        protected override DBSchemaView LoadAView(DbConnection con, DBSchemaItemRef forRef)
+        protected override void FillForeignKeyData(DBSchemaForeignKey fk, DataRow dtFKRow)
         {
-            throw new NotImplementedException();
+            DataTable tbl = dtFKRow.Table;
+            DataColumn catalog = GetColumn(tbl, "CONSTRAINT_CATALOG", false);
+            DataColumn schema = GetColumn(tbl, "CONSTRAINT_SCHEMA", false);
+            DataColumn name = GetColumn(tbl, "CONSTRAINT_NAME", true);
+            
+            fk.Catalog = GetColumnStringValue(dtFKRow, catalog);
+            fk.Schema = GetColumnStringValue(dtFKRow, schema);
+            fk.Name = GetColumnStringValue(dtFKRow, name);
+
+            DataColumn fkFromCatalog = GetColumn(tbl, "TABLE_CATALOG", false);
+            DataColumn fkFromSchema = GetColumn(tbl, "TABLE_SCHEMA", false);
+            DataColumn fkFromTable = GetColumn(tbl, "TABLE_NAME", false);
+            DataColumn fkFromColumn = GetColumn(tbl, "FKEY_FROM_COLUMN", true);
+
+            DataColumn fkToCatalog = GetColumn(tbl, "FKEY_TO_CATALOG", false);
+            DataColumn fkToSchema = GetColumn(tbl, "FKEY_TO_SCHEMA", false);
+            DataColumn fkToTable = GetColumn(tbl, "FKEY_TO_TABLE", true);
+            DataColumn fkToColumn = GetColumn(tbl, "FKEY_TO_COLUMN", true);
+            
+            fk.ForeignKeyTable = new DBSchemaItemRef(DBSchemaTypes.Table,
+                GetColumnStringValue(dtFKRow, fkFromCatalog),
+                GetColumnStringValue(dtFKRow, fkFromSchema),
+                GetColumnStringValue(dtFKRow, fkFromTable));
+
+            fk.PrimaryKeyTable = new DBSchemaItemRef(DBSchemaTypes.Table,
+                GetColumnStringValue(dtFKRow, fkToCatalog),
+                GetColumnStringValue(dtFKRow, fkToSchema),
+                GetColumnStringValue(dtFKRow, fkToTable));
+            
+            DBSchemaForeignKeyMapping map = new DBSchemaForeignKeyMapping();
+            map.ForeignColumn = GetColumnStringValue(dtFKRow, fkFromColumn);
+            map.PrimaryColumn = GetColumnStringValue(dtFKRow, fkToColumn);
+            fk.Mappings.Add(map);
         }
 
-        //
-        // DoCheckExists + support methods
-        // 
 
-        protected override bool DoCheckExists(DBSchemaItemRef itemRef)
+        protected override void FillTableColumns(DBSchemaTableColumnCollection atablecolumns, DataTable dtColumns)
         {
-            throw new NotImplementedException();
+            DataColumn TableNameColumn = GetColumn(dtColumns, "TABLE_NAME", true);
+            DataColumn TableSchemaColumn = GetColumn(dtColumns, "TABLE_SCHEMA", false);
+            DataColumn TableCatalogColumn = GetColumn(dtColumns, "TABLE_CATALOG", false);
+            DataColumn ColumnNameColumn = GetColumn(dtColumns, "COLUMN_NAME", true);
+            DataColumn OrdinalPositionColumn = GetColumn(dtColumns, "ORDINAL_POSITION", true);
+            DataColumn DefaultValueColumn = GetColumn(dtColumns, "COLUMN_DEFAULT", false);
+            DataColumn IsNullableColumn = GetColumn(dtColumns, "IS_NULLABLE", true);
+            DataColumn DataTypeColumn = GetColumn(dtColumns, "EDM_TYPE", true);
+            DataColumn MaxCharacterLengthColumn = GetColumn(dtColumns, "CHARACTER_MAXIMUM_LENGTH", false);
+            DataColumn AutoNumberColumn = GetColumn(dtColumns, "AUTOINCREMENT", false);
+            DataColumn PrimaryKeyColumn = GetColumn(dtColumns, "PRIMARY_KEY", false);
+
+            foreach (DataRow row in dtColumns.Rows)
+            {
+                DBSchemaTableColumn col = new DBSchemaTableColumn();
+                col.Name = GetColumnStringValue(row, ColumnNameColumn);
+                col.OrdinalPosition = GetColumnIntValue(row, OrdinalPositionColumn);
+                col.DefaultValue = GetColumnStringValue(row, DefaultValueColumn);
+                col.Nullable = GetColumnBoolValue(row, IsNullableColumn);
+                col.DbType = GetDbTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
+                col.Type = GetSystemTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
+                col.Size = GetColumnIntValue(row, MaxCharacterLengthColumn);
+                col.AutoAssign = GetColumnBoolValue(row, AutoNumberColumn);
+                col.PrimaryKey = GetColumnBoolValue(row, PrimaryKeyColumn);
+                col.ReadOnly = col.AutoAssign;
+                col.HasDefault = !string.IsNullOrEmpty(col.DefaultValue);
+
+                atablecolumns.Add(col);
+            }
+
         }
 
-        //
-        // DoGenerateCreateScript + support methods
-        //
-
-        protected override string DoGenerateCreateScript(DBSchemaTypes type, DBSchemaItem schema, DBQuery script, DBStatementBuilder builder)
-        {
-            throw new NotImplementedException();
-        }
-
-        //
-        // DoGenerateDropScript + support methods
-        //
-
-        protected override string DoGenerateDropScript(DBSchemaItemRef itemRef, DBStatementBuilder builder)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override DbType GetDbTypeForSqlType(string sqlType)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

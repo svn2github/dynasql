@@ -18,52 +18,75 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Data;
-using System.Data.Common;
 using Perceiveit.Data.Schema;
 using Perceiveit.Data.Query;
+using System.Data;
 
-namespace Perceiveit.Data.SqLite
+namespace Perceiveit.Data.SqlClient
 {
-    internal class DBSqLiteFactory : DBFactory
+    /// <summary>
+    /// Provider implementation for the System.Data.SqlClient database engine
+    /// </summary>
+    public class DBSqlClientImplementation : DBProviderImplementation
     {
         private static readonly DbType[] SUPPORTED_TYPES = new DbType[] {DbType.Int32, DbType.Int64, DbType.AnsiString, DbType.AnsiStringFixedLength
                                                                         ,DbType.Boolean, DbType.Byte, DbType.Currency, DbType.DateTime
                                                                         ,DbType.Decimal, DbType.Double, DbType.Guid, DbType.Single
                                                                         ,DbType.String, DbType.StringFixedLength, DbType.Binary};
+        public DBSqlClientImplementation()
+            : this("System.Data.SqlClient")
+        {
+        }
 
-        internal DBSqLiteFactory(string providerName)
+        public DBSqlClientImplementation(string providerName)
             : base(providerName)
         {
         }
 
-
-
+        
+        
         protected override DBDatabaseProperties GetPropertiesFromDb(DBDatabase forDatabase)
         {
-            string db;
-            string vers;
-            using (DbCommand cmd = forDatabase.CreateCommand("SELECT sqlite_version()", CommandType.Text))
-            {
-                object versValue = forDatabase.ExecuteScalar(cmd);
-                db = cmd.Connection.Database;
-                vers = (null == versValue) ? string.Empty : versValue.ToString();
-            }
+            string statement = "SELECT  SERVERPROPERTY('productversion') AS [version], SERVERPROPERTY ('productlevel') AS [level], SERVERPROPERTY ('edition') AS [edition]";
+            DBDatabaseProperties props;
+            System.Data.SqlClient.SqlConnectionStringBuilder builder = new System.Data.SqlClient.SqlConnectionStringBuilder(forDatabase.ConnectionString);
+            string dbname = builder.InitialCatalog;
+            if (string.IsNullOrEmpty(dbname))
+                dbname = builder.DataSource;
 
-            DBDatabaseProperties props = new DBDatabaseProperties("SQLite", db, "", "@{0}", vers,
-                                                SupportedSchemaOptions.TablesViewsAndIndexes | DBSchemaTypes.CommandScripts, false, DBParameterLayout.Named, SUPPORTED_TYPES);
-            
+            props = (DBDatabaseProperties)forDatabase.ExecuteRead(statement, delegate(System.Data.Common.DbDataReader reader)
+            {
+
+                if (reader.Read())
+                {
+                    return new DBDatabaseProperties(dbname, "SQL Server",
+                            reader["edition"].ToString(),
+                            reader["level"].ToString(),
+                            "@{0}",
+                            new Version(reader["version"].ToString()),
+                            SupportedSchemaOptions.All,
+                            false,
+                            DBParameterLayout.Named,
+                            SUPPORTED_TYPES, new TopType[] { TopType.Count, TopType.Percent });
+                }
+                else
+                {
+                    return DBDatabaseProperties.Unknown;
+
+                }
+            });
             return props;
+
         }
 
         protected override DBStatementBuilder CreateStatementBuilder(DBDatabase forDatabase, DBDatabaseProperties withProperties, System.IO.TextWriter writer, bool ownsWriter)
         {
-            return new DBStatementSQLiteBuilder(forDatabase, withProperties, writer, ownsWriter);
+            return new DBSQLClientStatementBuilder(forDatabase, withProperties, writer, ownsWriter);
         }
 
         protected override DBSchemaProvider CreateSchemaProvider(DBDatabase forDatabase, DBDatabaseProperties properties)
         {
-            return new DBSqLiteSchemaProvider(forDatabase, properties);
+            return new DBSQLClientSchemaProvider(forDatabase, properties);
         }
     }
 }

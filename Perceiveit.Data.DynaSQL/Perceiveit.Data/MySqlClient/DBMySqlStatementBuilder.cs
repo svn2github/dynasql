@@ -24,7 +24,10 @@ using Perceiveit.Data.Query;
 
 namespace Perceiveit.Data.MySqlClient
 {
-    internal class DBMySqlStatementBuilder : DBStatementBuilder
+    /// <summary>
+    /// Implements the MySql Statement builder
+    /// </summary>
+    public class DBMySqlStatementBuilder : DBStatementBuilder
     {
         #region staticvars
 
@@ -36,6 +39,8 @@ namespace Perceiveit.Data.MySqlClient
 
         private bool _buildingsproc;
         private string _mysqldelim;
+        private int _limits = -1;
+        private int _offset = -1;
         
         #endregion
 
@@ -62,6 +67,37 @@ namespace Perceiveit.Data.MySqlClient
         }
 
         #endregion
+
+
+
+        public override void WriteTop(double count, double offset, TopType topType)
+        {
+            if (Array.IndexOf<TopType>(this.DatabaseProperties.SupportedTopTypes, topType) < 0)
+                throw new NotSupportedException("The top type '" + topType.ToString() + "' is not supported by this database");
+
+            if (this.StatementDepth == 1)
+            {
+                this._limits = (int)count;
+
+                if (topType == TopType.Range)
+                    _offset = (int)offset;
+            }
+        }
+
+        public override void EndSelectStatement()
+        {
+            if (this.StatementDepth == 1 && this._limits > 0)
+            {
+                this.WriteRaw(" LIMIT ");
+                this.WriteRaw(_limits.ToString());
+                if (_offset > 0)
+                {
+                    this.Writer.Write(" OFFSET ");
+                    this.Writer.Write(_offset);
+                }
+            }
+            base.EndSelectStatement();
+        }
 
         public override void BeginIdentifier()
         {
@@ -272,17 +308,17 @@ namespace Perceiveit.Data.MySqlClient
 
             this.WriteSourceTable(tbl.Catalog, tbl.Schema, tbl.Name, null);
             this.BeginBlock();
-            List<DBSchemaColumn> sorted = this.SortColumnsByOrdinal(schemaIndex.Columns.GetColumns());
+            DBSchemaIndexColumnCollection sorted = schemaIndex.Columns;
             
             int index = 0;
             foreach (DBSchemaIndexColumn col in sorted)
             {
-                if (string.IsNullOrEmpty(col.Name))
+                if (string.IsNullOrEmpty(col.ColumnName))
                     throw new ArgumentNullException("DBSchemaIndexColumn.Name");
 
                 this.BeginOrderClause(col.SortOrder);
                 this.BeginIdentifier();
-                this.WriteRaw(col.Name);
+                this.WriteRaw(col.ColumnName);
                 this.EndIdentifier();
                 this.EndOrderClause(col.SortOrder);
 
@@ -355,8 +391,8 @@ namespace Perceiveit.Data.MySqlClient
 
             try
             {
-                this.GenerateProcedureParameters(schemaFunc, false);
-                WriteFunctionReturns(schemaFunc.ReturnDbType, schemaFunc.ReturnSize);
+                this.GenerateRoutineParameters(schemaFunc, false);
+                WriteFunctionReturns(schemaFunc.ReturnParameter.DbType, schemaFunc.ReturnParameter.ParameterSize);
                 this.BeginNewLine();
 
                 script.BuildStatement(this);
@@ -402,7 +438,7 @@ namespace Perceiveit.Data.MySqlClient
             
             try
             {
-                GenerateProcedureParameters(schemaSproc, true);
+                GenerateRoutineParameters(schemaSproc, true);
 
                 //now just output the script as SQL
                 script.BuildStatement(this);
@@ -414,11 +450,11 @@ namespace Perceiveit.Data.MySqlClient
 
         }
 
-        private void GenerateProcedureParameters(DBSchemaSproc schemaSproc, bool annotateDirection)
+        private void GenerateRoutineParameters(DBSchemaRoutine schemaRoutine, bool annotateDirection)
         {
-            if (schemaSproc.Parameters != null && schemaSproc.Parameters.Count > 0)
+            if (schemaRoutine.Parameters != null && schemaRoutine.Parameters.Count > 0)
             {
-                List<DBSchemaParameter> param = this.SortColumnsByOrdinal(schemaSproc.Parameters);
+                List<DBSchemaParameter> param = this.SortColumnsByOrdinal(schemaRoutine.Parameters);
                 this.WriteRaw(" (");
 
 
@@ -443,13 +479,12 @@ namespace Perceiveit.Data.MySqlClient
                             case System.Data.ParameterDirection.ReturnValue:
                                 //Skip the return parameters
                                 continue;
-                                break;
+                                
                             default:
                                 throw new ArgumentOutOfRangeException("DBSchemaParameter.Direction");
-                                break;
                         }
                     }
-                    this.WriteParameterReference(p.Name);
+                    this.WriteParameterReference(p.InvariantName);
                     this.WriteRaw(" ");
                     string options;
                     string type = this.GetNativeTypeForDbType(p.DbType, p.ParameterSize, out options);

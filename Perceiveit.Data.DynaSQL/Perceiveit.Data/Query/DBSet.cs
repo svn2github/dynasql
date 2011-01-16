@@ -22,16 +22,27 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a SET x = [value] statement
+    /// </summary>
     public abstract class DBSet : DBStatement
     {
         private DBAssign _assign;
 
+        /// <summary>
+        /// The Assignment that is set
+        /// </summary>
         public DBAssign Assignment
         {
             get { return this._assign; }
             protected set { this._assign = value; }
         }
 
+        /// <summary>
+        /// Creates and returns a new DBSet assignment
+        /// </summary>
+        /// <param name="assign"></param>
+        /// <returns></returns>
         public static DBSet Set(DBAssign assign)
         {
             DBSet set = new DBSetRef();

@@ -63,6 +63,13 @@ namespace Perceiveit.Data.DynaSql.Tests
 
         }
 
+        public static class Employees
+        {
+            public const string Table = "Employees";
+            public const string EmployeeID = "EmployeeID";
+
+        }
+
         /* -------------------------- End MS SQL Server Schema ------------------------- */
 
 
@@ -119,12 +126,19 @@ namespace Perceiveit.Data.DynaSql.Tests
             public const string CategoryID = "CategoryID";
 
         }
+        
+        public static class Employees
+        {
+            public const string Table = "Employees";
+            public const string EmployeeID = "EmployeeID";
+
+        }
 
         /* -------------------------- End MySQL Schema ------------------------- */
 
 
         /* ----------  Access 2007 Northwind Schema -------------- 
-         
+        //NOTE: x86 compilation only and script execution is not supported
         public const string DbConnection = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=""C:\Users\Richard Hewitson\Documents\Northwind07.accdb"";Persist Security Info=False;";
         public const string DbProvider = "System.Data.OleDb";
 
@@ -133,7 +147,7 @@ namespace Perceiveit.Data.DynaSql.Tests
             public const string Table = "Customers";
             public const string CustomerID = "ID";
             public const string CompanyName = "Company";
-            public const string Region = "Country/Region";
+            public const string Region = "Country_Region"; //changed from a back slash in the database to check support
         }
 
         public static class Categories
@@ -175,13 +189,19 @@ namespace Perceiveit.Data.DynaSql.Tests
 
         }
        
-       
+        public static class Employees
+        {
+            public const string Table = "Employees";
+            public const string EmployeeID = "EmployeeID";
+
+        }
+        
        /* -------------------------- End Access 2007 Schema ------------------------- */
 
         /* ----------  SQLite Northwind Schema -------------- 
 
 
-       public const string DbConnection = @"data source=C:\Development\Perceiveit.Data\Northwind_sqlite\Northwind.sl3";
+        public const string DbConnection = @"data source=C:\Development\Perceiveit.Data.DynaSQL\Northwind_sqlite\Northwind.sl3";
        public const string DbProvider = "System.Data.SQLite";
          
        public static class Customers
@@ -228,6 +248,13 @@ namespace Perceiveit.Data.DynaSql.Tests
            public const string ProductName = "ProductName";
            public const string SupplierID = "SupplierID";
            public const string CategoryID = "CategoryID";
+
+       }
+       
+       public static class Employees
+       {
+            public const string Table = "Employees";
+            public const string EmployeeID = "EmployeeID";
 
        }
 

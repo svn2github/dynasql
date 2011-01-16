@@ -51,7 +51,7 @@ namespace Perceiveit.Data.Schema
         [XmlAttribute("name")]
         public string Name 
         {
-            get { return this._name; }
+            get { return this._name == null ? string.Empty : _name; }
             set { this._name = value; }
         }
 
@@ -65,7 +65,7 @@ namespace Perceiveit.Data.Schema
         [XmlAttribute("schema")]
         public string Schema 
         {
-            get { return this._owner; }
+            get { return this._owner == null ? string.Empty : _owner; }
             set { this._owner = value; }
         }
 
@@ -79,7 +79,7 @@ namespace Perceiveit.Data.Schema
         [XmlAttribute("catalog")]
         public string Catalog 
         {
-            get { return _db; } 
+            get { return _db == null? string.Empty : _db; } 
             set { _db = value; }
         }
 
@@ -108,6 +108,33 @@ namespace Perceiveit.Data.Schema
         {
             get { return this._cont; }
             set { this._cont = value; }
+        }
+
+        #endregion
+
+        #region public string FullName {get;}
+
+        /// <summary>
+        /// Gets the fullly qualified name of this schema item reference
+        /// </summary>
+        public string FullName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.Catalog))
+                {
+                    if (string.IsNullOrEmpty(this.Schema))
+                        return this.Name;
+                    else
+                    {
+                        return this.Schema + "." + this.Name;
+                    }
+                }
+                else
+                {
+                    return string.Format("{0}.{1}.{2}", this.Catalog, this.Schema, this.Name);
+                }
+            }
         }
 
         #endregion
@@ -197,10 +224,7 @@ namespace Perceiveit.Data.Schema
             if (null == itemref)
                 throw new ArgumentNullException("itemref");
 
-            return (this.Type == itemref.Type)
-                && string.Equals(this.Catalog,itemref.Catalog,StringComparison.InvariantCultureIgnoreCase)
-                && string.Equals(this.Schema, itemref.Schema, StringComparison.InvariantCultureIgnoreCase)
-                && string.Equals(this.Name, itemref.Name, StringComparison.InvariantCultureIgnoreCase);
+            return this.ToString() == itemref.ToString();
         }
 
         #endregion
@@ -220,6 +244,9 @@ namespace Perceiveit.Data.Schema
         /// <returns>True of they are considered equal</returns>
         public override bool Equals(object obj)
         {
+            if (null == obj || !(obj is DBSchemaItemRef))
+                return false;
+
             return this.Equals((DBSchemaItemRef)obj);
         }
 
@@ -233,7 +260,7 @@ namespace Perceiveit.Data.Schema
         /// <returns></returns>
         public override int GetHashCode()
         {
-            return this.ToString().GetHashCode();
+            return this.FullName.GetHashCode();
         }
 
         #endregion
@@ -246,9 +273,20 @@ namespace Perceiveit.Data.Schema
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0}: {3}.{1}.{2}", this.Type, this.Schema, this.Name, this.Catalog);
+            if (this.Container != null)
+                return string.Format("{0}: {3}.{1}.{2} => {4}", this.Type, this.Schema, this.Name, this.Catalog, this.Container);
+            else
+                return string.Format("{0}: {3}.{1}.{2}", this.Type, this.Schema, this.Name, this.Catalog);
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// A collection of DBSchemaItemRefs
+    /// </summary>
+    public class DBSchemaItemRefCollection : List<DBSchemaItemRef>
+    {
+
     }
 }

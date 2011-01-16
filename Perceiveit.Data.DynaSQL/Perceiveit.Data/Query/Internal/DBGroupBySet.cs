@@ -22,7 +22,7 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
-    internal class DBGroupBySet : DBExpressionSet, IDBBoolean, IDBArregate
+    internal class DBGroupBySet : DBExpressionSet, IDBBoolean, IDBAggregate
     {
         private DBClauseList _grps;
 
@@ -205,7 +205,7 @@ namespace Perceiveit.Data.Query
 
         #region DBClause IDBArregate.Aggregate(AggregateFunction func, DBClause dbref)
 
-        DBClause IDBArregate.Aggregate(AggregateFunction func, DBClause dbref)
+        DBClause IDBAggregate.Aggregate(AggregateFunction func, DBClause dbref)
         {
             return this.Aggregate(func, dbref);
         }

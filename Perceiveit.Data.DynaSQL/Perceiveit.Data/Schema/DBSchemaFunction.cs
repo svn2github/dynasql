@@ -23,75 +23,25 @@ using System.Xml.Serialization;
 
 namespace Perceiveit.Data.Schema
 {
-    public class DBSchemaFunction : DBSchemaSproc
+    /// <summary>
+    /// represents a defined function in the database schema
+    /// </summary>
+    public class DBSchemaFunction : DBSchemaRoutine
     {
         #region ivars
 
-        private bool _assignedDbType = false;
-        private bool _assignedRuntimeType = false;
-        private DbType _retdbtype = DbType.Object;
-        private Type _retruntype = null;
-        private int _retsize = -1;
+        private DBSchemaParameter _retparam = null;
 
         #endregion
-
-
-        #region public DbType ReturnDbType { get;set }
-
         /// <summary>
-        /// Gets or sets the Return dbType for this function
+        /// Gets or sets the return parameter of this function
         /// </summary>
-        [XmlAttribute("return-type")]
-        public DbType ReturnDbType
+        public DBSchemaParameter ReturnParameter
         {
-            get { return this._retdbtype; }
-            set
-            {
-                this._retdbtype = value;
-                if (value != DbType.Object)
-                {
-                    if (!this._assignedRuntimeType)
-                        this._retruntype = this.GetRuntimeTypeFromDbType(value);
-
-                    _assignedDbType = true;
-                }
-            }
+            get { return _retparam; }
+            set { _retparam = value; }
         }
 
-        #endregion
-
-        #region public Type ReturnRuntimeType {get;set;}
-
-        /// <summary>
-        /// Gets or sets the Return Runtime Type
-        /// </summary>
-        [XmlIgnore()]
-        public Type ReturnRuntimeType
-        {
-            get { return this._retruntype; }
-            set
-            {
-                this._retruntype = value;
-                if (null != value)
-                {
-                    if (!_assignedDbType)
-                        _retdbtype = this.GetDbTypeFromRuntimeType(value);
-                    _assignedRuntimeType = true;
-                }
-            }
-        }
-
-        #endregion
-
-        #region public int ReturnSize {get;set;}
-
-        public int ReturnSize
-        {
-            get { return this._retsize; }
-            set { this._retsize = value; }
-        }
-
-        #endregion
 
         //
         // ctors
@@ -152,12 +102,10 @@ namespace Perceiveit.Data.Schema
         {
             base.ToString(sb);
 
-            if (this._assignedDbType || this._assignedRuntimeType)
+            if (null != this.ReturnParameter)
             {
                 sb.Append(" (Returns:");
-                sb.Append(this.ReturnDbType.ToString());
-                sb.Append(", ");
-                sb.Append(this.ReturnRuntimeType.ToString());
+                sb.Append(this.ReturnParameter);
                 sb.Append(")");
 
             }

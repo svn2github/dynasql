@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// A database engine function
+    /// </summary>
     public abstract class DBFunction : DBClause, IDBAlias
     {
         private Function _func;
@@ -83,12 +86,12 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region internal DBClauseList Parameters {get;} + bool HasParameters {get;}
+        #region public DBClauseList Parameters {get;} + bool HasParameters {get;}
 
         /// <summary>
         /// Gets the parameter list for this function
         /// </summary>
-        internal DBClauseList Parameters
+        public DBClauseList Parameters
         {
             get 
             {
@@ -98,6 +101,9 @@ namespace Perceiveit.Data.Query
             }
         }
 
+        /// <summary>
+        /// Returns true if this function has one or more parameters
+        /// </summary>
         public bool HasParameters
         {
             get { return this._params != null && this._params.Count > 0; }
@@ -124,21 +130,48 @@ namespace Perceiveit.Data.Query
 
         #region public static DBFunction IsNull(string field, DBClause otherwise) + 3 overloads
 
+        /// <summary>
+        /// Creates a new IsNull function reference to be executed on the database server - ISNULL(field, otherwise)
+        /// </summary>
+        /// <param name="field"></param>
+        /// <param name="otherwise"></param>
+        /// <returns></returns>
         public static DBFunction IsNull(string field, DBClause otherwise)
         {
             return IsNull(DBField.Field(field), otherwise);
         }
 
+        /// <summary>
+        /// Creates a new IsNull function reference to be executed on the database server - ISNULL(table.field, otherwise)
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <param name="otherwise"></param>
+        /// <returns></returns>
         public static DBFunction IsNull(string table, string field, DBClause otherwise)
         {
             return IsNull(DBField.Field(table, field), otherwise);
         }
 
+        /// <summary>
+        /// Creates a new IsNull function reference to be executed on the database server - ISNULL(schema.table.field, otherwise)
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <param name="otherwise"></param>
+        /// <returns></returns>
         public static DBFunction IsNull(string owner, string table, string field, DBClause otherwise)
         {
             return IsNull(DBField.Field(owner, table, field), otherwise);
         }
 
+        /// <summary>
+        /// Creates a new IsNull function reference to be executed on the database server - ISNULL(match, otherwise)
+        /// </summary>
+        /// <param name="match"></param>
+        /// <param name="otherwise"></param>
+        /// <returns></returns>
         public static DBFunction IsNull(DBClause match, DBClause otherwise)
         {
             DBFunctionRef fref = new DBFunctionRef();
@@ -153,6 +186,10 @@ namespace Perceiveit.Data.Query
 
         #region public static DBFunction GetDate()
 
+        /// <summary>
+        /// Creates a new GetDate() function to be executed on the database server
+        /// </summary>
+        /// <returns></returns>
         public static DBFunction GetDate()
         {
             DBFunction func = new DBFunctionRef();
@@ -165,6 +202,10 @@ namespace Perceiveit.Data.Query
 
         #region public static DBFunction LastID()
 
+        /// <summary>
+        /// Creates a new LastID function to be executed on the database server
+        /// </summary>
+        /// <returns></returns>
         public static DBFunction LastID()
         {
             DBFunction func = new DBFunctionRef();
@@ -176,14 +217,23 @@ namespace Perceiveit.Data.Query
         #endregion
 
 
-        #region  public static DBFunction Function(Function func, params DBClause[] parameters) + 3 overload
+        #region  public static DBFunction Function(Function func, params DBClause[] parameters) + 3 overloads
 
+        /// <summary>
+        /// Creates a new empty DBFunction reference
+        /// </summary>
+        /// <returns></returns>
         public static DBFunction Function()
         {
             DBFunction func = new DBFunctionRef();
             return func;
         }
 
+        /// <summary>
+        /// Creates a new DBFunction reference for the known function
+        /// </summary>
+        /// <param name="func"></param>
+        /// <returns></returns>
         public static DBFunction Function(Function func)
         {
             DBFunction f = DBFunction.Function();
@@ -191,6 +241,12 @@ namespace Perceiveit.Data.Query
             return f;
         }
 
+        /// <summary>
+        /// Creates a new DBFunction reference for the known function and appends the provided parameters
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public static DBFunction Function(Function func, params DBClause[] parameters)
         {
             DBFunction f = new DBFunctionRef();
@@ -205,6 +261,13 @@ namespace Perceiveit.Data.Query
             return f;
         }
 
+        /// <summary>
+        /// Creates a new DBFunction reference for the <i>custom</i> function and appends the provided parameters.
+        /// A custom function cannot be garanteed to be supported across all database engines
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
         public static DBFunction Function(string func, params DBClause[] parameters)
         {
             DBFunction f = new DBFunctionRef();

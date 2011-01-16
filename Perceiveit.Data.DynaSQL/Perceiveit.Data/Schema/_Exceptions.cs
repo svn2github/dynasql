@@ -27,16 +27,29 @@ namespace Perceiveit.Data.Schema
     [global::System.Serializable]
     public class DBSchemaProviderException : ApplicationException
     {
-        //
-        // For guidelines regarding the creation of new exception types, see
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconerrorraisinghandlingguidelines.asp
-        // and
-        //    http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dncscol/html/csharp07192001.asp
-        //
-
+        /// <summary>
+        /// Creates a new instance of the exception witout any details
+        /// </summary>
         public DBSchemaProviderException() { }
+
+        /// <summary>
+        /// Creates a new instance of the exception with the specified message
+        /// </summary>
+        /// <param name="message"></param>
         public DBSchemaProviderException(string message) : base(message) { }
+
+        /// <summary>
+        /// Creates a new instance of the exception with the specified message and inner exception
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="inner"></param>
         public DBSchemaProviderException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>
+        /// For binary serialization
+        /// </summary>
+        /// <param name="info"></param>
+        /// <param name="context"></param>
         protected DBSchemaProviderException(
           System.Runtime.Serialization.SerializationInfo info,
           System.Runtime.Serialization.StreamingContext context)

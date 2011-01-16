@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Abstract base class for statements - exist independently as an executable block
+    /// </summary>
     public abstract class DBStatement : DBClause
     {
     }

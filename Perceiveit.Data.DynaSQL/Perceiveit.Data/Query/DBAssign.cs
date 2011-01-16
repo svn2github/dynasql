@@ -22,12 +22,19 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Creates a new Assignment (X = Y) clause. 
+    /// Used specifically in UPDATE operations (SET field1 = param1, field2 = param2 etc.)
+    /// </summary>
     public abstract class DBAssign : DBClause
     {
 
         #region public DBClause Item {get;set;}
 
         private DBClause _item;
+        /// <summary>
+        /// Gets or sets the receiver of the value
+        /// </summary>
         public DBClause Item
         {
             get { return _item; }
@@ -39,6 +46,9 @@ namespace Perceiveit.Data.Query
         #region public DBClause ToValue {get; set;}
 
         private DBClause _toval;
+        /// <summary>
+        /// Gets or sets the value to be assigned
+        /// </summary>
         public DBClause ToValue
         {
             get { return _toval; }
@@ -53,6 +63,9 @@ namespace Perceiveit.Data.Query
 
         #region protected DBAssign()
 
+        /// <summary>
+        /// To support inherited constructors
+        /// </summary>
         protected DBAssign()
         {
         }
@@ -65,6 +78,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBAssign Set(DBClause item, DBClause toValue)
 
+        /// <summary>
+        /// Creates a new Assignment clause
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="toValue"></param>
+        /// <returns></returns>
         public static DBAssign Set(DBClause item, DBClause toValue)
         {
             DBAssignRef aref = new DBAssignRef();
@@ -78,6 +97,10 @@ namespace Perceiveit.Data.Query
 
         #region internal static DBAssign Assign()
 
+        /// <summary>
+        /// Creates a new Empty assignment
+        /// </summary>
+        /// <returns></returns>
         internal static DBAssign Assign()
         {
             DBAssignRef aref = new DBAssignRef();

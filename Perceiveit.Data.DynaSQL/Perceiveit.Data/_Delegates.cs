@@ -22,9 +22,34 @@ using System.Text;
 
 namespace Perceiveit.Data
 {
+    /// <summary>
+    /// Defines a method signature that returns the required value of a Parameter for methods created with the DBParam.ParamWithDelegate(...)
+    /// </summary>
+    /// <returns>The value of any required parameter</returns>
     public delegate object ParamValue();
 
+    //
+    // callback methods for the DBDataBase.ExecuteRead method
+    //
+
+    /// <summary>
+    /// one of 3 callback method signatures from the DBDatabase.ExecuteRead(...) methods.
+    /// </summary>
+    /// <param name="reader">The reader created by the DBDatabase from the statement</param>
+    /// <returns>Returns any object the the caller of the ExecuteRead statement requires.</returns>
     public delegate object DBCallback(System.Data.Common.DbDataReader reader);
 
+    /// <summary>
+    /// one of 3 callback methods signatures for the DBDatabase.ExecuteRead(...) methods. This signature supports the passing of a context object.
+    /// </summary>
+    /// <param name="reader">The reader created by the DBDatabase from the statement passed to ExecuteRead...</param>
+    /// <param name="context">Any context required by the delegate method</param>
+    /// <returns>Returns any object the call of the ExecuteRead statement requires.</returns>
     public delegate object DBContextCallback(System.Data.Common.DbDataReader reader, object context);
+
+    /// <summary>
+    /// One of 3 callback methods for the DBDatabase.ExecuteRead(...) methods. This signature does not return a value so no value is required to be returned
+    /// </summary>
+    /// <param name="reader">The reader created by the DBDatabase from the statement passed to ExecuteRead(..</param>
+    public delegate void DBEmptyCallback(System.Data.Common.DbDataReader reader);
 }

@@ -34,7 +34,12 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBComparison Equal(DBClause from, DBClause to)
-
+        /// <summary>
+        /// Creates an equal comparison for the left and right clauses
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         public static DBComparison Equal(DBClause from, DBClause to)
         {
             DBBinaryComparisonRef compref = new DBBinaryComparisonRef();
@@ -49,8 +54,20 @@ namespace Perceiveit.Data.Query
 
         #region public static DBComparison Compare(DBClause from, Compare op, DBClause to)
 
+        /// <summary>
+        /// Creates a comparison operation between the left and right clauses
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="op"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         public static DBComparison Compare(DBClause from, Compare op, DBClause to)
         {
+            if (null == from)
+                throw new ArgumentNullException("from");
+            if (null == to)
+                throw new ArgumentNullException("to");
+
             DBBinaryComparisonRef compref = new DBBinaryComparisonRef();
             compref.Left = from;
             compref.Right = to;
@@ -63,6 +80,13 @@ namespace Perceiveit.Data.Query
 
         #region public static DBComparison Between(DBClause value, DBClause min, DBClause max)
 
+        /// <summary>
+        /// Creates a teriary between operation for the value and the min and max clauses
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static DBComparison Between(DBClause value, DBClause min, DBClause max)
         {
             DBTertiaryComparisonRef tri = new DBTertiaryComparisonRef();
@@ -78,6 +102,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBComparison In(DBClause fld, params DBClause[] values)
 
+        /// <summary>
+        /// Creates a included in comparison using the parameter values
+        /// </summary>
+        /// <param name="fld"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
         public static DBComparison In(DBClause fld, params DBClause[] values)
         {
             DBValueGroup grp = DBValueGroup.All(values);
@@ -88,7 +118,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBComparison In(DBClause fld, DBClause clause)
-
+        /// <summary>
+        /// Creates an included in clause
+        /// </summary>
+        /// <param name="fld"></param>
+        /// <param name="clause"></param>
+        /// <returns></returns>
         public static DBComparison In(DBClause fld, DBClause clause)
         {
             return Compare(fld, Perceiveit.Data.Compare.In, clause);
@@ -98,6 +133,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBComparison Exists(DBClause clause)
 
+        /// <summary>
+        /// Creates an EXISTS comparison
+        /// </summary>
+        /// <param name="clause"></param>
+        /// <returns></returns>
         public static DBComparison Exists(DBClause clause)
         {
             DBUnaryComparisonRef un = new DBUnaryComparisonRef();
@@ -111,6 +151,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBComparison Not(DBClause clause)
 
+        /// <summary>
+        /// Creates an unary NOT comparison
+        /// </summary>
+        /// <param name="clause"></param>
+        /// <returns></returns>
         public static DBComparison Not(DBClause clause)
         {
             DBUnaryComparisonRef un = new DBUnaryComparisonRef();
@@ -137,9 +182,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region internal static DBClause Between()
+        #region internal static DBComparison Between()
 
-        internal static DBClause Between()
+        internal static DBComparison Between()
         {
             DBTertiaryComparisonRef comp = new DBTertiaryComparisonRef();
             comp.MinValue = null;
@@ -152,9 +197,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region internal static DBClause Compare()
+        #region internal static DBComparison Compare()
 
-        internal static DBClause Compare()
+        internal static DBComparison Compare()
         {
             DBBinaryComparisonRef comp = new DBBinaryComparisonRef();
             comp.Left = null;

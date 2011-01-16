@@ -17,50 +17,28 @@ namespace Perceiveit.Data.DynaSql.Tests
     [NUnit.Framework.TestFixture()]
     public class DynaSQLTests
     {
-
         [NUnit.Framework.TestFixtureSetUp()]
         public void SetUpConnectionDb()
         {
             //set up is called once for the test suite execution. Here we 
             //output the connection properties we are using just for identification purposes
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
             Console.WriteLine("DataBase Properties: " + db.GetProperties().ToString());
         }
 
-        public List<MyClass> SimpleQuery()
-        {
-            DBDatabase db = DBDatabase.Create("ConnectionName");
-
-            DBQuery sel = DBQuery.SelectAll()
-                                 .From("MyTable")
-                                 .WhereField("Name", Compare.Like, DBConst.String("filter%"));
-
-            List<MyClass> list = new List<MyClass>();
-
-            int count = (int)db.ExecuteRead(delegate(DbDataReader reader)
-            {
-                while (reader.Read())
-                {
-                    MyClass c = new MyClass();
-                    c.ID = Convert.ToInt32(reader["ID"]);
-                    c.Name = Convert.ToString(reader["Name"]);
-                    list.Add(c);
-                }
-                return list.Count;
-            });
-
-            return list;
-        }
-
+        
         /// <summary>
         /// Extracts a count of all the orders for all customers after a specified date
         /// </summary>
         [NUnit.Framework.Test()]
         public void Northwind_01_OrderCountTest()
         {
+            Console.WriteLine("BEGINNING TEST 01");
+            
             //initialize
             StringBuilder names = new StringBuilder();
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
 
             //date limit
@@ -109,13 +87,20 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_02_OrderToOrderDetails()
         {
+            Console.WriteLine("BEGINNING TEST 02");
+
             //initialize
             StringBuilder names = new StringBuilder();
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db); 
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
             
             //A static parameter with the specified value
-            DBParam cid = DBParam.ParamWithValue("BERGS");
+            DBParam cid;
+            if (Nw.DbProvider == "System.Data.OleDb") 
+                cid = DBParam.ParamWithValue(1); //My access schema uses integers for hte Customer ID
+            else
+                cid = DBParam.ParamWithValue("BERGS");
             
 
             //Create the select query
@@ -159,8 +144,10 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_03_ExistsTest()
         {
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            Console.WriteLine("BEGINNING TEST 03");
 
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
             DBSelectQuery select = DBQuery.SelectCount()
                                           .From(Nw.Categories.Table)
                                           .WhereIn(Nw.Categories.CategoryID, 1, 2, 3, 4);
@@ -184,8 +171,11 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_04_ArrayTestWithDelegate()
         {
+            Console.WriteLine("BEGINNING TEST 04");
+
             //initialize
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db); 
             List<int> ids = new List<int>();
             Dictionary<int, int> counts = new Dictionary<int, int>();
             Dictionary<int, double> sums = new Dictionary<int, double>();
@@ -267,8 +257,12 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_05_UpdateTests()
         {
+            Console.WriteLine("BEGINNING TEST 05");
+
             //initialize
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db); 
+            
             string origname = string.Empty;
             string origdesc = string.Empty;
             string newname = string.Empty;
@@ -430,8 +424,11 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_06_InsertTest()
         {
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
-            
+            Console.WriteLine("BEGINNING TEST 06");
+
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
             //create the parameters and insert query
             DBParam name = DBParam.ParamWithValue("new name");
             DBParam desc = DBParam.ParamWithValue("new description");
@@ -493,9 +490,12 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_07_InsertListAndReturnIDs()
         {
+            Console.WriteLine("BEGINNING TEST 07");
+
             //initialize
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider); 
-            
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
             //create a list of item to insert (in this case 10 items).
             List<Category> toInsert = new List<Category>();
             for (int i = 0; i < 10; i++)
@@ -522,51 +522,59 @@ namespace Perceiveit.Data.DynaSql.Tests
                 DBQuery.Select(DBFunction.LastID()) //the provider specific name of this function is catered for in each statement builder.
             );
 
-            //write the SQL to the console
-            OutputCommand(db, script);
-
-
-            //execute this in a transaction
-            int count = 0;
-            using(DbTransaction transaction = db.BeginTransaction())
+            if (db.GetProperties().CheckSupports(DBSchemaTypes.CommandScripts))
             {
-                for (index = 0; index < toInsert.Count; index++)
+                //write the SQL to the console
+                OutputCommand(db, script);
+
+
+                //execute this in a transaction
+                int count = 0;
+                using (DbTransaction transaction = db.BeginTransaction())
                 {
-                    Console.WriteLine();
-                    //the instances ID property is set to the return id
-                    toInsert[index].ID = Convert.ToInt32(db.ExecuteScalar(transaction, script));
-                    Console.WriteLine("Inserted : {0}", toInsert[index]);
-                    count++;
+                    for (index = 0; index < toInsert.Count; index++)
+                    {
+                        Console.WriteLine();
+                        //the instances ID property is set to the return id
+                        toInsert[index].ID = Convert.ToInt32(db.ExecuteScalar(transaction, script));
+                        Console.WriteLine("Inserted : {0}", toInsert[index]);
+                        count++;
+                    }
+
+                    transaction.Commit();
                 }
 
-                transaction.Commit();
+                Console.WriteLine("Inserted a total of '{0}' rows", count);
+
+                //clean up by collecting together all the inserted ids and deleting them
+                object[] allids = new object[count];
+                for (int i = 0; i < count; i++)
+                {
+                    allids[i] = toInsert[i].ID;
+                }
+
+                //use the WhereIn construct that can take an object[]
+                DBQuery del = DBQuery.DeleteFrom(Nw.Categories.Table)
+                                     .WhereIn(Nw.Categories.CategoryID, allids);
+
+                //write the SQL to the console
+                OutputCommand(db, del);
+
+                //Execute and get back the number of rows deleted.
+                int deleted = db.ExecuteNonQuery(del);
+
+                //assert that they are all deleted
+                NUnit.Framework.Assert.AreEqual(deleted, count);
+                Console.WriteLine("Deleted '{0}' rows from the table", deleted);
+
             }
-
-            Console.WriteLine("Inserted a total of '{0}' rows", count);
-
-            //clean up by collecting together all the inserted ids and deleting them
-            object[] allids = new object[count];
-            for (int i = 0; i < count; i++)
+            else
             {
-                allids[i] = toInsert[i].ID;
+                Console.WriteLine("Skipped DBScrips as this is not supported by the provider");
             }
-
-            //use the WhereIn construct that can take an object[]
-            DBQuery del = DBQuery.DeleteFrom(Nw.Categories.Table)
-                                 .WhereIn(Nw.Categories.CategoryID, allids);
-
-            //write the SQL to the console
-            OutputCommand(db, del);
-
-            //Execute and get back the number of rows deleted.
-            int deleted = db.ExecuteNonQuery(del);
-
-            //assert that they are all deleted
-            NUnit.Framework.Assert.AreEqual(deleted, count);
-            Console.WriteLine("Deleted '{0}' rows from the table", deleted);
-
-
         }
+
+        
 
         
         /// <summary>
@@ -575,7 +583,10 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_08_WhereSubSelect()
         {
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider); 
+            Console.WriteLine("BEGINNING TEST 08");
+
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
 
             //look for the used categories with a subselect on products
             DBQuery select = DBQuery.Select().Field(Nw.Categories.CategoryName).As("usedCategory")
@@ -625,7 +636,10 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_09_BigSubSelect()
         {
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            Console.WriteLine("BEGINNING TEST 09");
+
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
 
             object[] requiredregions = new object[] { "SP", "OR" };
 
@@ -684,8 +698,12 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_10_MultipleResults()
         {
+            Console.WriteLine("BEGINNING TEST 10");
+
             //initialize
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db); 
+            
             Dictionary<int, string> categories = new Dictionary<int, string>();
             Dictionary<int, string> products = new Dictionary<int, string>();
 
@@ -742,9 +760,12 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_11_FillingDataset()
         {
+            Console.WriteLine("BEGINNING TEST 11");
+
             //initialize
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
-            
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
             //first select statement
             DBQuery first = DBQuery.SelectFields(Nw.Categories.CategoryID, Nw.Categories.CategoryName)
                                    .From(Nw.Categories.Table);
@@ -791,8 +812,11 @@ namespace Perceiveit.Data.DynaSql.Tests
         [NUnit.Framework.Test()]
         public void Northwind_12_SelectTopN()
         {
+            Console.WriteLine("BEGINNING TEST 12");
+
             //initialize
-            DBDatabase db = DBDatabase.Create(Nw.DbConnection, Nw.DbProvider);
+            DBDatabase db = DBDatabase.Create("Northwind",Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
 
             //select statements - count, top 4 and top 10 percent
             DBQuery count = DBQuery.SelectCount().From(Nw.OrderDetails.Table);
@@ -806,11 +830,35 @@ namespace Perceiveit.Data.DynaSql.Tests
                                             .Fields(Nw.OrderDetails.OrderID, Nw.OrderDetails.Quantity)
                                             .From(Nw.OrderDetails.Table)
                                             .OrderBy(Nw.OrderDetails.Quantity, Order.Descending).And(Nw.OrderDetails.OrderID);
-             
+
+            DBSelectQuery sub = DBQuery.Select().TopN(100)
+                                                .Sum(Nw.OrderDetails.Quantity).As("total")
+                                                .Field(Nw.OrderDetails.ProductID).As("prod")
+                                                .From(Nw.OrderDetails.Table)
+                                                .GroupBy(Nw.OrderDetails.ProductID)
+                                                .OrderBy(DBAggregate.Aggregate(AggregateFunction.Sum, DBField.Field( Nw.OrderDetails.Quantity)),Order.Descending);
+
+            DBQuery topwithSubSelect = DBQuery.Select().TopN(10)
+                                            .Fields("total", "prod")
+                                            .From(sub).As("sub")
+                                            .OrderBy("total", Order.Descending);
             //write the SQL to the console
+
+            bool supportsPercent = true;
+
             OutputCommand(db, count);
             OutputCommand(db, topfour);
-            OutputCommand(db, toppercent);
+            try
+            {
+                OutputCommand(db, toppercent);
+            }
+            catch (NotSupportedException) 
+            { 
+                Console.Write("Provider Does not support percent");
+                supportsPercent = false;
+            }
+
+            OutputCommand(db, topwithSubSelect);
 
             //gets the total count of rows in the order details table so we can 
             //compare later on
@@ -828,9 +876,28 @@ namespace Perceiveit.Data.DynaSql.Tests
             });
             //validate the result
             NUnit.Framework.Assert.AreEqual(4, topids.Length);
+            int[] percent = new int[] { };
 
+            if (supportsPercent)
+            {
+                percent = (int[])db.ExecuteRead(toppercent, delegate(DbDataReader reader)
+                {
+                    List<int> ids = new List<int>();
+                    while (reader.Read())
+                    {
+                        ids.Add(Convert.ToInt32(reader[0]));
+                    }
+                    return ids.ToArray();
+                });
 
-            int[] percent = (int[])db.ExecuteRead(toppercent, delegate(DbDataReader reader)
+                //check that the values are the same on both
+                for (int i = 0; i < topids.Length; i++)
+                {
+                    NUnit.Framework.Assert.AreEqual(topids[i], percent[i], "The id's at index '" + i + "' do not match");
+                }
+            }
+
+            int[] withsubselect = (int[])db.ExecuteRead(topwithSubSelect, delegate(DbDataReader reader)
             {
                 List<int> ids = new List<int>();
                 while (reader.Read())
@@ -839,19 +906,7 @@ namespace Perceiveit.Data.DynaSql.Tests
                 }
                 return ids.ToArray();
             });
-
-            //check that the values are the same on both
-            for (int i = 0; i < topids.Length; i++)
-			{
-                NUnit.Framework.Assert.AreEqual(topids[i],percent[i]);
-			}
-            
-            //now confirm the percent returned is within hte bounds of the total number of rows
-            double required = (cnt / 100.0) * 10.0;
-            int min = (int)Math.Floor(required);
-            int max = (int)Math.Ceiling(required);
-
-            NUnit.Framework.Assert.IsTrue(percent.Length >= min && percent.Length <= max);
+            NUnit.Framework.Assert.AreEqual(withsubselect.Length, 10, "The expected return of 10 products was actually '" + withsubselect.Length.ToString() + "'");
 
             Console.WriteLine("Total row count was :{0}, 10 percent of this was returned:{1}, " +
                 "and the ids of the four with the highest quantity were:{2},{3},{4},{5}", cnt, percent.Length, topids[0], topids[1], topids[2], topids[3]);
@@ -860,9 +915,159 @@ namespace Perceiveit.Data.DynaSql.Tests
 
 
 
+        [NUnit.Framework.Test()]
+        public void Northwind_13_SelectLeftAndRightJoin()
+        {
+            Console.WriteLine("BEGINNING TEST 13");
+
+            //initialize
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+            //Count all the employees then run a left join onto orders subquery (with a date limit) and make sure we get the same number
+            //SELECT E.employeeid, O.ordercount FROM EMPLOYEES E
+            //    LEFT OUTER JOIN (SELECT employeeid, COUNT(*) as ordercount FROM ORDERS
+            //                     WHERE OrderDate > '01 May 1998'
+            //                     GROUP BY employeeid) O 
+            //        ON E.EmployeeID = O.EmployeeID
+            //ORDER BY ordercount
+
+
+            DateTime dtlimit = new DateTime(1998, 05, 01);
+
+            DBQuery allemps = DBQuery.SelectCount().From(Nw.Employees.Table);
+            int countallemps = Convert.ToInt32(db.ExecuteScalar(allemps));
+            Console.WriteLine("Total number of employees is '" + countallemps + "'");
+
+            //Generate the sub query first
+            DBSelectQuery empordercount = DBQuery.Select()
+                                           .Field(Nw.Orders.EmployeeID)
+                                           .Count(DBField.AllFields()).As("ordercount")
+                                           .From(Nw.Orders.Table)
+                                           .Where(Nw.Orders.OrderDate, Compare.GreaterThan, DBConst.DateTime(dtlimit))
+                                           .GroupBy(Nw.Orders.EmployeeID);
+
+            DBSelectQuery left = DBQuery.Select()
+                                  .Field("E", Nw.Employees.EmployeeID)
+                                  .Field("O", "ordercount")
+                                  .From(Nw.Employees.Table).As("E")
+                                  .LeftJoin(empordercount).As("O")
+                                        .On("E",Nw.Employees.EmployeeID,Compare.Equals,"O",Nw.Orders.EmployeeID)
+                                  .OrderBy("O", "ordercount");
+
+
+            bool hasempty = false;
+            Dictionary<int, int> empstoorders = new Dictionary<int, int>();
+            //do the read and populate the dictionary
+            db.ExecuteRead(left, delegate(DbDataReader reader)
+            {
+                while (reader.Read())
+                {
+                    int empid = reader.GetInt32(0);//employeeid
+                    int count;
+                    if (reader.IsDBNull(1))
+                    {
+                        count = -1;
+                        hasempty = true;
+                    }
+                    else
+                    {
+                        count = reader.GetInt32(1);//ordercount
+                    }
+                    empstoorders.Add(empid, count);//add to the dictionary
+                }
+            });
+
+            //make sure empty ones are returned
+            if (hasempty)
+                Console.WriteLine("Left joins found");
+            else
+                throw new InvalidOperationException("The left join could not be checked - all employees returned orders with in the date");
+
+            NUnit.Framework.Assert.AreEqual(countallemps,empstoorders.Count,"the number of employees returned from the left join does not match the total numer of employees");
+
+            Console.WriteLine("Left join returned '" + empstoorders.Count + "' employees which matches the total number of employees");
+            foreach (KeyValuePair<int,int> kvp in empstoorders)
+            {
+                Console.WriteLine(string.Format("Employee id '{0}' returned '{1}' orders within the date", kvp.Key, kvp.Value < 0 ? "NULL" : kvp.Value.ToString()));
+            }
+
+            //Now Switch it around for the RIGHT OUTER JOIN - just as a test
+
+            //SELECT O.ordercount,  E.employeeid
+            //    FROM (SELECT employeeid, COUNT(*) as ordercount FROM ORDERS
+            //                     WHERE OrderDate > '01 May 1998'
+            //                     GROUP BY employeeid) O 
+            //    RIGHT OUTER JOIN EMPLOYEES E
+            //        ON O.EmployeeID = E.EmployeeID
+            //ORDER BY ordercount
+
+
+            DBSelectQuery right = DBQuery.Select()
+                                  .Field("O", "ordercount")
+                                  .Field("E", Nw.Employees.EmployeeID)
+                                  .From(empordercount).As("O")
+                                  .RightJoin(Nw.Employees.Table).As("E")
+                                        .On("O", Nw.Orders.EmployeeID, Compare.Equals, "E", Nw.Employees.EmployeeID)
+                                  .OrderBy("O", "ordercount");
+
+
+            hasempty = false;
+            Dictionary<int, int> orderstoemps = new Dictionary<int, int>();
+            //do the read and populate the dictionary
+            db.ExecuteRead(right, delegate(DbDataReader reader)
+            {
+                while (reader.Read())
+                {
+                    int count;
+                    if (reader.IsDBNull(0))
+                    {
+                        count = -1;
+                        hasempty = true;
+                    }
+                    else
+                    {
+                        count = reader.GetInt32(0);//ordercount
+                    }
+
+                    int empid = reader.GetInt32(1);//employeeid
+                    orderstoemps.Add(empid, count);//add to the dictionary
+                }
+            });
+
+            //make sure empty ones are returned
+            if (hasempty)
+                Console.WriteLine("Right joins found");
+            else
+                throw new InvalidOperationException("The right join could not be checked - all employees returned orders with in the date");
+
+            NUnit.Framework.Assert.AreEqual(countallemps, orderstoemps.Count, "the number of employees returned from the RIGHT join does not match the total numer of employees");
+
+            Console.WriteLine("RIGHT join returned '" + orderstoemps.Count + "' employees which matches the total number of employees");
+            foreach (KeyValuePair<int, int> kvp in orderstoemps)
+            {
+                Console.WriteLine(string.Format("Employee id '{0}' returned '{1}' orders within the date", kvp.Key, kvp.Value < 0 ? "NULL" : kvp.Value.ToString()));
+            }
+
+        }
+
+
+        [NUnit.Framework.TestFixtureTearDown()]
+        public void DumpSummary()
+        {
+            Profile.DBConsoleProfilerSingletonFactory.Instance().DumpExecutionSummary();
+        }
+
         //
         // Support methods
         //
+
+        private static void AttachProfiler(DBDatabase db)
+        {
+            //Profilers are defined in the config file - if not using then can be attached here as required
+            //db.AttachProfiler(Profile.DBConsoleProfilerSingletonFactory.Instance(), true);
+            //db.AttachProfiler(new Profile.DBTextFileProfiler("Northwind"), true);
+        }
 
         /// <summary>
         /// Outputs the SQL for a DBQuery onto the console, along with any parameters
@@ -871,19 +1076,7 @@ namespace Perceiveit.Data.DynaSql.Tests
         /// <param name="q"></param>
         private static void OutputCommand(DBDatabase db, DBQuery q)
         {
-            Console.WriteLine();
-            using (DbCommand cmd = db.CreateCommand(q))
-            {
-                Console.WriteLine(cmd.CommandText);
-                if (cmd.Parameters.Count > 0)
-                {
-                    foreach (DbParameter p in cmd.Parameters)
-                    {
-                        Console.WriteLine("Parameter : {0} ( Type:{1}, Direction:{2}, Size:{3}, Source:{4}, Value:{5})", p.ParameterName, p.DbType, p.Direction, p.Size, p.SourceColumn, p.Value);
-
-                    }
-                }
-            }
+            
         }
 
     }

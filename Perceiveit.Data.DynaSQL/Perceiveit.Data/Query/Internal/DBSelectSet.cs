@@ -22,7 +22,7 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
-    internal class DBSelectSet : DBCalculableExpressionSet, IDBAlias, IDBBoolean, IDBArregate
+    internal class DBSelectSet : DBCalculableExpressionSet, IDBAlias, IDBBoolean, IDBAggregate
     {
 
         private DBClauseList _results;

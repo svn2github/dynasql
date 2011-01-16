@@ -22,85 +22,193 @@ using System.Text;
 
 namespace Perceiveit.Data
 {
+    /// <summary>
+    /// Encapsulates specific information about a database such as version and supported features. 
+    /// </summary>
+    /// <remarks>Use the DBDatabase.GetProperties() method to get the fully populated instance for a specific connection</remarks>
     public class DBDatabaseProperties
     {
+        /// <summary>
+        /// Empty unknown database properties.
+        /// </summary>
+        public static readonly DBDatabaseProperties Unknown = new DBDatabaseProperties("Unknown", "Unknown", "Unknown", "Unknown", "{0}", new Version(0, 0), (DBSchemaTypes)0, true, DBParameterLayout.Named, null, null);
 
-        public static readonly string Unknown = String.Empty;
+        //
+        // properties
+        //
 
+        #region public string ServerEdition {get;}
 
         private string _edition;
+
+        /// <summary>
+        /// Gets the server edition
+        /// </summary>
         public string ServerEdition
         {
             get { return _edition; }
         }
 
+        #endregion
+
+        #region public string ProductLevel
+
         private string _productlevel;
+
+        /// <summary>
+        /// Gets the Product level
+        /// </summary>
         public string ProductLevel
         {
             get { return _productlevel; }
         }
 
+        #endregion
+
+        #region public string ProductName {get;}
+
         private string _name;
+
+        /// <summary>
+        /// Gets the name of the database engine product
+        /// </summary>
         public string ProductName
         {
             get { return _name; }
         }
 
+        #endregion
+
+        #region public Version ProductVersion
+
         private Version _vers;
+
+        /// <summary>
+        /// Gets the product version
+        /// </summary>
         public Version ProductVersion
         {
             get { return _vers; }
         }
 
+        #endregion
+
+        #region public string ParameterFormat {get;}
+
         private string _paramformat;
+
+        /// <summary>
+        /// Gets the format string for converting a generic parameter name to an implementation specific name
+        /// </summary>
         public string ParameterFormat
         {
             get { return _paramformat; }
         }
 
-        private DBSchemaTypes _supportedschemas;
-        public DBSchemaTypes SupportedSchemas 
-        {
-            get { return _supportedschemas; }
-            protected set { _supportedschemas = value; }
-        }
+        #endregion
 
-        private bool _casesensitive;
-        public bool CaseSensitiveNames
-        {
-            get { return _casesensitive; }
-            protected set { _casesensitive = value; }
-        }
+        #region public DBParameterLayout ParameterLayout {get; protected set;}
 
         private DBParameterLayout _paramlayout;
+
+        /// <summary>
+        /// Gets the layout type of parameters - Positional or Named
+        /// </summary>
+        /// <remarks>Inheritors can set this value</remarks>
         public DBParameterLayout ParameterLayout
         {
             get { return _paramlayout; }
             protected set { _paramlayout = value; }
         }
 
+        #endregion
+
+        #region public DBSchemaTypes SupportedSchemas {get; protected set;}
+
+        private DBSchemaTypes _supportedschemas;
+
+        /// <summary>
+        /// Gets the supported schema types for this database - Tables, Views, Procedures, Functions etc...
+        /// </summary>
+        /// <remarks>Inheritors can set this value</remarks>
+        public DBSchemaTypes SupportedSchemas 
+        {
+            get { return _supportedschemas; }
+            protected set { _supportedschemas = value; }
+        }
+
+        #endregion
+
+        #region public bool CaseSensitiveNames {get; protected set;}
+
+        private bool _casesensitive;
+
+        /// <summary>
+        /// Gets the flag that defines if this database uses case sensitive identifiers
+        /// </summary>
+        /// <remarks>Inheritors can set this value</remarks>
+        public bool CaseSensitiveNames
+        {
+            get { return _casesensitive; }
+            protected set { _casesensitive = value; }
+        }
+
+        #endregion
+
+        #region public System.Data.DbType[] SupportedDbTypes {get; protected set;}
+
         private System.Data.DbType[] _supportedtypes;
+
+        /// <summary>
+        /// Gets an array of supported DbTypes for this database
+        /// </summary>
+        /// <remarks>Inheritors can set this value</remarks>
         public System.Data.DbType[] SupportedDbTypes
         {
             get { return _supportedtypes; }
             protected set { _supportedtypes = value; }
         }
 
+        #endregion
 
-        public DBDatabaseProperties(string productName, 
-                                    string productLevel, 
-                                    string serverEdition, 
-                                    string parameterFormat, 
-                                    string version, 
-                                    DBSchemaTypes supports, 
-                                    bool caseSensitive, 
-                                    DBParameterLayout layout,
-                                    System.Data.DbType[] supportedDbTypes)
-            : this(productName, productLevel, serverEdition, parameterFormat, new Version(version), supports, caseSensitive, layout, supportedDbTypes)
+        #region public TopType[] SupportedTopTypes {get; protected set;}
+
+        private TopType[] _supportedTopTypes;
+
+        /// <summary>
+        /// Gets the supported top types - Count, Percent and Range
+        /// </summary>
+        /// <remarks>Inheritors can set this value</remarks>
+        public TopType[] SupportedTopTypes
         {
+            get { return _supportedTopTypes; }
+            protected set { _supportedTopTypes = value; }
         }
 
-        public DBDatabaseProperties(string productName, 
+        #endregion
+
+        //
+        // .ctor
+        //
+
+        #region internal protected DBDatabaseProperties(...)
+
+        /// <summary>
+        /// Creates a new instance of the DBDatabaseProperties
+        /// </summary>
+        /// <param name="databaseName"></param>
+        /// <param name="productName"></param>
+        /// <param name="productLevel"></param>
+        /// <param name="serverEdition"></param>
+        /// <param name="parameterFormat"></param>
+        /// <param name="version"></param>
+        /// <param name="supports"></param>
+        /// <param name="caseSensitive"></param>
+        /// <param name="layout"></param>
+        /// <param name="supportedDbTypes"></param>
+        /// <param name="supportedTopTypes"></param>
+        internal protected DBDatabaseProperties(string databaseName,
+            string productName, 
             string productLevel, 
             string serverEdition, 
             string parameterFormat, 
@@ -108,7 +216,8 @@ namespace Perceiveit.Data
             DBSchemaTypes supports, 
             bool caseSensitive, 
             DBParameterLayout layout,
-            System.Data.DbType[] supportedDbTypes)
+            System.Data.DbType[] supportedDbTypes,
+            TopType[] supportedTopTypes)
         {
             this._vers = version;
             this._edition = serverEdition;
@@ -119,19 +228,49 @@ namespace Perceiveit.Data
             this.CaseSensitiveNames = caseSensitive;
             this.ParameterLayout = layout;
             this.SupportedDbTypes = supportedDbTypes;
+            this.SupportedTopTypes = supportedTopTypes;
         }
 
+        #endregion
 
+        //
+        // public methods
+        //
+
+        #region public bool CheckSupports(DBSchemaTypes schema)
+
+        /// <summary>
+        /// Returns true if the Database supports the required schema type
+        /// </summary>
+        /// <param name="schema">The schema type to check (can be multiple)</param>
+        /// <returns>True if the schema type is supported</returns>
         public bool CheckSupports(DBSchemaTypes schema)
         {
             return (this.SupportedSchemas & schema) > 0;
         }
 
+        #endregion
+
+        #region public bool CheckSupportsType(System.Data.DbType type)
+
+        /// <summary>
+        /// Returns true if the database supports the required data type
+        /// </summary>
+        /// <param name="type">The data type to check</param>
+        /// <returns>True if it is supported</returns>
         public bool CheckSupportsType(System.Data.DbType type)
         {
             return Array.IndexOf<System.Data.DbType>(SupportedDbTypes, type) > -1;
         }
 
+        #endregion
+
+        #region public override string ToString() + 1 overload
+
+        /// <summary>
+        /// Builds a summary string of the properties of this database
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -141,6 +280,11 @@ namespace Perceiveit.Data
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Appends key properties and their values to the StringBuilder. 
+        /// Inheritors can override this method to append other properties
+        /// </summary>
+        /// <param name="sb"></param>
         protected virtual void ToString(StringBuilder sb)
         {
             sb.Append("product:");
@@ -152,6 +296,8 @@ namespace Perceiveit.Data
             sb.Append(", version:");
             sb.Append(this.ProductVersion);
         }
+
+        #endregion
 
     }
 }

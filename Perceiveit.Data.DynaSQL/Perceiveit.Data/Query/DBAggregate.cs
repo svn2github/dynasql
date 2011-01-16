@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines an aggregate function to be generated for a clause
+    /// </summary>
     public abstract class DBAggregate : DBCalculableClause
     {
         //
@@ -31,11 +34,13 @@ namespace Perceiveit.Data.Query
         #region public AggregateFunction Function {get;set;}
 
         private AggregateFunction _func;
-
+        /// <summary>
+        /// Gets or sets the aggregate function for this instance
+        /// </summary>
         public AggregateFunction Function
         {
             get { return _func; }
-            protected set { _func = value; }
+            set { _func = value; }
         }
 
         #endregion
@@ -43,11 +48,13 @@ namespace Perceiveit.Data.Query
         #region public DBClause InnerReference {get;set;}
 
         private DBClause _innerref;
-
+        /// <summary>
+        /// Gets or sets the inner clause for the aggregation
+        /// </summary>
         public DBClause InnerReference
         {
             get { return _innerref; }
-            protected set { _innerref = value; }
+            set { _innerref = value; }
         }
 
         #endregion
@@ -56,6 +63,9 @@ namespace Perceiveit.Data.Query
 
         private string _alias;
 
+        /// <summary>
+        /// Gets the alias name for the resultant clause
+        /// </summary>
         public string Alias
         {
             get { return _alias; }
@@ -70,7 +80,11 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBAggregate Count(DBClause reference)
-
+        /// <summary>
+        /// Creates a new Count aggregation for this passed clause.
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public static DBAggregate Count(DBClause reference)
         {
             return Aggregate(AggregateFunction.Count, reference);
@@ -80,15 +94,24 @@ namespace Perceiveit.Data.Query
 
         #region public static DBAggregate CountAll()
 
+        /// <summary>
+        /// Creates a new Count(*) aggregation
+        /// </summary>
+        /// <returns></returns>
         public static DBAggregate CountAll()
         {
+            
             return Aggregate(AggregateFunction.Count, DBField.AllFields());
         }
 
         #endregion
 
         #region public static DBAggregate Count(string field)
-
+        /// <summary>
+        /// Creates a new Count('field') aggregation
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns></returns>
         public static DBAggregate Count(string field)
         {
             return Aggregate(AggregateFunction.Count, DBField.Field(field));
@@ -97,9 +120,17 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBAggregate Aggregate(AggregateFunction func, DBClause reference)
-
+        /// <summary>
+        /// Creates a new Aggregation for the provided clause.
+        /// </summary>
+        /// <param name="func"></param>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public static DBAggregate Aggregate(AggregateFunction func, DBClause reference)
         {
+            if (null == reference)
+                throw new ArgumentNullException("reference");
+
             DBAggregateRef cref = new DBAggregateRef();
             cref.Function = func;
             cref.InnerReference = reference;

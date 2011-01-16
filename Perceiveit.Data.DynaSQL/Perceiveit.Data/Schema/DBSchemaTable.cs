@@ -22,6 +22,9 @@ using System.Xml.Serialization;
 
 namespace Perceiveit.Data.Schema
 {
+    /// <summary>
+    /// Defines the schema information of the table in a database
+    /// </summary>
     [XmlRoot("table", Namespace="http://schemas.perceiveit.co.uk/Query/schema/")]
     [Serializable()]
     public class DBSchemaTable : DBSchemaItem
@@ -29,7 +32,8 @@ namespace Perceiveit.Data.Schema
         #region ivars
 
         private DBSchemaTableColumnCollection _cols;
-        private DbSchemaIndexCollection _indexes;
+        private DBSchemaIndexCollection _indexes;
+        private DBSchemaForeignKeyCollection _fks;
 
         #endregion
 
@@ -37,7 +41,7 @@ namespace Perceiveit.Data.Schema
         // public properties
         //
 
-        #region public DBSchemaTableColumnCollection Columns { get; protected set; }
+        #region public DBSchemaTableColumnCollection Columns { get; set; }
 
         /// <summary>
         /// Gets the collection of DBSchemaColumns in this table
@@ -48,6 +52,36 @@ namespace Perceiveit.Data.Schema
         {
             get { return this._cols; }
             set { this._cols = value; }
+        }
+
+        #endregion
+
+        #region public DBSchemaItemRefCollection Indexes {get; set;}
+
+        /// <summary>
+        /// Gets the collection of DBSchemaIndexes in this table
+        /// </summary>
+        [XmlArray("indexes")]
+        [XmlArrayItem("index", typeof(DBSchemaIndex))]
+        public DBSchemaIndexCollection Indexes
+        {
+            get { return this._indexes; }
+            set { this._indexes = value; }
+        }
+
+        #endregion
+
+        #region public DBSchemaForeignKeyCollection ForeignKeys {get;set;}
+
+        /// <summary>
+        /// Gets the collection of DBSchemaForeignKeys in this table
+        /// </summary>
+        [XmlArray("foreign-keys")]
+        [XmlArrayItem("fk", typeof(DBSchemaForeignKey))]
+        public DBSchemaForeignKeyCollection ForeignKeys
+        {
+            get { return this._fks; }
+            set { this._fks = value; }
         }
 
         #endregion
@@ -70,7 +104,11 @@ namespace Perceiveit.Data.Schema
         #endregion
 
         #region public DBSchemaTable(string owner, string name)
-
+        /// <summary>
+        /// Creates an new DBSchemaTable
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
         public DBSchemaTable(string owner, string name)
             : this()
         {

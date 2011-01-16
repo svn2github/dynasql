@@ -22,13 +22,15 @@ using System.Xml.Serialization;
 
 namespace Perceiveit.Data.Schema
 {
+    /// <summary>
+    /// Defines the schema of a view column in a database
+    /// </summary>
     public class DBSchemaViewColumn : DBSchemaColumn
     {
 
         #region ivars
 
-        private bool _hasDefault = false;
-        private string _default = string.Empty;
+        private string _default = null;
 
         #endregion
 
@@ -41,10 +43,11 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets whether this column has a default value
         /// </summary>
+        [XmlIgnore()]
         public bool HasDefault
         {
-            get { return this._hasDefault; }
-            set { this._hasDefault = value; }
+            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.HasDefault); }
+            set { this.SetColumnFlag(DBSchemaColumnFlags.HasDefault, value); }
         }
 
         #endregion
@@ -54,6 +57,7 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets the DbAssigned default value for this Table column
         /// </summary>
+        [XmlElement("default")]
         public string DefaultValue
         {
             get { return this._default; }
@@ -61,9 +65,9 @@ namespace Perceiveit.Data.Schema
             {
                 this._default = value;
                 if (null == value)
-                    _hasDefault = false;
+                    HasDefault = false;
                 else
-                    _hasDefault = true;
+                    HasDefault = true;
             }
         }
 
@@ -73,10 +77,17 @@ namespace Perceiveit.Data.Schema
         // .ctors
         //
 
+        /// <summary>
+        /// Creates a new DBSchemaViewColumn
+        /// </summary>
         public DBSchemaViewColumn()
             : base()
         { }
 
+        /// <summary>
+        /// Creates a new DBSchemaViewColumn with the specifed name
+        /// </summary>
+        /// <param name="name"></param>
         public DBSchemaViewColumn(string name)
             : base(name)
         {
@@ -87,7 +98,10 @@ namespace Perceiveit.Data.Schema
         //
 
         #region public override string ToString()
-
+        /// <summary>
+        /// returms a human readable string representing this instance
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("Column '{0}' {1} (Runtime Type: {8}, Size: {2}, Read Only:{3}, Nullable:{4}, HasDefault:{6} ({5}), Ordinal:{7})",
@@ -98,23 +112,61 @@ namespace Perceiveit.Data.Schema
     }
 
 
-    public class DBSchemaViewColumnCollection : System.Collections.ObjectModel.KeyedCollection<string, DBSchemaViewColumn>
+    /// <summary>
+    /// Defines a collection of columns accessible by name or index
+    /// </summary>
+    public class DBSchemaViewColumnCollection : System.Collections.Generic.List<DBSchemaViewColumn>
     {
+        /// <summary>
+        /// 
+        /// </summary>
         public DBSchemaViewColumnCollection()
-            : base(StringComparer.InvariantCultureIgnoreCase)
+            : base()
         {
         }
 
-        protected override string GetKeyForItem(DBSchemaViewColumn item)
+        /// <summary>
+        /// Gets the first column with a matching name (initially case-sensitive, then a second case insensitive search is performed
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public DBSchemaViewColumn this[string name]
         {
-            return item.Name;
+            get
+            {
+                foreach (DBSchemaViewColumn col in this)
+                {
+                    if (string.Equals(col.Name, name, StringComparison.InvariantCulture))
+                        return col;
+                }
+                foreach (DBSchemaViewColumn col in this)
+                {
+                    if (string.Equals(col.Name, name, StringComparison.InvariantCultureIgnoreCase))
+                        return col;
+                }
+                return null;
+            }
         }
 
+        /// <summary>
+        /// Gets all the columns as an array
+        /// </summary>
+        /// <returns></returns>
         public IEnumerable<DBSchemaColumn> GetColumns()
         {
             DBSchemaViewColumn[] cols = new DBSchemaViewColumn[this.Count];
             this.CopyTo(cols, 0);
             return cols;
+        }
+
+        /// <summary>
+        /// returns true it this collection contains a column with the specifeid name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public bool Contains(string name)
+        {
+            return this[name] != null;
         }
     }
 }

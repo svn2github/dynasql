@@ -46,7 +46,11 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBQuery SelectCount() + 3 overloads
-
+        
+        /// <summary>
+        /// Begins a new SELECT statement with a COUNT(*) as the first result
+        /// </summary>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectCount()
         {
             DBSelectSet sel = DBSelectSet.SelectCount();
@@ -56,6 +60,11 @@ namespace Perceiveit.Data.Query
             return q;
         }
 
+        /// <summary>
+        /// Begins a new SELECT statement with a COUNT([field]) as the first result
+        /// </summary>
+        /// <param name="field">The name of the field to count</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectCount(string field)
         {
             DBSelectSet sel = DBSelectSet.SelectCount(field);
@@ -64,6 +73,13 @@ namespace Perceiveit.Data.Query
             return q;
         }
 
+
+        /// <summary>
+        /// Begins a new SELECT statement with a COUNT([table].[field]) as the first result
+        /// </summary>
+        /// <param name="field">The name of the field to count</param>
+        /// <param name="table">The name of the table (or alias) containing the field to count</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectCount(string table, string field)
         {
             DBSelectSet sel = DBSelectSet.SelectCount(table, field);
@@ -72,6 +88,13 @@ namespace Perceiveit.Data.Query
             return q;
         }
 
+        /// <summary>
+        /// Begins a new SELECT statement with a COUNT([owner].[table].[field]) as the first result
+        /// </summary>
+        /// <param name="field">The name of the field to count</param>
+        /// <param name="table">The name of the table (or alias) containing the field to count</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectCount(string owner, string table, string field)
         {
             DBSelectSet sel = DBSelectSet.SelectCount(owner, table, field);
@@ -86,6 +109,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBQuery SelectFields(params string[] fields)
 
+        /// <summary>
+        /// Begins a new SELECT statement with a set of fields as the result
+        /// </summary>
+        /// <param name="fields">The name of the fields to select</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectFields(params string[] fields)
         {
             DBSelectSet sel = DBSelectSet.SelectFields(fields);
@@ -99,7 +127,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBSelectQuery Select()
-
+        /// <summary>
+        /// Begins a new SELECT statement. Add fields and tables by using the methods on the instance returned
+        /// </summary>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery Select()
         {
             DBSelectQuery q = new DBSelectQuery();
@@ -109,7 +140,11 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBSelectQuery SelectTopN(int count)
-
+        /// <summary>
+        /// Begins a new SELECT statement with a limit of [count] items returned
+        /// </summary>
+        /// <param name="count">The total number of items to return</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectTopN(int count)
         {
             DBSelectQuery q = DBQuery.Select();
@@ -118,18 +153,12 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public static DBSelectQuery SelectTopPercent(double percent)
-
-        public static DBSelectQuery SelectTopPercent(double percent)
-        {
-            DBSelectQuery q = DBQuery.Select();
-            return q.TopPercent(percent);
-        }
-
-        #endregion
-
         #region public static DBSelectQuery SelectDistinct()
 
+        /// <summary>
+        /// Begins a new SELECT DISTINCT statement. Add fields and tables by using the methods on the instance returned
+        /// </summary>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectDistinct()
         {
             DBSelectQuery q = DBQuery.Select();
@@ -138,12 +167,16 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public static DBSelectQuery Select(DBClause fields)
-
-        public static DBSelectQuery Select(DBClause field)
+        #region public static DBSelectQuery Select(DBClause field)
+        /// <summary>
+        /// Begins a new SELECT statement with the clause as the first value returned.
+        /// </summary>
+        /// <param name="clause">Any valid SQL clause (DBConst, DBParam, etc.) </param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
+        public static DBSelectQuery Select(DBClause clause)
         {
             DBSelectQuery q = new DBSelectQuery();
-            q.SelectSet = DBSelectSet.Select(field);
+            q.SelectSet = DBSelectSet.Select(clause);
             q.Last = q.SelectSet;
             return q;
         }
@@ -151,7 +184,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBSelectQuery SelectAll()
-
+        /// <summary>
+        /// Begins a new SELECT * statement.
+        /// </summary>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectAll()
         {
             DBSelectQuery q = new DBSelectQuery();
@@ -163,7 +199,11 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBSelectQuery SelectAll(string table)
-
+        /// <summary>
+        /// Begins a new SELECT [table].* statment
+        /// </summary>
+        /// <param name="table">The name (or alias) of the table</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectAll(string table)
         {
             DBSelectQuery q = new DBSelectQuery();
@@ -176,6 +216,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBSelectQuery SelectAll(string owner, string table)
 
+        /// <summary>
+        /// Begins a new SELECT [owner].[table].* statment
+        /// </summary>
+        /// <param name="table">The name (or alias) of the table</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
         public static DBSelectQuery SelectAll(string owner, string table)
         {
             DBSelectQuery q = new DBSelectQuery();
@@ -193,6 +239,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBExecQuery Exec(string name)
 
+        /// <summary>
+        /// Begins a new 'EXEC [procedure name]' statement
+        /// </summary>
+        /// <param name="name">The name of the procedure</param>
+        /// <returns>A new DBExecQuery to support statement chaining</returns>
         public static DBExecQuery Exec(string name)
         {
             DBExecQuery exec = new DBExecQuery();
@@ -209,11 +260,20 @@ namespace Perceiveit.Data.Query
 
         #region public static DBUpdateQuery Update() + 3 overloads
 
+        /// <summary>
+        /// Begins a new UPDATE statement
+        /// </summary>
+        /// <returns>A new DBUpdateQuery to support statement chaining</returns>
         public static DBUpdateQuery Update()
         {
             return new DBUpdateQuery();
         }
 
+        /// <summary>
+        /// Begins a new UPDATE [table] statement
+        /// </summary>
+        /// <param name="table">The name of the table to update the rows on</param>
+        /// <returns>A new DBUpdateQuery to support statement chaining</returns>
         public static DBUpdateQuery Update(string table)
         {
             DBUpdateQuery upd = Update();
@@ -222,6 +282,12 @@ namespace Perceiveit.Data.Query
             return upd;
         }
 
+        /// <summary>
+        /// Begins a new UPDATE [table] statement
+        /// </summary>
+        /// <param name="table">The name of the table to update the rows on</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBUpdateQuery to support statement chaining</returns>
         public static DBUpdateQuery Update(string owner, string table)
         {
             DBUpdateQuery upd = Update();
@@ -230,6 +296,11 @@ namespace Perceiveit.Data.Query
             return upd;
         }
 
+        /// <summary>
+        /// Begins a new UPDATE [source] statement
+        /// </summary>
+        /// <param name="source">The table to update the rows on</param>
+        /// <returns>A new DBUpdateQuery to support statement chaining</returns>
         public static DBUpdateQuery Update(DBTable source)
         {
             DBUpdateQuery upd = DBUpdateQuery.Update();
@@ -247,6 +318,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBInsertQuery InsertInto(string intoTable) + 3 overloads
 
+        /// <summary>
+        /// Begins a new INSERT INTO [table] statement
+        /// </summary>
+        /// <param name="intoTable">The table to insert the rows on</param>
+        /// <returns>A new DBInsertQuery to support statement chaining</returns>
         public static DBInsertQuery InsertInto(string intoTable)
         {
             DBTable ts = DBTable.Table(intoTable);
@@ -256,6 +332,12 @@ namespace Perceiveit.Data.Query
             return q;
         }
 
+        /// <summary>
+        /// Begins a new INSERT INTO [owner].[table] statement
+        /// </summary>
+        /// <param name="table">The table to insert the rows on</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBInsertQuery to support statement chaining</returns>
         public static DBInsertQuery InsertInto(string owner, string table)
         {
             DBTable ts = DBTable.Table(owner, table);
@@ -266,6 +348,11 @@ namespace Perceiveit.Data.Query
         }
 
 
+        /// <summary>
+        /// Begins a new INSERT INTO [table] statement
+        /// </summary>
+        /// <param name="tbl">The table to insert the rows on</param>
+        /// <returns>A new DBInsertQuery to support statement chaining</returns>
         public static DBInsertQuery InsertInto(DBTable tbl)
         {
             DBInsertQuery q = new DBInsertQuery();
@@ -274,6 +361,10 @@ namespace Perceiveit.Data.Query
             return q;
         }
 
+        /// <summary>
+        /// Begins a new INSERT INTO statement
+        /// </summary>
+        /// <returns>A new DBInsertQuery to support statement chaining</returns>
         internal static DBInsertQuery InsertInto()
         {
             DBInsertQuery q = new DBInsertQuery();
@@ -289,15 +380,26 @@ namespace Perceiveit.Data.Query
 
         #region public static DBDeleteQuery DeleteFrom(string intoTable) + 2 overloads
 
-        public static DBDeleteQuery DeleteFrom(string intoTable)
+        /// <summary>
+        /// begins a new DELETE FROM [table] statement
+        /// </summary>
+        /// <param name="table">The name of the table to delete from</param>
+        /// <returns>A new DBDeleteQuery to support statement chaining</returns>
+        public static DBDeleteQuery DeleteFrom(string table)
         {
-            DBTable ts = DBTable.Table(intoTable);
+            DBTable ts = DBTable.Table(table);
             DBDeleteQuery q = new DBDeleteQuery();
             q.FromTable = ts;
             q.Last = ts;
             return q;
         }
 
+        /// <summary>
+        /// begins a new DELETE FROM [owner].[table] statement
+        /// </summary>
+        /// <param name="table">The name of the table to delete from</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBDeleteQuery to support statement chaining</returns>
         public static DBDeleteQuery DeleteFrom(string owner, string table)
         {
             DBTable ts = DBTable.Table(owner, table);
@@ -308,11 +410,16 @@ namespace Perceiveit.Data.Query
         }
 
 
-        public static DBDeleteQuery DeleteFrom(DBTable tbl)
+        /// <summary>
+        /// begins a new DELETE FROM [table] statement
+        /// </summary>
+        /// <param name="table">The table to delete from</param>
+        /// <returns>A new DBDeleteQuery to support statement chaining</returns>
+        public static DBDeleteQuery DeleteFrom(DBTable table)
         {
             DBDeleteQuery q = new DBDeleteQuery();
-            q.FromTable = tbl;
-            q.Last = tbl;
+            q.FromTable = table;
+            q.Last = table;
             return q;
         }
 
@@ -324,12 +431,22 @@ namespace Perceiveit.Data.Query
 
         #region public static DBScript Begin() + 2 overloads
 
+        /// <summary>
+        /// Starts a new script where multiple statements can be executed within the same command
+        /// </summary>
+        /// <returns>A new DBScript for statement chaining</returns>
         public static DBScript Begin()
         {
             DBScript s = new DBScript();
             return s;
         }
 
+        /// <summary>
+        /// Starts a new script where multiple statements can be executed within the same command
+        /// and sets the first statement to the specified query
+        /// </summary>
+        /// <param name="query">The first statement in the script</param>
+        /// <returns>A new DBScript for statement chaining</returns>
         public static DBScript Begin(DBQuery query)
         {
             DBScript s = Begin();
@@ -337,6 +454,11 @@ namespace Perceiveit.Data.Query
             return s;
         }
 
+        /// <summary>
+        /// Starts a new script where the provided multiple statements can be executed within the same command
+        /// </summary>
+        /// <param name="querys">The statements in the script</param>
+        /// <returns>A new DBScript for statement chaining</returns>
         public static DBScript Begin(params DBQuery[] querys)
         {
             DBScript s = Begin();
@@ -356,6 +478,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBScript Script(params DBQuery[] statements)
 
+        /// <summary>
+        /// Starts a new script where the provided multiple statements can be executed within the same command
+        /// </summary>
+        /// <param name="statements">The statements in the script</param>
+        /// <returns>A new DBScript for statement chaining</returns>
         public static DBScript Script(params DBStatement[] statements)
         {
             DBScript s = Begin();
@@ -374,7 +501,11 @@ namespace Perceiveit.Data.Query
         //
 
         #region protected internal virtual System.Data.CommandType GetCommandType()
-
+        /// <summary>
+        /// Gets the command type for this query (default is Text).
+        /// Inheritors can override to return their own type of command
+        /// </summary>
+        /// <returns></returns>
         protected internal virtual System.Data.CommandType GetCommandType()
         {
             return System.Data.CommandType.Text;
@@ -382,13 +513,33 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        //
+        // SQL String methods
+        //
+
+        #region public string ToSQLString(DBDatabase fordatabase)
+        
+        /// <summary>
+        /// Generates the implementation specific sql statement for this query. 
+        /// </summary>
+        /// <param name="fordatabase">The DBDatabase to use for generation of the SQL statement</param>
+        /// <returns>This SQL statement as a string</returns>
+        public string ToSQLString(DBDatabase fordatabase)
+        {
+            return fordatabase.GetCommandText(this);
+        }
+
+        #endregion
 
         //
         // writeXml methods
         //
 
         #region public void WriteXml(System.Xml.XmlWriter writer)
-
+        /// <summary>
+        /// Outputs this query as an xml stream onto the specifed writer
+        /// </summary>
+        /// <param name="writer"></param>
         public void WriteXml(System.Xml.XmlWriter writer)
         {
             this.WriteXml(writer, "http://schemas.perceiveit.co.uk/Query", "");
@@ -398,6 +549,12 @@ namespace Perceiveit.Data.Query
 
         #region public void WriteXml(System.Xml.XmlWriter writer, string ns, string prefix)
 
+        /// <summary>
+        /// Outputs this query as an xml stream onto the specified writer with the specified namespace and prefix
+        /// </summary>
+        /// <param name="writer">The XmlWriter to output to</param>
+        /// <param name="ns">The xml namespace to use</param>
+        /// <param name="prefix">The specifed prefix</param>
         public void WriteXml(System.Xml.XmlWriter writer, string ns, string prefix)
         {
             XmlWriterContext context = new XmlWriterContext(ns, prefix);
@@ -423,7 +580,11 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBQuery ReadXml(System.Xml.XmlReader reader)
-
+        /// <summary>
+        /// Inputs the XmlReader and attempts to parse as a valid DbQuery
+        /// </summary>
+        /// <param name="reader">The reader to load the DbQuery from</param>
+        /// <returns>The parsed DbQuery</returns>
         public static DBQuery ReadXml(System.Xml.XmlReader reader)
         {
             return DBQuery.ReadXml(reader, "http://schemas.perceiveit.co.uk/Query", "");
@@ -433,9 +594,16 @@ namespace Perceiveit.Data.Query
 
         #region public static DBQuery ReadXml(System.Xml.XmlReader reader, string ns, string pref)
 
-        public static DBQuery ReadXml(System.Xml.XmlReader reader, string ns, string pref)
+        /// <summary>
+        /// Inputs the XmlReader and attempts to parse as a valid DbQuery with the specified element namespace and prefix
+        /// </summary>
+        /// <param name="reader">The reader to load the DbQuery from</param>
+        /// <param name="ns">The namespace of the DBQuery elements</param>
+        /// <param name="prefix">The prefix</param>
+        /// <returns>The parsed DbQuery</returns>
+        public static DBQuery ReadXml(System.Xml.XmlReader reader, string ns, string prefix)
         {
-            XmlReaderContext context = new XmlReaderContext(ns, pref);
+            XmlReaderContext context = new XmlReaderContext(ns, prefix);
             return DBQuery.sReadXml(reader, context);
         }
 
@@ -443,16 +611,30 @@ namespace Perceiveit.Data.Query
 
         #region public static DBQuery ReadXml(System.Xml.XmlReader reader, string ns, string pref, XmlFactory factory)
 
-        public static DBQuery ReadXml(System.Xml.XmlReader reader, string ns, string pref, XmlFactory factory)
+        /// <summary>
+        /// Inputs the XmlReader and attempts to parse as a valid DbQuery with the 
+        /// specified element namespace and prefix
+        /// </summary>
+        /// <param name="reader">The reader to load the DbQuery from</param>
+        /// <param name="ns">The namespace of the DBQuery elements</param>
+        /// <param name="prefix">The prefix</param>
+        /// <param name="factory">An XmlFactory that creates new DBClause instances from their known names</param>
+        /// <returns>The parsed DbQuery</returns>
+        public static DBQuery ReadXml(System.Xml.XmlReader reader, string ns, string prefix, XmlFactory factory)
         {
-            XmlReaderContext context = new XmlReaderContext(ns, pref, factory);
+            XmlReaderContext context = new XmlReaderContext(ns, prefix, factory);
             return DBQuery.sReadXml(reader, context);
         }
 
         #endregion
 
         #region private static DBQuery sReadXml(System.Xml.XmlReader reader, XmlReaderContext context)
-
+        /// <summary>
+        /// Read implementation
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         private static DBQuery sReadXml(System.Xml.XmlReader reader, XmlReaderContext context)
         {
             DBQuery q = null;

@@ -1,4 +1,4 @@
-﻿/*  Copyright 2009 PerceiveIT Limited
+﻿/*  Copyright 2010 PerceiveIT Limited
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
@@ -25,14 +25,24 @@ using System.Data;
 
 namespace Perceiveit.Data.MySqlClient
 {
-    internal class DBMySqlFactory : DBFactory
+    /// <summary>
+    /// Supports the DBProviderImplementation for the "MySql.Data.MySqlClient" provider
+    /// </summary>
+    public class DBMySqlImplementation : DBProviderImplementation
     {
         private static readonly DbType[] SUPPORTED_TYPES = new DbType[] {DbType.Int32, DbType.Int64, DbType.AnsiString, DbType.AnsiStringFixedLength
                                                                         ,DbType.Boolean, DbType.Byte, DbType.Currency, DbType.DateTime
                                                                         ,DbType.Decimal, DbType.Double, DbType.Guid, DbType.Single
                                                                         ,DbType.String, DbType.StringFixedLength, DbType.Binary};
 
-        public DBMySqlFactory(string providername)
+        private static readonly TopType[] SUPPORTED_TOPTYPES = new TopType[] { TopType.Count, TopType.Range };
+
+        public DBMySqlImplementation()
+            : this("MySql.Data.MySqlClient") 
+        { 
+        }
+
+        public DBMySqlImplementation(string providername)
             : base(providername)
         {
         }
@@ -43,8 +53,10 @@ namespace Perceiveit.Data.MySqlClient
             string vers;
             string edition = string.Empty;
 
-            string versionFunction = "SELECT VERSION()";
+            string db = this.GetDataSourceNameFromConnection(forDatabase, ';','=',"Database");
 
+            string versionFunction = "SELECT VERSION()";
+            
             try
             {
                 object value = forDatabase.ExecuteScalar(versionFunction, System.Data.CommandType.Text);
@@ -59,13 +71,14 @@ namespace Perceiveit.Data.MySqlClient
                         vers = vers.Substring(0, index - 1);
                     }
                 }
-                props = new DBDatabaseProperties("MySql",
+
+                props = new DBDatabaseProperties(db, "MySql",
                                                 string.Empty, 
                                                 edition, "?{0}", 
-                                                vers, 
+                                                new Version(vers), 
                                                 SupportedSchemaOptions.All, 
                                                 false, DBParameterLayout.Named,
-                                                SUPPORTED_TYPES);
+                                                SUPPORTED_TYPES, SUPPORTED_TOPTYPES);
             }
             catch (Exception ex)
             {

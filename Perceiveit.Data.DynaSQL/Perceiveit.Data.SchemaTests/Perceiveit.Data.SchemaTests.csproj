@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{470DF7E2-7AC0-4D32-A091-EA4CF050CFE1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Perceiveit.Data.SchemaTests</RootNamespace>
+    <AssemblyName>Perceiveit.Data.SchemaTests</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ClientConnection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClientConnection.Designer.cs">
+      <DependentUpon>ClientConnection.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\EditorWraper.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\EditorWraper.Designer.cs">
+      <DependentUpon>EditorWraper.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SchemaForeignKeyEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SchemaForeignKeyEditor.Designer.cs">
+      <DependentUpon>SchemaForeignKeyEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SchemaIndexEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SchemaIndexEditor.Designer.cs">
+      <DependentUpon>SchemaIndexEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SchemaSprocEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SchemaSprocEditor.Designer.cs">
+      <DependentUpon>SchemaSprocEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SchemaFunctionEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SchemaFunctionEditor.Designer.cs">
+      <DependentUpon>SchemaFunctionEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SchemaTableEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SchemaTableEditor.Designer.cs">
+      <DependentUpon>SchemaTableEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\SchemaViewEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\SchemaViewEditor.Designer.cs">
+      <DependentUpon>SchemaViewEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SchemaExplorer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SchemaExplorer.Designer.cs">
+      <DependentUpon>SchemaExplorer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ISchemaEditor.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ClientConnection.resx">
+      <DependentUpon>ClientConnection.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\EditorWraper.resx">
+      <DependentUpon>EditorWraper.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SchemaForeignKeyEditor.resx">
+      <DependentUpon>SchemaForeignKeyEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SchemaIndexEditor.resx">
+      <DependentUpon>SchemaIndexEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SchemaSprocEditor.resx">
+      <DependentUpon>SchemaSprocEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SchemaFunctionEditor.resx">
+      <DependentUpon>SchemaFunctionEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SchemaTableEditor.resx">
+      <DependentUpon>SchemaTableEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\SchemaViewEditor.resx">
+      <DependentUpon>SchemaViewEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SchemaExplorer.resx">
+      <DependentUpon>SchemaExplorer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="App.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Perceiveit.Data\Perceiveit.Data.csproj">
+      <Project>{5A3E3137-F7D8-4416-B6A0-2F5902F5754D}</Project>
+      <Name>Perceiveit.Data</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Symbol Red Delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Symbol White Delete.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Database_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Database_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DatabaseAdd_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fk_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fk_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Folder_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Folder_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\index_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\index_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Script_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Script_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Table_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Table_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\view_16.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\view_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ajax-loader-1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ajax-loader-2.gif" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

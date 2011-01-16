@@ -22,12 +22,19 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a boolean operation - AND, OR, XOR
+    /// </summary>
     public abstract class DBBooleanOp : DBCalculableClause
     {
+
         #region public DBClause Left {get;set;}
 
         private DBClause _left;
 
+        /// <summary>
+        /// Gets or sets the left argument of the operation
+        /// </summary>
         public DBClause Left 
         {
             get { return _left; }
@@ -39,7 +46,9 @@ namespace Perceiveit.Data.Query
         #region public BooleanOp Operator {get;set;}
 
         private BooleanOp _op;
-
+        /// <summary>
+        /// Gets or sets the boolean operator.
+        /// </summary>
         public BooleanOp Operator
         {
             get { return _op; }
@@ -51,7 +60,9 @@ namespace Perceiveit.Data.Query
         #region public DBClause Right {get;set;}
 
         private DBClause _right;
-
+        /// <summary>
+        /// Gets or sets the right argument of the operation.
+        /// </summary>
         public DBClause Right
         {
             get { return _right; }

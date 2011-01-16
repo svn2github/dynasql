@@ -1003,7 +1003,7 @@ namespace Perceiveit.Data.Query
                 case (DBSchemaTypes)0:
                 default:
                     throw new ArgumentOutOfRangeException("type");
-                    break;
+                    
             }
         }
 
@@ -1044,7 +1044,6 @@ namespace Perceiveit.Data.Query
                     break;
                 default:
                     throw new ArgumentOutOfRangeException("type");
-                    break;
             }
         }
 
@@ -1135,7 +1134,14 @@ namespace Perceiveit.Data.Query
         public virtual DbParameter CreateCommandParameter(DbCommand cmd, StatementParameter sparam)
         {
             DbParameter p = cmd.CreateParameter();
+            PopulateParameter(p, sparam);
 
+            return p;
+
+        }
+
+        internal void PopulateParameter(DbParameter p, StatementParameter sparam)
+        {
             string name = sparam.ParameterName;
             //if (string.IsNullOrEmpty(name))
             //    p.SourceColumn = this.GetUniqueParameterName(DBParam.ParameterNamePrefix);
@@ -1160,9 +1166,6 @@ namespace Perceiveit.Data.Query
             value = ConvertParamValueToNativeValue(p.DbType, value);
             p.Direction = sparam.ValueSource.Direction;
             p.Value = value;
-
-            return p;
-
         }
 
         #endregion
@@ -1172,79 +1175,7 @@ namespace Perceiveit.Data.Query
 
         protected virtual System.Data.DbType GetDbType(object val)
         {
-            System.Data.DbType type;
-            if (null == val || val is DBNull)
-                return System.Data.DbType.Object;
-
-            TypeCode code = Type.GetTypeCode(val.GetType());
-            switch (code)
-            {
-                case TypeCode.Boolean:
-                    type = System.Data.DbType.Boolean;
-                    break;
-                case TypeCode.Byte:
-                    type = System.Data.DbType.Byte;
-                    break;
-                case TypeCode.Char:
-                    type = System.Data.DbType.AnsiStringFixedLength;
-                    break;
-                case TypeCode.DBNull:
-                    type = System.Data.DbType.Object;
-                    break;
-                case TypeCode.DateTime:
-                    type = System.Data.DbType.DateTime;
-                    break;
-                case TypeCode.Decimal:
-                    type = System.Data.DbType.Decimal;
-                    break;
-                case TypeCode.Double:
-                    type = System.Data.DbType.Double;
-                    break;
-                case TypeCode.Empty:
-                    type = System.Data.DbType.Object;
-                    break;
-                case TypeCode.Int16:
-                    type = System.Data.DbType.Int16;
-                    break;
-                case TypeCode.Int32:
-                    type = System.Data.DbType.Int32;
-                    break;
-                case TypeCode.Int64:
-                    type = System.Data.DbType.Int64;
-                    break;
-                case TypeCode.SByte:
-                    type = System.Data.DbType.SByte;
-                    break;
-                case TypeCode.Single:
-                    type = System.Data.DbType.Single;
-                    break;
-                case TypeCode.String:
-                    type = System.Data.DbType.String;
-                    break;
-                case TypeCode.UInt16:
-                    type = System.Data.DbType.UInt16;
-                    break;
-                case TypeCode.UInt32:
-                    type = System.Data.DbType.UInt32;
-                    break;
-                case TypeCode.UInt64:
-                    type = System.Data.DbType.UInt64;
-                    break;
-
-                case TypeCode.Object:
-                default:
-                    if (val is byte[])
-                        type = System.Data.DbType.Binary;
-                    else if (val is Guid)
-                        type = System.Data.DbType.Guid;
-                    else if (val is TimeSpan)
-                        type = System.Data.DbType.DateTimeOffset;
-                    else
-                        type = System.Data.DbType.Object;
-
-                    break;
-            }
-            return type;
+            return DBHelper.GetDBTypeForObject(val);
         }
 
         #endregion
@@ -1273,20 +1204,29 @@ namespace Perceiveit.Data.Query
         // write methods
         //
 
-        #region public virtual void WriteTop(double value, TopType topType)
+        #region public virtual void WriteTop(double value, double offset, TopType topType)
 
-        public virtual void WriteTop(double value, TopType topType)
+        public virtual void WriteTop(double count, double offset, TopType topType)
         {
+            if (Array.IndexOf<TopType>(this.DatabaseProperties.SupportedTopTypes, topType) < 0)
+                throw new NotSupportedException("The top type '" + topType.ToString() + "' is not supported by this database");
+
             this.Writer.Write(" TOP ");
             if (topType == TopType.Percent)
             {
-                this.Writer.Write(value);
+                this.Writer.Write(count);
                 this.Writer.Write(" PERCENT ");
             }
-            else
+            else if(topType == TopType.Count)
             {
-                this.Writer.Write((int)value);
+                this.Writer.Write((int)count);
                 this.Writer.Write(" ");
+            }
+            else if (topType == TopType.Range)
+            {
+                this.Writer.Write((int)count);
+                this.Writer.Write(", ");
+                this.Writer.Write((int)offset);
             }
 
         }

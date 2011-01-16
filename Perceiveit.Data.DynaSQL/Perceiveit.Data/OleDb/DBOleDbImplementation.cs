@@ -25,7 +25,11 @@ using System.Data;
 
 namespace Perceiveit.Data.OleDb
 {
-    internal class DBOleDbFactory : DBFactory
+    /// <summary>
+    /// Defines a DBProviderImplementation for the "System.Data.OleDb" database engine. NOTE: The only fuly supported engine within this is MS Access
+    /// and the JET engine. Other's may need to extend this class to provider their own support.
+    /// </summary>
+    public class DBOleDbImplementation : DBProviderImplementation
     {
         private static readonly DbType[] SUPPORTED_TYPES = new DbType[] {DbType.Int32, DbType.Int64, DbType.AnsiString, DbType.AnsiStringFixedLength
                                                                         ,DbType.Boolean, DbType.Byte, DbType.Currency, DbType.DateTime
@@ -37,7 +41,14 @@ namespace Perceiveit.Data.OleDb
                                                                         ,DbType.Decimal, DbType.Double, DbType.Guid, DbType.Single
                                                                         ,DbType.String, DbType.StringFixedLength, DbType.Binary};
 
-        public DBOleDbFactory(string providerName)
+        internal const string MSAccessProductName = "MS Access";
+
+        public DBOleDbImplementation()
+            : this("System.Data.OleDb")
+        {
+        }
+
+        public DBOleDbImplementation(string providerName)
             : base(providerName)
         {
         }
@@ -66,10 +77,11 @@ namespace Perceiveit.Data.OleDb
                 if (this.TryGetProviderSpecificProperties(provider, forDatabase, out props))
                     return props;
             }
-           
-            props = new DBDatabaseProperties("OleDb", "?", "?", "?","0.0", 
+
+            string datasource = GetDataSourceNameFromConnection(forDatabase, ';', '=', "data source");
+            props = new DBDatabaseProperties(datasource,"OleDb", "?", "?", "?", new Version("0.0"),
                 SupportedSchemaOptions.TablesViewsAndIndexes, false, DBParameterLayout.Positional,
-                SUPPORTED_TYPES);
+                SUPPORTED_TYPES, new TopType[] { TopType.Count });
             return props;
 
         }
@@ -80,9 +92,13 @@ namespace Perceiveit.Data.OleDb
             switch (provider.ToLower())
             {
                 case("microsoft.ace.oledb.12.0"):
-                    props = new DBDatabaseProperties("MS Access", "Microsoft", "OLEDB", "?", "12.0",
-                            SupportedSchemaOptions.TablesViewsAndIndexes, false, DBParameterLayout.Positional,
-                            SUPPORTED_ACCESS_TYPES);
+                    string datasource = GetDataSourceNameFromConnection(database, ';', '=', "data source");
+                    if (!string.IsNullOrEmpty(datasource))
+                        datasource = System.IO.Path.GetFileNameWithoutExtension(datasource);
+
+                    props = new DBDatabaseProperties(datasource, MSAccessProductName, "Microsoft", "OLEDB", "?", new Version("12.0"),
+                            SupportedSchemaOptions.TablesViewsAndIndexes | DBSchemaTypes.StoredProcedure, false, DBParameterLayout.Positional,
+                            SUPPORTED_ACCESS_TYPES, new TopType[] { TopType.Count });
                     break;
                 default:
                     break;
@@ -97,7 +113,10 @@ namespace Perceiveit.Data.OleDb
 
         protected override DBSchemaProvider CreateSchemaProvider(DBDatabase forDatabase, DBDatabaseProperties properties)
         {
-            return new DBOleDbSchemaProvider(forDatabase, properties);
+            if (null != properties && properties.ProductName == MSAccessProductName)
+                return new DBMSAccessSchemaProvider(forDatabase, properties);
+            else
+                throw new NotSupportedException("The Schema provider is not supported for the product '" + properties.ProductName + "'");
         }
     }
 }

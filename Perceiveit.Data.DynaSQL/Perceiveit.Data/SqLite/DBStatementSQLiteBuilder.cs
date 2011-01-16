@@ -23,8 +23,27 @@ using Perceiveit.Data.Query;
 
 namespace Perceiveit.Data.SqLite
 {
+    /// <summary>
+    /// Builds statements for the SQLite database engine
+    /// </summary>
     public class DBStatementSQLiteBuilder : DBStatementBuilder
     {
+        #region ivars
+
+        /// <summary>
+        /// Defines the value for the TopN function that is later output on the sql string as Limits
+        /// </summary>
+        private int _limits = -1;
+
+        /// <summary>
+        /// defines the value for the offset at which to start outputting the rows and appended to the LIMIT value
+        /// </summary>
+        private int _offset = -1;
+
+
+        #endregion
+
+
         public DBStatementSQLiteBuilder(DBDatabase forDatabase, DBDatabaseProperties properties, System.IO.TextWriter tw, bool ownswriter)
             : base(forDatabase, properties, tw, ownswriter)
         {
@@ -51,6 +70,35 @@ namespace Perceiveit.Data.SqLite
             this.DecrementStatementBlock();
             //this.BeginNewLine();
             //this.Writer.WriteLine("END");
+        }
+
+        public override void WriteTop(double limit, double offset, TopType topType)
+        {
+            
+
+            if (this.StatementDepth == 1)
+            {
+                if (topType == TopType.Percent)
+                    throw new NotSupportedException("This provider does not support the top percent syntax");
+
+                this._limits = (int)limit;
+                this._offset = (int)offset;
+            }
+        }
+
+        public override void EndSelectStatement()
+        {
+            if (this.StatementDepth == 1 && this._limits > 0)
+            {
+                this.WriteRaw(" LIMIT ");
+                this.WriteRaw(_limits.ToString());
+                if (this._offset > 0)
+                {
+                    this.WriteRaw(" OFFSET ");
+                    this.WriteRaw(_offset.ToString());
+                }
+            }
+            base.EndSelectStatement();
         }
         
     }

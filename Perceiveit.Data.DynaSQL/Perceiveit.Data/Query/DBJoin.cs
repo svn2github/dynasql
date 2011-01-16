@@ -22,7 +22,10 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
-
+    /// <summary>
+    /// Defines a join from one clause to another along with the comparison.
+    /// e.g INNER JOIN Table2 ON Table1.column1 = Table2.column1
+    /// </summary>
     public abstract class DBJoin : DBClause, IDBAlias, IDBBoolean, IDBJoinable
     {
         private DBClause _fromcol;
@@ -35,6 +38,9 @@ namespace Perceiveit.Data.Query
 
         #region public JoinType JoinType {get; protected set;}
 
+        /// <summary>
+        /// Gets the JoinType - Inheritors can set this value
+        /// </summary>
         public JoinType JoinType
         {
             get { return _jtype; }
@@ -75,7 +81,10 @@ namespace Perceiveit.Data.Query
 
 
         #region IDBAlias - public void As(string aliasName)
-
+        /// <summary>
+        /// Assigns an alias to this joins table
+        /// </summary>
+        /// <param name="aliasName"></param>
         public void As(string aliasName)
         {
             ((IDBAlias)this.JoinedTo).As(aliasName);
@@ -84,7 +93,11 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region IDBBoolean - public DBClause And(DBClause reference)
-
+        /// <summary>
+        /// Appends an AND condition to the comparison
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public DBClause And(DBClause reference)
         {
             if (this.Comparison == null)
@@ -98,6 +111,11 @@ namespace Perceiveit.Data.Query
 
         #region IDBBoolean - public DBClause Or(DBClause reference)
 
+        /// <summary>
+        /// Appends an OR condition to the joins comparison
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public DBClause Or(DBClause reference)
         {
             if (this.Comparison == null)
@@ -110,7 +128,11 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region IDBJoinable - public DBClause On(DBComparison compare)
-
+        /// <summary>
+        /// Appends or sets the condition to this joins comparison
+        /// </summary>
+        /// <param name="compare"></param>
+        /// <returns></returns>
         public DBClause On(DBComparison compare)
         {
             if (this.Comparison != null)
@@ -122,15 +144,24 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        
+
         //
         // static methods
         //
 
         #region public static DBJoin InnerJoin(DBReference jointo, DBFieldRef from, DBFieldRef to, ComparisonOperator comparison)
-
+        /// <summary>
+        /// Creates a new INNER JOIN with the ON set to the comparison of from and to
+        /// </summary>
+        /// <param name="jointo"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="comparison"></param>
+        /// <returns></returns>
         public static DBJoin InnerJoin(DBClause jointo, DBClause from, DBClause to, Compare comparison)
         {
-            DBComparison compref = DBComparison.Equal(from, to);
+            DBComparison compref = DBComparison.Compare(from, comparison, to);
 
             return InnerJoin(jointo, compref);
         }
@@ -138,7 +169,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBJoin InnerJoin(DBReference jointo, DBComparison comp)
-
+        /// <summary>
+        /// Creates a new INNER JOIN with the ON set to the comparison
+        /// </summary>
+        /// <param name="jointo"></param>
+        /// <param name="comp"></param>
+        /// <returns></returns>
         public static DBJoin InnerJoin(DBClause jointo, DBComparison comp)
         {
             return Join(jointo, JoinType.InnerJoin, comp);
@@ -146,8 +182,16 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
         #region public static DBJoin Join(DBReference jointo, JoinType joinType, DBComparison comp)
 
+        /// <summary>
+        /// Creates a new join of the specified type and the ON set to the specified comparison
+        /// </summary>
+        /// <param name="jointo"></param>
+        /// <param name="joinType"></param>
+        /// <param name="comp"></param>
+        /// <returns></returns>
         public static DBJoin Join(DBClause jointo, JoinType joinType, DBComparison comp)
         {
             DBJoinRef jref = new DBJoinRef();
@@ -162,6 +206,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBJoin Join(DBClause jointo, JoinType joinType)
 
+        /// <summary>
+        /// Creates a new JOIN of the specified type with no comparison
+        /// </summary>
+        /// <param name="jointo"></param>
+        /// <param name="joinType"></param>
+        /// <returns></returns>
         public static DBJoin Join(DBClause jointo, JoinType joinType)
         {
             DBJoinRef join = new DBJoinRef();
@@ -173,7 +223,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region internal static DBJoin Join()
-
+        /// <summary>
+        /// Creates a new empty join
+        /// </summary>
+        /// <returns></returns>
         internal static DBJoin Join()
         {
             return new DBJoinRef();
@@ -208,6 +261,11 @@ namespace Perceiveit.Data.Query
 
         public override bool BuildStatement(DBStatementBuilder builder)
         {
+            if (null == this.JoinedTo)
+                throw new NullReferenceException(Errors.NoJoinRightReference);
+            if (null == this.Comparison)
+                throw new NullReferenceException(Errors.NoJoinLimits);
+
             builder.BeginJoin(this.JoinType);
             this.JoinedTo.BuildStatement(builder);
             builder.BeginJoinOnList();

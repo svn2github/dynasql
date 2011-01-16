@@ -23,10 +23,22 @@ using Perceiveit.Data.Query;
 
 namespace Perceiveit.Data.SqlClient
 {
-    internal class DBSQLClientStatementBuilder : DBStatementBuilder
+    /// <summary>
+    /// Generates SQL statements for the System.Data.SQLClient database engine
+    /// </summary>
+    /// <remarks>The base DBStatementBuilder uses the SQLClient as a reference model - not because it is a standard, 
+    /// but because the engine supports the DbCommandBehavior option which all .NET providers should support to be fully compliant
+    /// <para>Other implementations do have to override methods but with this one we don't</para></remarks>
+    public class DBSQLClientStatementBuilder : DBStatementBuilder
     {
-
-        public DBSQLClientStatementBuilder(DBDatabase forDatabase, DBDatabaseProperties properties, System.IO.TextWriter tw, bool ownswriter)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="forDatabase"></param>
+        /// <param name="properties"></param>
+        /// <param name="tw"></param>
+        /// <param name="ownswriter"></param>
+        internal protected DBSQLClientStatementBuilder(DBDatabase forDatabase, DBDatabaseProperties properties, System.IO.TextWriter tw, bool ownswriter)
             : base(forDatabase, properties, tw, ownswriter)
         {
         }

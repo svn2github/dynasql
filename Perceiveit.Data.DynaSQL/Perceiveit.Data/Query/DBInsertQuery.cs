@@ -22,6 +22,10 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a new INSERT query. 
+    /// Use DBQuery.Insert or one of its overloads to create intances of this method
+    /// </summary>
     public class DBInsertQuery : DBQuery
     {
 
@@ -78,6 +82,9 @@ namespace Perceiveit.Data.Query
 
         #region protected internal DBClause Last {get;set;}
 
+        /// <summary>
+        /// Gets or sets the last clause acted on so that statements can be chained.
+        /// </summary>
         protected internal DBClause Last
         {
             get { return this._last; }
@@ -91,25 +98,47 @@ namespace Perceiveit.Data.Query
         //
 
         #region public DBInsertQuery Field(string field) + 4 overloads
-
+        /// <summary>
+        /// Specify explictly one of the schema.table.columns to be set when performing this insert
+        /// </summary>
+        /// <param name="owner">The table schema owner</param>
+        /// <param name="table">The name of the table</param>
+        /// <param name="field">The name of the column</param>
+        /// <returns>Iteslf so statements can be chained</returns>
         public DBInsertQuery Field(string owner, string table, string field)
         {
             DBField fld = DBField.Field(owner, table, field);
             return Field(fld);
         }
 
+        /// <summary>
+        /// Specify explicity one of the table.columns to be set when performing this insert
+        /// </summary>
+        /// <param name="table">The name of the table</param>
+        /// <param name="field">The name of the column</param>
+        /// <returns>Itself so statements can be chained</returns>
         public DBInsertQuery Field(string table, string field)
         {
             DBField fld = DBField.Field(table, field);
             return Field(fld);
         }
 
+        /// <summary>
+        /// Specify the name of one of the columns to be set when performing this insert
+        /// </summary>
+        /// <param name="field">The name of the column</param>
+        /// <returns>Itself so statements can be chained</returns>
         public DBInsertQuery Field(string field)
         {
             DBField fld = DBField.Field(field);
             return Field(fld);
         }
         
+        /// <summary>
+        /// Specify one of the columns to be set when performing this insert
+        /// </summary>
+        /// <param name="field">Any clause</param>
+        /// <returns>Itself so that statements can be chained</returns>
         public DBInsertQuery Field(DBClause field)
         {
             if (_fields == null)
@@ -119,6 +148,11 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
+        /// <summary>
+        /// Specify a range of columns (as an array or comma separated list) to be set when performing this insert
+        /// </summary>
+        /// <param name="fields">The fields to set</param>
+        /// <returns>Itself so that statements can be chained</returns>
         public DBInsertQuery Fields(params string[] fields)
         {
             if (_fields == null)
@@ -136,15 +170,24 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-
         #region public DBInsertQuery Value(ParamValue valueProvider) + 2 overloads
 
+        /// <summary>
+        /// Specify a value for the correspoding column via a delegate method
+        /// </summary>
+        /// <param name="valueProvider">A (anonymous) delegate that returns an object when invoked</param>
+        /// <returns>Itself so statements can be chained</returns>
         public DBInsertQuery Value(ParamValue valueProvider)
         {
             DBParam p = DBParam.ParamWithDelegate(valueProvider);
             return Value(p);
         }
 
+        /// <summary>
+        /// Specify a value for the corresponding column as a clause - DBConst, DBParam etc
+        /// </summary>
+        /// <param name="clause">The clause to return the value</param>
+        /// <returns>Itself so statements can be chained</returns>
         public DBInsertQuery Value(DBClause clause)
         {
             if (_innerselect != null)
@@ -156,6 +199,11 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
+        /// <summary>
+        /// Specify a number of values for the corresponding columns as clauses - DBConst, DBParam etc.
+        /// </summary>
+        /// <param name="values">The values to use as an array or comma separated list</param>
+        /// <returns>Itself so statements can be chained</returns>
         public DBInsertQuery Values(params DBClause[] values)
         {
             if (_innerselect != null)
@@ -177,6 +225,12 @@ namespace Perceiveit.Data.Query
 
         #region public DBInsertQuery Select(DBSelectQuery select)
 
+        /// <summary>
+        /// Appends a select statement to the Insert query which will be evaluated
+        /// at runtime and actioned on the database.
+        /// </summary>
+        /// <param name="select">The select query which returns the results to be inserted.</param>
+        /// <returns>Itself so statements can be chained</returns>
         public DBInsertQuery Select(DBSelectQuery select)
         {
             if(_values != null)
@@ -196,6 +250,11 @@ namespace Perceiveit.Data.Query
 
         #region public override bool BuildStatement(DBStatementBuilder builder)
 
+        /// <summary>
+        /// Generates the INSERT statement using the provider specific statement builder
+        /// </summary>
+        /// <param name="builder">The builder that outputs provider specific statements</param>
+        /// <returns>true</returns>
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginInsertStatement();
@@ -251,6 +310,12 @@ namespace Perceiveit.Data.Query
         
         #region protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         
+        /// <summary>
+        /// Outputs all the xml elements of this INSERT query on the XmlWriter
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
             if (this._into != null)
@@ -281,7 +346,12 @@ namespace Perceiveit.Data.Query
 
         #region protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
         
-
+        /// <summary>
+        /// Reads each inner Xml element and returns true if it was a known xml element
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
         {
             bool b;

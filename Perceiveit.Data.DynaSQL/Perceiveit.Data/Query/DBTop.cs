@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a TOP/LIMITS ... restriction for a select query
+    /// </summary>
     public abstract class DBTop : DBClause
     {
         //
@@ -32,6 +35,9 @@ namespace Perceiveit.Data.Query
 
         private double _val;
 
+        /// <summary>
+        /// Gets or sets the N value to return for the TOP [N] clause
+        /// </summary>
         public double TopValue
         {
             get { return _val; }
@@ -40,10 +46,28 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public double Startoffset {get; set;}
+
+        private double _startoffset = -1.0;
+
+        /// <summary>
+        /// Gets or sets the optional start offset to begin returning rows
+        /// </summary>
+        public double StartOffset
+        {
+            get { return _startoffset; }
+            set { _startoffset = value; }
+        }
+
+        #endregion
+
         #region public TopType Type {get;set;}
 
         private TopType _type;
 
+        /// <summary>
+        /// Gets or sets the type of TOP required (count or percent)
+        /// </summary>
         public TopType Type
         {
             get { return _type; }
@@ -57,7 +81,11 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBTop Number(int count)
-
+        /// <summary>
+        /// Creates and returns a new TOP [count] statement
+        /// </summary>
+        /// <param name="count">The number of rows to return</param>
+        /// <returns></returns>
         public static DBTop Number(int count)
         {
             DBTop top = new DBTopRef();
@@ -70,6 +98,11 @@ namespace Perceiveit.Data.Query
 
         #region public static DBTop Percent(double percent)
 
+        /// <summary>
+        /// Creates and returns a new TOP [percent] PERCENT statement
+        /// </summary>
+        /// <param name="percent"></param>
+        /// <returns></returns>
         public static DBTop Percent(double percent)
         {
             DBTop top = new DBTopRef();
@@ -82,6 +115,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBTop Top(double value, TopType type)
 
+        /// <summary>
+        /// Creates a returns a new TOP (LIMITS) statment with the specified restrictions
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static DBTop Top(double value, TopType type)
         {
             DBTop top = new DBTopRef();
@@ -92,6 +131,22 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+        /// <summary>
+        /// Create a new LIMITS [range...] statement
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="startOffset"></param>
+        /// <returns></returns>
+        public static DBTop Range(int count, int startOffset)
+        {
+            DBTop top = new DBTopRef();
+            top.Type = TopType.Range;
+            top.TopValue = count;
+            top.StartOffset = startOffset;
+
+            return top;
+        }
 
         #region internal static DBClause Top()
 
@@ -127,7 +182,7 @@ namespace Perceiveit.Data.Query
         {
             if (this.TopValue > 0.0)
             {
-                builder.WriteTop(this.TopValue, this.Type);
+                builder.WriteTop(this.TopValue, this.StartOffset, this.Type);
                 return true;
             }
             else

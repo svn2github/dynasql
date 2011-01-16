@@ -70,7 +70,7 @@ namespace Perceiveit.Data
         /// Multiple results sets from the query will be populated in the order of the tables in the DataSet.
         /// </summary>
         /// <param name="ds">The DataSet to Populate</param>
-        /// <param name="option">Specifies the manner in which imported rows are handled</param>
+        /// <param name="tables">The array of table names that are to be populated by the results of the query</param>
         /// <param name="query">The Query to use to populate the data</param>
         public void PopulateDataSet(DataSet ds, DBQuery query, params string[] tables)
         {
@@ -284,7 +284,6 @@ namespace Perceiveit.Data
         /// <param name="ds">The DataSet to Populate</param>
         /// <param name="option">Specifies the manner in which imported rows are handled</param>
         /// <param name="cmd">The DbCommand to use to populate the data</param>
-        /// <param name="tables">The array of table names that are to be populated by the results of the query</param>
         public void PopulateDataSet(DataSet ds, DbCommand cmd, LoadOption option)
         {
             this.PopulateDataSet(ds, cmd, option, this.ExtractTableNames(ds));

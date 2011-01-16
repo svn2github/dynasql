@@ -46,6 +46,9 @@ namespace Perceiveit.Data.Query
 
         #region protected override string XmlElementName
 
+        /// <summary>
+        /// overrides the base implemntation to return an empty element name
+        /// </summary>
         protected override string XmlElementName
         {
             get { return XmlHelper.EmptyName; }

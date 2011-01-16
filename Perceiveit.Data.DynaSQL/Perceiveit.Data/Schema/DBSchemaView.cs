@@ -22,6 +22,9 @@ using System.Xml.Serialization;
 
 namespace Perceiveit.Data.Schema
 {
+    /// <summary>
+    /// Defines the schema of a view in the database
+    /// </summary>
     [XmlRoot("view", Namespace = "http://schemas.perceiveit.co.uk/Query/schema/")]
     public class DBSchemaView : DBSchemaItem
     {
@@ -72,6 +75,9 @@ namespace Perceiveit.Data.Schema
 
         #region public DBSchemaView()
 
+        /// <summary>
+        /// Creates a new empty view
+        /// </summary>
         public DBSchemaView()
             : this(DBSchemaTypes.View, string.Empty, string.Empty)
         {
@@ -80,7 +86,11 @@ namespace Perceiveit.Data.Schema
         #endregion
 
         #region public DBSchemaView(string owner, string name)
-        
+        /// <summary>
+        /// Creates a new view with the specified name and schema owner
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
         public DBSchemaView(string owner, string name)
             : this(DBSchemaTypes.View, owner, name)
         {
@@ -89,7 +99,12 @@ namespace Perceiveit.Data.Schema
         #endregion
 
         #region protected DBSchemaView(DBSchemaTypes type, string owner, string name)
-
+        /// <summary>
+        /// Creates a new view with the specified type, owner, and name
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
         protected DBSchemaView(DBSchemaTypes type, string owner, string name)
             : base(name, owner, type)
         {

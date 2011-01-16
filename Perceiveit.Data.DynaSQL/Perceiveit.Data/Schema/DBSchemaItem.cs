@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml.Serialization;
+using System.Data;
 
 namespace Perceiveit.Data.Schema
 {
@@ -95,6 +96,33 @@ namespace Perceiveit.Data.Schema
         {
             get { return this._type; }
             private set { this._type = value; }
+        }
+
+        #endregion
+
+        #region public string FullName {get;}
+
+        /// <summary>
+        /// Gets the fullly qualified name of this schema item
+        /// </summary>
+        public string FullName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.Catalog))
+                {
+                    if (string.IsNullOrEmpty(this.Schema))
+                        return this.Name;
+                    else
+                    {
+                        return this.Schema + "." + this.Name;
+                    }
+                }
+                else
+                {
+                    return string.Format("{0}.{1}.{2}", this.Catalog, this.Schema, this.Name);
+                }
+            }
         }
 
         #endregion
@@ -197,6 +225,36 @@ namespace Perceiveit.Data.Schema
 
         #endregion
 
+        #region protected virtual DbType GetDbTypeFromRuntimeType(Type value)
+
+        /// <summary>
+        /// Gets the DbType that is the closest match for the runtime Type
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual DbType GetDbTypeFromRuntimeType(Type value)
+        {
+            if (null == value)
+                return DbType.Object;
+            else
+                return DBHelper.GetDBTypeForRuntimeType(value);
+        }
+
+        #endregion
+
+        #region protected virtual Type GetRuntimeTypeFromDbType(DbType value)
+
+        /// <summary>
+        /// Returns the default runtime type that is the closest match to the DbType
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        protected virtual Type GetRuntimeTypeFromDbType(DbType value)
+        {
+            return DBHelper.GetRuntimeTypeForDbType(value);
+        }
+
+        #endregion
 
     }
 

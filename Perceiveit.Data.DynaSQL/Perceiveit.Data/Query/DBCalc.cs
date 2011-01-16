@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Creates a new binary calculation
+    /// </summary>
     public abstract class DBCalc : DBCalculableClause
     {
 
@@ -32,7 +35,9 @@ namespace Perceiveit.Data.Query
         #region public BinaryOp BinaryOp {get;set;}
 
         private BinaryOp _op;
-
+        /// <summary>
+        /// Gets or sets the binary operation type
+        /// </summary>
         public BinaryOp BinaryOp
         {
             get { return _op; }
@@ -44,7 +49,9 @@ namespace Perceiveit.Data.Query
         #region public DBClause Left {get;set;}
 
         private DBClause _left;
-
+        /// <summary>
+        /// Gets or sets the left argument
+        /// </summary>
         public DBClause Left
         {
             get { return _left; }
@@ -56,7 +63,9 @@ namespace Perceiveit.Data.Query
         #region public DBClause Right {get;set;}
 
         private DBClause _right;
-
+        /// <summary>
+        /// Gets or sets the right argument
+        /// </summary>
         public DBClause Right
         {
             get { return _right; }
@@ -69,6 +78,9 @@ namespace Perceiveit.Data.Query
 
         private string _as;
 
+        /// <summary>
+        /// Gets or sets the alias name
+        /// </summary>
         public string Alias
         {
             get { return _as; }
@@ -82,9 +94,20 @@ namespace Perceiveit.Data.Query
         //
 
         #region public static DBCalc Calculate(DBClause left, BinaryOp op, DBClause right)
-
+        /// <summary>
+        /// Creates a new binary calculation with the left, op and right arguments
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="op"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static DBCalc Calculate(DBClause left, BinaryOp op, DBClause right)
         {
+            if (null == left)
+                throw new ArgumentNullException("left");
+            if (null == right)
+                throw new ArgumentNullException("right");
+
             DBCalcRef cref = new DBCalcRef();
             cref.BinaryOp = op;
             cref.Left = left;
@@ -96,7 +119,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBCalc Plus(DBClause left, DBClause right)
-
+        /// <summary>
+        /// Creates a new Addition operation
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static DBCalc Plus(DBClause left, DBClause right)
         {
             return Calculate(left, BinaryOp.Add, right);
@@ -105,7 +133,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBCalc Minus(DBClause left, DBClause right)
-
+        /// <summary>
+        /// Creates a new Subtract operation
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static DBCalc Minus(DBClause left, DBClause right)
         {
             return Calculate(left, BinaryOp.Subtract, right);
@@ -114,7 +147,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBCalc Times(DBClause left, DBClause right)
-
+        /// <summary>
+        /// Creates a new  multiply operation
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static DBCalc Times(DBClause left, DBClause right)
         {
             return Calculate(left, BinaryOp.Multiply, right);
@@ -124,6 +162,12 @@ namespace Perceiveit.Data.Query
 
         #region public static DBCalc Divide(DBClause left, DBClause right)
 
+        /// <summary>
+        /// Creates a new division operation
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static DBCalc Divide(DBClause left, DBClause right)
         {
             return Calculate(left, BinaryOp.Divide, right);
@@ -132,7 +176,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBCalc Modulo(DBClause left, DBClause right)
-
+        /// <summary>
+        /// Creates a new Modulo operation
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static DBCalc Modulo(DBClause left, DBClause right)
         {
             return Calculate(left, BinaryOp.Modulo, right);
@@ -153,7 +202,7 @@ namespace Perceiveit.Data.Query
     }
 
 
-    public class DBCalcRef : DBCalc, IDBAlias
+    internal class DBCalcRef : DBCalc, IDBAlias
     {
 
         //

@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Defines a table reference in a DBQuery
+    /// </summary>
     public abstract class DBTable : DBClause, IDBAlias, IDBJoinable, IDBBoolean
     {
         //
@@ -31,7 +34,9 @@ namespace Perceiveit.Data.Query
         #region public string Name {get; set;}
 
         private string _name;
-
+        /// <summary>
+        /// Gets or sets the Name of the table
+        /// </summary>
         public string Name
         {
             get { return _name; }
@@ -44,6 +49,9 @@ namespace Perceiveit.Data.Query
 
         private string _owner;
 
+        /// <summary>
+        /// Gets or sets the schema owner of the table
+        /// </summary>
         public string Owner
         {
             get { return _owner; }
@@ -55,7 +63,9 @@ namespace Perceiveit.Data.Query
         #region public DBJoinList Joins {get;}
 
         private DBJoinList _joins;
-
+        /// <summary>
+        /// Gets the list of JOINS on this table
+        /// </summary>
         internal DBJoinList Joins
         {
             get
@@ -72,6 +82,9 @@ namespace Perceiveit.Data.Query
 
         private string _alias;
 
+        /// <summary>
+        /// Gets or sets the Alias name of this table
+        /// </summary>
         public string Alias
         {
             get { return _alias; }
@@ -82,6 +95,9 @@ namespace Perceiveit.Data.Query
 
         #region public bool HasJoins
 
+        /// <summary>
+        /// Returns true if this table reference has joins
+        /// </summary>
         public bool HasJoins
         {
             get { return this._joins != null && this._joins.Count > 0; }
@@ -109,7 +125,13 @@ namespace Perceiveit.Data.Query
         //
 
         #region public DBJoin InnerJoin(string table, string parentfield, string childfield) + 2 overloads
-
+        /// <summary>
+        /// Appends a new INNER JOIN between this table an the specified table matching between this tables parentfield and the other tables child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentfield"></param>
+        /// <param name="childfield"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(string table, string parentfield, string childfield)
         {
             DBTable tbl = Table(table);
@@ -119,6 +141,13 @@ namespace Perceiveit.Data.Query
             return InnerJoin(tbl, parent, child);
         }
 
+        /// <summary>
+        /// Appends a new INNER JOIN between this table an the specified table matching between this tables parentfield and the other tables child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentField"></param>
+        /// <param name="childField"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(DBTable table, DBClause parentField, DBClause childField)
         {
             DBJoin join = DBJoin.InnerJoin(table, parentField, childField, Compare.Equals);
@@ -126,6 +155,12 @@ namespace Perceiveit.Data.Query
             return join;
         }
 
+        /// <summary>
+        /// Appends a new INNER JOIN between this table an the specified clause matching with the specified comparison
+        /// </summary>
+        /// <param name="foreign"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
         public DBJoin InnerJoin(DBClause foreign, DBComparison compare)
         {
             DBJoin join = DBJoin.InnerJoin(foreign, compare);
@@ -135,8 +170,55 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        /// <summary>
+        /// Appends a new LEFT OUTER JOIN between this table and the specified table matching between this tables parentfield and the other tables child field
+        /// </summary>
+        /// <param name="tbl"></param>
+        /// <param name="parent"></param>
+        /// <param name="comp"></param>
+        /// <param name="child"></param>
+        /// <returns></returns>
+        public DBJoin LeftJoin(DBTable tbl, DBClause parent, Compare comp, DBClause child)
+        {
+            DBComparison c = DBComparison.Compare(parent, comp, child);
+            return LeftJoin(tbl, c); 
+        }
+
+        /// <summary>
+        /// Appends a new LEFT OUTER JOIN between this table an the specified clause matching on the comparison
+        /// </summary>
+        /// <param name="foreign"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public DBJoin LeftJoin(DBClause foreign, DBComparison compare)
+        {
+            DBJoin join = DBJoin.Join(foreign, JoinType.LeftOuter, compare);
+            this.Joins.Add(join);
+            return join;
+        }
+
+        /// <summary>
+        /// Appends a new RIGHT OUTER JOIN between this table an the specified clause matching on the comparison
+        /// </summary>
+        /// <param name="foreign"></param>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public DBJoin RightJoin(DBClause foreign, DBComparison compare)
+        {
+            DBJoin join = DBJoin.Join(foreign, JoinType.RightOuter, compare);
+            this.Joins.Add(join);
+            return join;
+        }
+
         #region public DBJoin Join(DBClause table, JoinType type, DBComparison comp)
 
+        /// <summary>
+        /// Appends a new [type] JOIN between this table an the specified clause matching on the comparison
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="type"></param>
+        /// <param name="comp"></param>
+        /// <returns></returns>
         public DBJoin Join(DBClause table, JoinType type, DBComparison comp)
         {
             DBJoin join = DBJoin.Join(table, type, comp);
@@ -154,8 +236,16 @@ namespace Perceiveit.Data.Query
 
         #region public static DBTable Table(string name)
 
+        /// <summary>
+        /// Creates and returns a new DBTable reference with the specifed name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static DBTable Table(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("name");
+
             DBTableRef tref = new DBTableRef();
             tref.Name = name;
             return tref;
@@ -164,9 +254,17 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBTable Table(string owner, string name)
-
+        /// <summary>
+        /// Creates and returns a new DBTable reference with the specifed schema owner name
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static DBTable Table(string owner, string name)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentNullException("name");
+
             DBTableRef tref = new DBTableRef();
             tref.Name = name;
             tref.Owner = owner;
@@ -176,7 +274,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public static DBTable Table()
-
+        /// <summary>
+        /// Creates and returns a new DBTable reference with the specifed name
+        /// </summary>
+        /// <returns></returns>
         public static DBTable Table()
         {
             DBTableRef tref = new DBTableRef();
@@ -192,6 +293,10 @@ namespace Perceiveit.Data.Query
 
         #region IDBAlias Members
 
+        /// <summary>
+        /// Specifies the alias name for this table
+        /// </summary>
+        /// <param name="aliasName"></param>
         public void As(string aliasName)
         {
             this._alias = aliasName;
@@ -201,8 +306,16 @@ namespace Perceiveit.Data.Query
 
         #region IDBJoinable Members
 
+        /// <summary>
+        /// Adds a comparison to the last join for this table
+        /// </summary>
+        /// <param name="compare"></param>
+        /// <returns></returns>
         public DBClause On(DBComparison compare)
         {
+            if (this.HasJoins == false)
+                throw new InvalidOperationException("No joined tables or sub queries to join to");
+
             IDBJoinable join = (IDBJoinable)this.Joins[this.Joins.Count - 1];
             join.On(compare);
             return (DBClause)join;
@@ -212,15 +325,31 @@ namespace Perceiveit.Data.Query
 
         #region IDBBoolean Members
 
+        /// <summary>
+        /// Adds an AND comparison to the last join
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public DBClause And(DBClause reference)
         {
+            if (this.HasJoins == false)
+                throw new InvalidOperationException("No joined tables or sub queries to join to");
+
             IDBBoolean join = (IDBBoolean)this.Joins[this.Joins.Count - 1];
             join.And(reference);
             return (DBClause)join;
         }
 
+        /// <summary>
+        /// Adds an OR comparison to the last join
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <returns></returns>
         public DBClause Or(DBClause reference)
         {
+            if (this.HasJoins == false)
+                throw new InvalidOperationException("No joined tables or sub queries to join to");
+
             IDBBoolean join = (IDBBoolean)this.Joins[this.Joins.Count - 1];
             join.Or(reference);
             return (DBClause)join;

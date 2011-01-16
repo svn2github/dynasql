@@ -22,13 +22,19 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Represents a batch of DBStatement statements that can be passed to the 
+    /// database engine in one command and executed
+    /// </summary>
     public class DBScript : DBQuery
     {
 
         #region internal List<DBQuery> Inner {get;}
 
         private DBStatementList _inner;
-
+       /// <summary>
+       /// Gets the list of statements in this script
+       /// </summary>
         internal DBStatementList Inner
         {
             get 
@@ -43,6 +49,9 @@ namespace Perceiveit.Data.Query
 
         #region public bool HasInnerStatements {get;}
 
+        /// <summary>
+        /// Returns true if this script has one or more inner statements
+        /// </summary>
         public bool HasInnerStatements
         {
             get
@@ -58,7 +67,9 @@ namespace Perceiveit.Data.Query
         //
 
         #region internal DBScript()
-
+        /// <summary>
+        /// Creates a new DBScript
+        /// </summary>
         internal DBScript() : base()
         {
         }
@@ -70,7 +81,11 @@ namespace Perceiveit.Data.Query
         //
 
         #region public DBScript Append(DBStatement query)
-
+        /// <summary>
+        /// Appends the statement onto this script
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public DBScript Append(DBStatement query)
         {
             return this.Then(query);
@@ -79,7 +94,11 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public DBScript Then(DBStatement query)
-
+        /// <summary>
+        /// Appends the statement onto this script
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         public DBScript Then(DBStatement query)
         {
             this.Inner.Add(query);
@@ -89,7 +108,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public DBScript End()
-
+        /// <summary>
+        /// Closes the script
+        /// </summary>
+        /// <returns></returns>
         public DBScript End()
         {
             return this;
@@ -97,55 +119,83 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        public static DBStatement Declare(DBParam param)
+        /// <summary>
+        /// creates a parameter Declaration in this script
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public DBScript Declare(DBParam param)
         {
             DBDeclaration dec = DBDeclaration.Declare(param);
-            return dec;
+            this.Then(dec);
+            return this;
         }
 
-        public static DBStatement Declare(string name, System.Data.DbType type)
-        {
-            DBParam p = DBParam.Param(name, type);
-            return Declare(p);
-        }
 
-        public static DBStatement Declare(string name, System.Data.DbType type, int size)
-        {
-            DBParam p = DBParam.Param(name, type, size);
-            return Declare(p);
-        }
-
-        public static DBStatement Set(DBAssign assignment)
+        /// <summary>
+        /// creates a parameter assignment in this script
+        /// </summary>
+        /// <param name="assignment"></param>
+        /// <returns></returns>
+        public DBScript Set(DBAssign assignment)
         {
             DBSet set = DBSet.Set(assignment);
-            return set;
+            this.Then(set);
+            return this;
         }
 
-        public static DBStatement Set(DBParam param, DBClause clause)
+        /// <summary>
+        /// creates a parameter assignment statement in this script
+        /// </summary>
+        /// <param name="param"></param>
+        /// <param name="clause"></param>
+        /// <returns></returns>
+        public DBScript Set(DBParam param, DBClause clause)
         {
             DBAssign assign = DBAssign.Set(param, clause);
-            return Set(assign);
+            return this.Set(assign);
         }
 
-        public static DBStatement Return()
+        /// <summary>
+        /// Creates a return statement in this script
+        /// </summary>
+        /// <returns></returns>
+        public DBScript Return()
         {
             DBReturn ret = DBReturn.Return();
-            return ret;
+            this.Then(ret);
+            return this;
         }
 
-        public static DBStatement Return(DBClause clause)
+        /// <summary>
+        /// Creates a return statement with value in this script
+        /// </summary>
+        /// <param name="clause"></param>
+        /// <returns></returns>
+        public DBStatement Return(DBClause clause)
         {
             DBReturn ret = DBReturn.Return(clause);
+            this.Then(ret);
             return ret;
         }
 
-        public static DBStatement Return(string paramName)
+        /// <summary>
+        /// Creates a return statement with the parameter in this script
+        /// </summary>
+        /// <param name="paramName"></param>
+        /// <returns></returns>
+        public DBStatement Return(string paramName)
         {
             DBParam p = DBParam.Param(paramName);
             return Return(p);
         }
 
-        public static DBStatement Return(DBParam param)
+        /// <summary>
+        /// Creates a return statement with the parameter in this script
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public DBStatement Return(DBParam param)
         {
             DBReturn ret = DBReturn.Return(param);
             return ret;
@@ -157,6 +207,11 @@ namespace Perceiveit.Data.Query
 
         #region public override bool BuildStatement(DBStatementBuilder builder)
 
+        /// <summary>
+        /// Builds the script with the specified statement builder
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             if (this._inner != null && this._inner.Count > 0)
@@ -187,7 +242,9 @@ namespace Perceiveit.Data.Query
         //
 
         #region protected override string XmlElementName {get;}
-
+        /// <summary>
+        /// Gets the xml element name for this script
+        /// </summary>
         protected override string XmlElementName
         {
             get { return XmlHelper.Script; }
@@ -196,7 +253,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
-        
+        /// <summary>
+        /// reads the inner elements
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
         {
             bool b;
@@ -215,7 +277,12 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
-        
+        /// <summary>
+        /// writes all the inner elements in this script
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
             if (this.HasInnerStatements)

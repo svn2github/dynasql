@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.50727</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{5A3E3137-F7D8-4416-B6A0-2F5902F5754D}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -29,10 +29,14 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <SccProjectName>SAK</SccProjectName>
-    <SccLocalPath>SAK</SccLocalPath>
-    <SccAuxPath>SAK</SccAuxPath>
-    <SccProvider>SAK</SccProvider>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -50,6 +54,27 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\Perceiveit.Data.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisUseTypeNameInSuppression>true</CodeAnalysisUseTypeNameInSuppression>
+    <CodeAnalysisModuleSuppressionsFile>GlobalSuppressions.cs</CodeAnalysisModuleSuppressionsFile>
+    <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -60,32 +85,63 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\DBConfigurationSection.cs" />
+    <Compile Include="Configuration\DBProviderImplementationConfigElement.cs" />
+    <Compile Include="Configuration\DBProviderImplementationConfigSection.cs" />
     <Compile Include="DBDatabase_DataSetMethods.cs" />
     <Compile Include="DBHelper.cs" />
+    <Compile Include="OleDb\DBMSAccessDBTypeMapping.cs" />
+    <Compile Include="Configuration\DBProfilerConfigElement.cs" />
+    <Compile Include="Configuration\DBProfilerConfigSection.cs" />
+    <Compile Include="Configuration\DBProfilerConfigSettingElement.cs" />
+    <Compile Include="Profile\DBCollectionProfiler.cs" />
+    <Compile Include="Profile\DBConsoleProfiler.cs" />
+    <Compile Include="Profile\DBProfilerBase.cs" />
+    <Compile Include="Profile\DBProfilerSettings.cs" />
+    <Compile Include="Profile\DBTextFileProfiler.cs" />
+    <Compile Include="Profile\IDBProfiler.cs" />
+    <Compile Include="Profile\ProfileConnection.cs" />
+    <Compile Include="Profile\ProfilerExecData.cs" />
+    <Compile Include="Profile\ProfilerExecSummary.cs" />
+    <Compile Include="Profile\ProfileDataSummaryCollection.cs" />
     <Compile Include="Query\DBDeclaration.cs" />
-    <Compile Include="DBFactory.cs" />
+    <Compile Include="DBProviderImplementation.cs" />
     <Compile Include="Query\DBReturn.cs" />
     <Compile Include="Query\DBSet.cs" />
     <Compile Include="Query\DBStatement.cs" />
-    <Compile Include="MySqlClient\DBMySqlFactory.cs" />
+    <Compile Include="MySqlClient\DBMySqlImplementation.cs" />
     <Compile Include="MySqlClient\DBMySqlSchemaProvider.cs" />
     <Compile Include="MySqlClient\DBMySqlStatementBuilder.cs" />
-    <Compile Include="OleDb\DBOleDbFactory.cs" />
-    <Compile Include="OleDb\DBOleDbSchemaProvider.cs" />
+    <Compile Include="OleDb\DBOleDbImplementation.cs" />
+    <Compile Include="OleDb\DBMSAccessSchemaProvider.cs" />
     <Compile Include="OleDb\DBOleDbStatementBuilder.cs" />
-    <Compile Include="Schema\DBSchemaProvider_Table.cs" />
-    <Compile Include="Schema\DBSchemaProvider_View.cs" />
+    <Compile Include="Query\DBTokenList.cs" />
+    <Compile Include="Schema\DBSchemaColumn.cs" />
+    <Compile Include="Schema\DBSchemaForeignKey.cs" />
+    <Compile Include="Schema\DBSchemaForeignKeyMapping.cs" />
+    <Compile Include="Schema\DBSchemaFunction.cs" />
+    <Compile Include="Schema\DBSchemaIndex.cs" />
+    <Compile Include="Schema\DBSchemaIndexColumn.cs" />
+    <Compile Include="Schema\DBSchemaItem.cs" />
+    <Compile Include="Schema\DBSchemaItemCollection.cs" />
+    <Compile Include="Schema\DBSchemaItemRef.cs" />
+    <Compile Include="Schema\DBSchemaMetaDataCollection.cs" />
+    <Compile Include="Schema\DBSchemaParameter.cs" />
+    <Compile Include="Schema\DBSchemaProvider.cs" />
+    <Compile Include="Schema\DBSchemaRoutine.cs" />
+    <Compile Include="Schema\DBSchemaSproc.cs" />
+    <Compile Include="Schema\DBSchemaTable.cs" />
     <Compile Include="Schema\DBSchemaTableColumn.cs" />
+    <Compile Include="Schema\DBSchemaView.cs" />
     <Compile Include="Schema\DBSchemaViewColumn.cs" />
     <Compile Include="Schema\_Exceptions.cs" />
-    <Compile Include="SqlClient\DBSqlClientFactory.cs" />
+    <Compile Include="SqlClient\DBSqlClientImplementation.cs" />
     <Compile Include="SqlClient\DBSQLClientSchemaProvider.cs" />
-    <Compile Include="SqLite\DBSqLiteFactory.cs" />
+    <Compile Include="SqLite\DBSqLiteImplementaion.cs" />
     <Compile Include="SqLite\DBSqLiteSchemaProvider.cs" />
     <Compile Include="SqLite\DBStatementSQLiteBuilder.cs" />
     <Compile Include="SupportedSchemaOptions.cs" />
     <Compile Include="Query\DBCalculableClause.cs" />
-    <Compile Include="Schema\DBSchemaProvider.cs" />
     <Compile Include="Query\DBToken.cs" />
     <Compile Include="Query\Internal\DBCalculableExpressionSet.cs" />
     <Compile Include="Query\DBAggregate.cs" />
@@ -119,23 +175,13 @@
     <Compile Include="Query\DBTop.cs" />
     <Compile Include="Query\DBUpdateQuery.cs" />
     <Compile Include="Query\Internal\DBValueSet.cs" />
-    <Compile Include="Schema\DBSchemaColumn.cs" />
-    <Compile Include="Schema\DBSchemaFunction.cs" />
-    <Compile Include="Schema\DBSchemaIndex.cs" />
-    <Compile Include="Schema\DBSchemaIndexColumn.cs" />
-    <Compile Include="Schema\DBSchemaItem.cs" />
-    <Compile Include="Schema\DBSchemaItemCollection.cs" />
-    <Compile Include="Schema\DBSchemaItemRef.cs" />
-    <Compile Include="Schema\DBSchemaParameter.cs" />
-    <Compile Include="Schema\DBSchemaSproc.cs" />
-    <Compile Include="Schema\DBSchemaTable.cs" />
-    <Compile Include="Schema\DBSchemaView.cs" />
     <Compile Include="_Delegates.cs" />
     <Compile Include="Query\_Interfaces.cs" />
     <Compile Include="Query\XmlHelper.cs" />
     <Compile Include="Query\XmlFactory.cs" />
     <Compile Include="Query\XmlReaderContext.cs" />
     <Compile Include="Query\XmlWriterContext.cs" />
+    <Compile Include="_Documentation.cs" />
     <Compile Include="_Enumerations.cs" />
     <Compile Include="Query\DBClause.cs" />
     <Compile Include="Query\DBClauseList.cs" />
@@ -149,10 +195,12 @@
       <DependentUpon>Errors.resx</DependentUpon>
     </Compile>
     <Content Include="COPYING.txt" />
+    <Content Include="Sample.config.xml" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
+    <None Include="Configuration\Perceiveit.Data.ConfigSchema.xsd" />
     <None Include="Query\DynaSQL.cd" />
   </ItemGroup>
   <ItemGroup>

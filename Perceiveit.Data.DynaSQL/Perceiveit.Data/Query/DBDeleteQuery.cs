@@ -22,6 +22,9 @@ using System.Text;
 
 namespace Perceiveit.Data.Query
 {
+    /// <summary>
+    /// Encapsulates a DELETE sql query statement
+    /// </summary>
     public class DBDeleteQuery : DBQuery
     {
         private DBFilterSet _where;
@@ -34,6 +37,9 @@ namespace Perceiveit.Data.Query
 
         #region internal DBFilterSet WhereSet {get;set;}
 
+        /// <summary>
+        /// Gets or sets the WHERE filter for the delete statement
+        /// </summary>
         internal DBFilterSet WhereSet
         {
             get { return _where; }
@@ -44,6 +50,9 @@ namespace Perceiveit.Data.Query
 
         #region internal DBTable FromTable {get;set;}
 
+        /// <summary>
+        /// Gets or sets the DBTable this delete statement refers to
+        /// </summary>
         internal DBTable FromTable
         {
             get { return _from; }
@@ -54,6 +63,9 @@ namespace Perceiveit.Data.Query
 
         #region internal DBClause Last {get;set;}
 
+        /// <summary>
+        /// Gets or sets the last clause that was modified - for chaining statements
+        /// </summary>
         internal DBClause Last
         {
             get { return this._last; }
@@ -77,6 +89,11 @@ namespace Perceiveit.Data.Query
 
         #region public override bool BuildStatement(DBStatementBuilder builder)
 
+        /// <summary>
+        /// Generates the SQL statement using the provided builder for this DELETE query
+        /// </summary>
+        /// <param name="builder">The provider specific builder</param>
+        /// <returns>true if the statement was built</returns>
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginDeleteStatement();
@@ -102,7 +119,10 @@ namespace Perceiveit.Data.Query
         //
 
         #region protected override string XmlElementName {get;}
-        
+
+        /// <summary>
+        /// Gets the XmlElement name for this DBDeleteQuery
+        /// </summary>
         protected override string XmlElementName
         {
             get { return XmlHelper.Delete; }
@@ -113,7 +133,7 @@ namespace Perceiveit.Data.Query
         #region protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         
         /// <summary>
-        /// Overrides the default implementation to write the From statement and Where statement
+        /// Overrides the default implementation to write the From statement and Where elements
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="context"></param>
@@ -137,6 +157,12 @@ namespace Perceiveit.Data.Query
 
         #region protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
         
+        /// <summary>
+        /// Overrides the base implementation to read the From and Where elements
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
         protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
         {
             bool b;
@@ -167,7 +193,13 @@ namespace Perceiveit.Data.Query
         #region public DBDeleteQuery Where(DBClause clause, ComparisonOperator compare, DBClause right) + 1 overload
 
         
-
+        /// <summary>
+        /// Creates the first where clause in this DBDeleteQuery using the left and right clauses as operands in the comparison
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="compare">The comparison type - Equals etc...</param>
+        /// <param name="right">The right operand</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery Where(DBClause left, Compare compare, DBClause right)
         {
             DBFilterSet fs = DBFilterSet.Where(left, compare, right);
@@ -177,6 +209,11 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
+        /// <summary>
+        /// Creates the first where clause in this DBDeleteQuery using the DBComparison as the filter.
+        /// </summary>
+        /// <param name="compare">The DBComparison to use</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery Where(DBComparison compare)
         {
             DBFilterSet fs = DBFilterSet.Where(compare);
@@ -190,11 +227,24 @@ namespace Perceiveit.Data.Query
 
         #region public DBDeleteQuery WhereFieldEquals(string field, DBClause value) + 1 overload
 
+        /// <summary>
+        /// Creates the first where clause by using an equals comparison between the specified field and the clause
+        /// </summary>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery WhereFieldEquals(string field, DBClause value)
         {
             return WhereField(field, Compare.Equals, value);
         }
 
+        /// <summary>
+        /// Creates the first where clause by using an equals comparison between the specified table.field and the clause
+        /// </summary>
+        /// <param name="fieldTable">The name of the table the field belongs to</param>
+        /// <param name="fieldName">The name of the field to comapre against</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery WhereFieldEquals(string fieldTable, string fieldName, DBClause value)
         {
             return WhereField(fieldTable, fieldName, Compare.Equals, value);
@@ -204,18 +254,42 @@ namespace Perceiveit.Data.Query
 
         #region public DBDeleteQuery WhereField(string field, ComparisonOperator op, DBClause value) + 2 overload
 
+        /// <summary>
+        /// Creates the first where clause by using the specified comparison between the specified field and the clause
+        /// </summary>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery WhereField(string field, Compare op, DBClause value)
         {
             DBField fld = DBField.Field(field);
             return Where(fld, op, value);
         }
 
+        /// <summary>
+        /// Creates the first where clause by using the specified comparison between the specified table.field and the clause
+        /// </summary>
+        /// <param name="fieldTable">The table the field belongs to</param>
+        /// <param name="fieldName">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery WhereField(string fieldTable, string fieldName, Compare op, DBClause value)
         {
             DBField fld = DBField.Field(fieldTable, fieldName);
             return Where(fld, op, value);
         }
 
+        /// <summary>
+        /// Creates the first where clause by using the specified comparison between the specified owner.table.field and the clause
+        /// </summary>
+        /// <param name="fieldOwner">The schema owner of the table</param>
+        /// <param name="fieldTable">The table the field belongs to</param>
+        /// <param name="fieldName">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery WhereField(string fieldOwner, string fieldTable, string fieldName, Compare op, DBClause value)
         {
             DBField fld = DBField.Field(fieldOwner, fieldTable, fieldName);
@@ -224,35 +298,39 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public DBDeleteQuery AndWhere(DBClause left, ComparisonOperator op, DBClause right) + 3 overloads
+        #region public DBDeleteQuery AndWhere(DBClause left, ComparisonOperator op, DBClause right) + 4 overloads
 
+        /// <summary>
+        /// Creates a futher where clause in this DBDeleteQuery using the left and right 
+        /// clauses as operands in the comparison. Then combines with the previous filter in a boolean AND operation
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="op">The comparison type - Equals etc...</param>
+        /// <param name="right">The right operand</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery AndWhere(DBClause left, Compare op, DBClause right)
         {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
             _where = _where.And(left, op, right);
             _last = _where;
 
             return this;
         }
 
-        public DBDeleteQuery AndWhere(string field, Compare op, DBClause right)
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery using the specified comparison.
+        /// Then combines with the previous filter in a boolean AND operation
+        /// </summary>
+        /// <param name="comparison">The comparison filter</param>
+        /// <returns>Itself so further statements can be combined</returns>
+        public DBDeleteQuery AndWhere(DBComparison comparison)
         {
-            _where = _where.And(field, op, right);
-            _last = _where;
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
 
-            return this;
-        }
-
-        public DBDeleteQuery AndWhere(string table, string field, Compare op, DBClause right)
-        {
-            _where = _where.And(table, field, op, right);
-            _last = _where;
-
-            return this;
-        }
-
-        public DBDeleteQuery AndWhere(string owner, string table, string field, Compare op, DBClause right)
-        {
-            _where = _where.And(owner, table, field, op, right);
+            _where = _where.And(comparison);
             _last = _where;
 
             return this;
@@ -260,18 +338,104 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public DBDeleteQuery AndWhere(DBClause left, ComparisonOperator op, DBClause right) + 4 overloads
+
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery between the specified field and the clause.
+        /// Then combines with the previous filter in a boolean AND operation
+        /// </summary>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="right">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
+        public DBDeleteQuery AndWhereField(string field, Compare op, DBClause right)
+        {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
+            _where = _where.And(field, op, right);
+            _last = _where;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery between the specified table.field and the clause.
+        /// Then combines with the previous filter in a boolean AND operation
+        /// </summary>
+        /// <param name="table">The table the field belongs to</param>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
+        public DBDeleteQuery AndWhereField(string table, string field, Compare op, DBClause value)
+        {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
+            _where = _where.And(table, field, op, value);
+            _last = _where;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery between the specified owner.table.field and the clause.
+        /// Then combines with the previous filter in a boolean AND operation
+        /// </summary>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <param name="table">The table the field belongs to</param>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="value">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
+        public DBDeleteQuery AndWhereField(string owner, string table, string field, Compare op, DBClause value)
+        {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
+            _where = _where.And(owner, table, field, op, value);
+            _last = _where;
+
+            return this;
+        }
+
+        
+
+        #endregion
+
         #region public DBDeleteQuery OrWhere(DBClause left, ComparisonOperator op, DBClause right) + 1 overloads
 
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery using the specified comparison.
+        /// Then combines with the previous filter in a boolean OR operation
+        /// </summary>
+        /// <param name="comparison">The comparison filter</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery OrWhere(DBClause comparison)
         {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
             _where = _where.Or(comparison);
             _last = _where;
 
             return this;
         }
 
+        /// <summary>
+        /// Creates a futher where clause in this DBDeleteQuery using the left and right 
+        /// clauses as operands in the comparison. Then combines with the previous filter in a boolean AND operation
+        /// </summary>
+        /// <param name="left">The left operand</param>
+        /// <param name="op">The comparison type - Equals etc...</param>
+        /// <param name="right">The right operand</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery OrWhere(DBClause left, Compare op, DBClause right)
         {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
             _where = _where.Or(left, op, right);
             _last = _where;
 
@@ -281,25 +445,61 @@ namespace Perceiveit.Data.Query
         #endregion
 
         #region public DBDeleteQuery OrWhereField(string field, Compare op, DBClause right)
-        
+
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery between the specified field and the clause.
+        /// Then combines with the previous filter in a boolean OR operation
+        /// </summary>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="right">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery OrWhereField(string field, Compare op, DBClause right)
         {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
             _where = _where.Or(field, op, right);
             _last = _where;
 
             return this;
         }
 
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery between the specified table.field and the clause.
+        /// Then combines with the previous filter in a boolean OR operation
+        /// </summary>
+        /// <param name="table">The table the field belongs to</param>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="right">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery OrWhereField(string table, string field, Compare op, DBClause right)
         {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
             _where = _where.Or(table, field, op, right);
             _last = _where;
 
             return this;
         }
 
+        /// <summary>
+        /// Creates a further where clause in this DBDeleteQuery between the specified owner.table.field and the clause.
+        /// Then combines with the previous filter in a boolean OR operation
+        /// </summary>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <param name="table">The table the field belongs to</param>
+        /// <param name="field">The field to compare against</param>
+        /// <param name="op">The comparison operator</param>
+        /// <param name="right">The value clause</param>
+        /// <returns>Itself so further statements can be combined</returns>
         public DBDeleteQuery OrWhereField(string owner, string table, string field, Compare op, DBClause right)
         {
+            if (null == _where)
+                throw new NullReferenceException(Errors.CannotAppendWhereClauseWithoutInitial);
+
             _where = _where.Or(owner, table, field, op, right);
             _last = _where;
 
@@ -310,6 +510,12 @@ namespace Perceiveit.Data.Query
 
         #region public DBSelectQuery WhereIn(string field, params object[] values) + 3 overloads
 
+        /// <summary>
+        /// Creates the first where clause in this DBDeleteQuery using the fields and a series of constant values
+        /// </summary>
+        /// <param name="field">The field which will be compared to the psecified values</param>
+        /// <param name="values">The set of values to limit the deletion to</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery WhereIn(string field, params object[] values)
         {
             DBField fld = DBField.Field(field);
@@ -329,9 +535,14 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
-        public DBDeleteQuery WhereIn(string table, string field, params DBClause[] values)
+        /// <summary>
+        /// Creates the first where clause in this DBDeleteQuery using the fields and a series of DBClauses that are evaluated at execution time
+        /// </summary>
+        /// <param name="fld">The field which will be compared to the specified values</param>
+        /// <param name="values">The set of DBClauses to be evaluated and compared</param>
+        /// <returns>Itself so further statements can be chained</returns>
+        public DBDeleteQuery WhereIn(DBField fld, params DBClause[] values)
         {
-            DBField fld = DBField.Field(table, field);
             DBComparison compare = DBComparison.In(fld, values);
             DBFilterSet fs = DBFilterSet.Where(compare);
             this._where = fs;
@@ -339,7 +550,13 @@ namespace Perceiveit.Data.Query
 
             return this;
         }
-        
+
+        /// <summary>
+        /// Creates the first where clause in this DBDeleteQuery using the fields and a sub select that is evaluated at execution time
+        /// </summary>
+        /// <param name="field">The field which will be compared to the specified values</param>
+        /// <param name="select">The sub select to be evaluated and compared</param>
+        /// <returns>Itself so further statements can be chained</returns>
         public DBDeleteQuery WhereIn(string field, DBSelectQuery select)
         {
             DBField fld = DBField.Field(field);
@@ -354,129 +571,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        //
-        //IDBCalculable Implementation
-        //
-
-        #region public DBDeleteQuery Plus(DBClause dbref)
-
-        public DBDeleteQuery Plus(DBClause dbref)
-        {
-            if (this._last is IDBCalculable)
-                this._last = ((IDBCalculable)this._last).Calculate(BinaryOp.Add, dbref);
-            else
-                throw new InvalidOperationException("Cannot support calculations on the this query set");
-            return this;
-        }
-
-        #endregion
-
-        #region public DBDeleteQuery Minus(DBClause dbref)
-
-        public DBDeleteQuery Minus(DBClause dbref)
-        {
-            if (this._last is IDBCalculable)
-                this._last = ((IDBCalculable)this._last).Calculate(BinaryOp.Subtract, dbref);
-            else
-                throw new InvalidOperationException("Cannot support calculations on the this query set");
-            return this;
-        }
         
-        #endregion
-
-        #region public DBDeleteQuery Times(DBClause dbref)
-
-        public DBDeleteQuery Times(DBClause dbref)
-        {
-            if (this._last is IDBCalculable)
-                this._last = ((IDBCalculable)this._last).Calculate(BinaryOp.Multiply, dbref);
-            else
-                throw new InvalidOperationException("Cannot support calculations on the this query set");
-            return this;
-        }
-
-        #endregion
-
-        #region public DBDeleteQuery Divide(DBClause dbref)
-
-        public DBDeleteQuery Divide(DBClause dbref)
-        {
-            if (this._last is IDBCalculable)
-                this._last = ((IDBCalculable)this._last).Calculate(BinaryOp.Divide, dbref);
-            else
-                throw new InvalidOperationException("Cannot support calculations on the this query set");
-            return this;
-        }
-
-        #endregion
-
-        #region public DBDeleteQuery Modulo(DBClause dbref)
-
-        public DBDeleteQuery Modulo(DBClause dbref)
-        {
-            if (this._last is IDBCalculable)
-                this._last = ((IDBCalculable)this._last).Calculate(BinaryOp.Modulo, dbref);
-            else
-                throw new InvalidOperationException("Cannot support calculations on the this query set");
-            return this;
-        }
-
-        #endregion
-
-        //
-        // And Implementation
-        //
-
-        #region public DBDeleteQuery And(string field) + 3 overloads
-
-        public DBDeleteQuery And(DBClause clause)
-        {
-            if (_last == null)
-            {
-                if (_where != null)
-                    _last = _where;
-            }
-            if (_last is IDBBoolean)
-            {
-                _last = ((IDBBoolean)_last).And(clause);
-                return this;
-            }
-            else
-                throw new ArgumentException("The last clause in the statement does not support 'and' operations");
-
-        }
-
-        public DBDeleteQuery And(string parent, Compare comp, string child)
-        {
-            DBField par = DBField.Field(parent);
-            DBField chi = DBField.Field(child);
-            return And(par, comp, chi);
-        }
-
-        public DBDeleteQuery And(string parentTable, string parentField, Compare comp, string childTable, string childField)
-        {
-            DBField par = DBField.Field(parentTable, parentField);
-            DBField chi = DBField.Field(childTable, childField);
-            return And(par, comp, chi);
-        }
-
-        public DBDeleteQuery And(string parentOwner, string parentTable, string parentField, Compare comp, string childOwner, string childTable, string childField)
-        {
-            DBField par = DBField.Field(parentOwner, parentTable, parentField);
-            DBField chi = DBField.Field(childOwner, childTable, childField);
-            return And(par, comp, chi);
-        }
-
-        public DBDeleteQuery And(DBClause left, Compare comp, DBClause right)
-        {
-            DBComparison comarison = DBComparison.Compare(left, comp, right);
-            return And(comarison);
-        }
-
-
-
-        #endregion
-
 
         //
         // static factory
@@ -485,7 +580,7 @@ namespace Perceiveit.Data.Query
         #region internal static DBDeleteQuery Delete()
 
         /// <summary>
-        /// internal factory method for the XmlFactory
+        /// internal factory method for the DBDeleteQuery
         /// </summary>
         /// <returns></returns>
         internal static DBDeleteQuery Delete()

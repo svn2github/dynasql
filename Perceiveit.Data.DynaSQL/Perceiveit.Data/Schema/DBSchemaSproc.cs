@@ -15,6 +15,7 @@
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -23,35 +24,37 @@ using System.Xml.Serialization;
 
 namespace Perceiveit.Data.Schema
 {
+    /// <summary>
+    /// Defines the schema of a stored procedure for a database definition
+    /// </summary>
     [XmlRoot("sproc", Namespace = "http://schemas.perceiveit.co.uk/Query/schema/")]
-    public class DBSchemaSproc : DBSchemaItem
+    public class DBSchemaSproc : DBSchemaRoutine
     {
         #region ivars
 
-        private DBSchemaParameterCollection _params = new DBSchemaParameterCollection();
+        private DBSchemaViewColumnCollection _results = new DBSchemaViewColumnCollection();
+
 
         #endregion
-
-
+        
         //
         // public properties
         //
 
-        #region public DBSchemaParameterCollection Parameters
+        #region public DBSchemaViewColumnCollection Results {get;set;}
 
         /// <summary>
-        /// Gets the collection of parameters associated with this item
+        /// Gets or sets the collection of column results for the StoredProcedure
         /// </summary>
-        [XmlArray("params")]
-        [XmlArrayItem("param")]
-        public DBSchemaParameterCollection Parameters
+        [XmlArray("results")]
+        [XmlArrayItem("column")]
+        public DBSchemaViewColumnCollection Results
         {
-            get { return this._params; }
-            set { this._params = value; }
+            get { return this._results; }
+            set { this._results = value; }
         }
 
         #endregion
-
 
         //
         // .ctors
@@ -95,47 +98,13 @@ namespace Perceiveit.Data.Schema
         /// <param name="owner"></param>
         /// <param name="name"></param>
         protected DBSchemaSproc(DBSchemaTypes type, string owner, string name)
-            : base(name, owner, type)
+            : base(type, owner, name)
         {
         }
 
         #endregion
 
-        //
-        // protected methods
-        //
-
-        #region protected virtual DbType GetDbTypeFromRuntimeType(Type value)
-
-        /// <summary>
-        /// Gets the DbType that is the closest match for the runtime Type
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        protected virtual DbType GetDbTypeFromRuntimeType(Type value)
-        {
-            if (null == value)
-                return DbType.Object;
-            else
-                return DBHelper.GetDBTypeForRuntimeType(value);
-        }
-
-        #endregion
-
-        #region protected virtual Type GetRuntimeTypeFromDbType(DbType value)
-
-        /// <summary>
-        /// Returns the default runtime type that is the closest match to the DbType
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        protected virtual Type GetRuntimeTypeFromDbType(DbType value)
-        {
-            return DBHelper.GetRuntimeTypeForDbType(value);
-        }
-
-        #endregion
-
+        
 
         
     }

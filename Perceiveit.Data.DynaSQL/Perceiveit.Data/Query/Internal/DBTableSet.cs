@@ -24,7 +24,7 @@ namespace Perceiveit.Data.Query
 {
     internal class DBTableSet : DBExpressionSet, IDBAlias, IDBJoinable, IDBBoolean
     {
-        private DBTable _root;
+        private IDBJoinable _root;
 
         //
         // properties
@@ -32,7 +32,7 @@ namespace Perceiveit.Data.Query
         
         #region protected DBTable Root {get;set;}
 
-        protected DBTable Root
+        protected IDBJoinable Root
         {
             get { return _root; }
             set { _root = value; }
@@ -58,7 +58,7 @@ namespace Perceiveit.Data.Query
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             if (this._root != null)
-                return this.Root.BuildStatement(builder);
+                return ((DBClause)this.Root).BuildStatement(builder);
             else
                 return false;
         }
@@ -86,7 +86,7 @@ namespace Perceiveit.Data.Query
         protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
             if (this.HasRoot)
-                this.Root.WriteXml(writer, context);
+                ((DBClause)this.Root).WriteXml(writer, context);
             return base.WriteInnerElements(writer, context);
         }
 
@@ -135,6 +135,14 @@ namespace Perceiveit.Data.Query
             return set;
         }
 
+        public static DBTableSet From(DBSubQuery subquery)
+        {
+            DBTableSet set = new DBTableSet();
+            set.Root = subquery;
+            set.Last = subquery;
+            return set;
+        }
+
         #endregion
 
         #region public DBTableSet InnerJoin(DBClause table) + 4 overloads
@@ -156,7 +164,13 @@ namespace Perceiveit.Data.Query
         {
             DBComparison comp = DBComparison.Compare(parent, op, child);
 
-            this.Root.InnerJoin(table, comp);
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).InnerJoin(table, comp);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).InnerJoin(table, comp);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
             this.Last = table;
 
             return this;
@@ -164,21 +178,91 @@ namespace Perceiveit.Data.Query
 
         public DBTableSet InnerJoin(DBTable table, DBComparison compare)
         {
-            this.Root.InnerJoin(table, compare);
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).InnerJoin(table, compare);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).InnerJoin(table, compare);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
             this.Last = table;
 
             return this;
         }
 
+        
+
         public DBTableSet InnerJoin(DBClause table)
         {
-            this.Root.InnerJoin(table, null);
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).InnerJoin(table, null);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).InnerJoin(table, null);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
             this.Last = table;
 
             return this;
         }
 
         #endregion
+
+        public DBTableSet LeftJoin(DBTable table)
+        {
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).LeftJoin(table, null);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).LeftJoin(table, null);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
+            this.Last = table;
+
+            return this;
+        }
+
+        public DBTableSet RightJoin(DBTable table)
+        {
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).RightJoin(table, null);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).RightJoin(table, null);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
+            this.Last = table;
+
+            return this;
+        }
+
+        public DBTableSet LeftJoin(DBSubQuery sub)
+        {
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).LeftJoin(sub, null);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).LeftJoin(sub, null);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
+            this.Last = sub;
+
+            return this;
+        }
+
+        public DBTableSet RightJoin(DBSubQuery sub)
+        {
+            if (this.Root is DBTable)
+                ((DBTable)this.Root).RightJoin(sub, null);
+            else if (this.Root is DBSubQuery)
+                ((DBSubQuery)this.Root).RightJoin(sub, null);
+            else
+                throw new InvalidOperationException("Current root does not support joins");
+
+            this.Last = sub;
+
+            return this;
+        }
 
         #region public DBTableSet On(DBComparison comp) + 1 overload
 

@@ -33,7 +33,6 @@ namespace Perceiveit.Data.Schema
 
         private DBSchemaIndexColumnCollection _cols = new DBSchemaIndexColumnCollection();
         private DBSchemaItemRef _tblref;
-        private DBSchemaTable _tbl;
         private bool _isPk;
         private bool _isUnique;
 
@@ -53,22 +52,13 @@ namespace Perceiveit.Data.Schema
         [XmlArrayItem("column", typeof(DBSchemaIndexColumn))]
         public DBSchemaIndexColumnCollection Columns 
         {
-            get { return this._cols; }
+            get
+            {
+                if (null == _cols)
+                    _cols = new DBSchemaIndexColumnCollection();
+                return this._cols;
+            }
             set { this._cols = value; }
-        }
-
-        #endregion
-
-        #region public DBSchemaTable Table {get;set;}
-
-        /// <summary>
-        /// Gets or sets the table this index references
-        /// </summary>
-        [XmlIgnore()]
-        public DBSchemaTable Table
-        {
-            get { return this._tbl; }
-            set { this._tbl = value; }
         }
 
         #endregion
@@ -76,17 +66,14 @@ namespace Perceiveit.Data.Schema
         #region public DBSchemaItemRef TableReference {get;set;}
 
         /// <summary>
-        /// Gets or Sets the TableReference for this Index. NOTE: If the Table is set then its reference will be returned by default
+        /// Gets or Sets the TableReference for this Index.
         /// </summary>
         [XmlElement("table-ref")]
         public DBSchemaItemRef TableReference
         {
             get
             {
-                if (null == this.Table)
-                    return _tblref;
-                else
-                    return this.Table.GetReference();
+                return _tblref;
             }
             set
             {
@@ -101,6 +88,7 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets the falg that identifies if this is a PrimaryKey index
         /// </summary>
+        [XmlAttribute("is-pk")]
         public bool IsPrimaryKey
         {
             get { return this._isPk; }
@@ -114,6 +102,7 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets the falg that identifies if this Index required unique values
         /// </summary>
+        [XmlAttribute("is-unique")]
         public bool IsUnique
         {
             get { return this._isUnique; }
@@ -155,7 +144,12 @@ namespace Perceiveit.Data.Schema
         #endregion
 
         #region protected DBSchemaIndex(DBSchemaTypes type, string owner, string name)
-
+        /// <summary>
+        /// Creates a new DBSchema index
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
         protected DBSchemaIndex(DBSchemaTypes type, string owner, string name)
             : base(name, owner, type)
         { }
@@ -164,20 +158,35 @@ namespace Perceiveit.Data.Schema
 
     }
 
+    /// <summary>
+    /// A collection of DBSchemaIndexes
+    /// </summary>
     [Serializable()]
-    public class DbSchemaIndexCollection : System.Collections.ObjectModel.KeyedCollection<DBSchemaItemRef, DBSchemaIndex>
+    public class DBSchemaIndexCollection : System.Collections.ObjectModel.KeyedCollection<DBSchemaItemRef, DBSchemaIndex>
     {
-
-        public DbSchemaIndexCollection()
+        /// <summary>
+        /// Creates a new instance of the DBSchemaIndexCollection
+        /// </summary>
+        public DBSchemaIndexCollection()
             : base()
         {
         }
 
+        /// <summary>
+        /// Gets the DBSchemaItemRef key for the index
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         protected override DBSchemaItemRef GetKeyForItem(DBSchemaIndex item)
         {
             return item.GetReference();
         }
-
+        /// <summary>
+        /// Attempts to retrieve and index by it's reference
+        /// </summary>
+        /// <param name="indexRef"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
         public bool TryGetIndex(DBSchemaItemRef indexRef, out DBSchemaIndex index)
         {
             if (this.Count == 0)

@@ -39,8 +39,8 @@ namespace Perceiveit.Data.Schema
         private bool _assignedRuntimeType = false;
         private int _size = -1;
         private int _ordinal = -1;
-        private bool _readonly = false;
-        private bool _null = true;
+
+        private DBSchemaColumnFlags _flags;
 
         #endregion
 
@@ -48,7 +48,22 @@ namespace Perceiveit.Data.Schema
         // public properties
         //
 
-        #region public string Name { get; set; } 
+        #region public DBSchemaColumnFlags ColumnFlags {get;set;}
+
+        /// <summary>
+        /// Gets or Sets the ColumnFlags for this column
+        /// </summary>
+        [XmlAttribute("flags")]
+        [System.ComponentModel.Browsable(false)]
+        public DBSchemaColumnFlags ColumnFlags
+        {
+            get { return _flags; }
+            set { _flags = value; }
+        }
+
+        #endregion
+
+        #region public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the column
@@ -117,6 +132,7 @@ namespace Perceiveit.Data.Schema
         /// Gets or sets the size (in bytes or characters) of the column data.
         /// Less than zero indicates (near) unlimited size
         /// </summary>
+        [XmlAttribute("size")]
         public int Size 
         {
             get { return this._size; }
@@ -131,10 +147,11 @@ namespace Perceiveit.Data.Schema
         /// Gets or Sets the flag that identifies 
         /// if this column is readonly
         /// </summary>
+        [XmlIgnore()]
         public bool ReadOnly 
         {
-            get { return this._readonly; }
-            set { this._readonly = value; }
+            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.ReadOnly); }
+            set { this.SetColumnFlag(DBSchemaColumnFlags.ReadOnly, value); }
         }
 
         #endregion
@@ -145,10 +162,11 @@ namespace Perceiveit.Data.Schema
         /// Gets or sets the flag that identifies if
         /// this column can contain a null value
         /// </summary>
+        [XmlIgnore()]
         public bool Nullable 
         {
-            get { return this._null; }
-            set { this._null = value; }
+            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.Nullable); }
+            set { this.SetColumnFlag(DBSchemaColumnFlags.Nullable, value); }
         }
 
         #endregion
@@ -158,6 +176,7 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Gets or sets the Ordinal position of this column in the Table
         /// </summary>
+        [XmlAttribute("ordinal")]
         public int OrdinalPosition
         {
             get { return this._ordinal; }
@@ -230,8 +249,59 @@ namespace Perceiveit.Data.Schema
 
         #endregion
 
+        #region protected bool IsColumnFlagSet(DBSchemaColumnFlags flag)
+        /// <summary>
+        /// Returns true if this columns flag has been set
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <returns></returns>
+        protected bool IsColumnFlagSet(DBSchemaColumnFlags flag)
+        {
+            return (this._flags & flag) > 0;
+        }
 
-        
+        #endregion
+
+        #region protected void SetColumnFlag(DBSchemaColumnFlags flag, bool value)
+        /// <summary>
+        /// Sets this columns flag or clears
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <param name="value"></param>
+        protected void SetColumnFlag(DBSchemaColumnFlags flag, bool value)
+        {
+            if (value)
+                SetColumnFlag(flag);
+            else
+                ClearColumnFlag(flag);
+        }
+
+        #endregion
+
+        #region protected void SetColumnFlag(DBSchemaColumnFlags flag)
+        /// <summary>
+        /// Sets this columns flag
+        /// </summary>
+        /// <param name="flag"></param>
+        protected void SetColumnFlag(DBSchemaColumnFlags flag)
+        {
+            _flags = _flags | flag;
+        }
+
+        #endregion 
+
+        #region protected void ClearColumnFlag(DBSchemaColumnFlags flag)
+        /// <summary>
+        /// Clears the specified flag
+        /// </summary>
+        /// <param name="flag"></param>
+        protected void ClearColumnFlag(DBSchemaColumnFlags flag)
+        {
+            _flags = _flags & ~flag;
+        }
+
+        #endregion
+
     }
 
     

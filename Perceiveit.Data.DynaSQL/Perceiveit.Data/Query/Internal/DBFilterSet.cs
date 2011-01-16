@@ -197,9 +197,14 @@ namespace Perceiveit.Data.Query
 
         #region public static DBFilterSet Where(DBComparison compare) + 2 overloads
 
-        public static DBFilterSet Where(DBClause leftRef, Compare op, DBClause right)
+        public static DBFilterSet Where(DBClause left, Compare op, DBClause right)
         {
-            DBComparison comp = DBComparison.Compare(leftRef, op, right);
+            if (null == left)
+                throw new ArgumentNullException("left");
+            else if (null == right)
+                throw new ArgumentNullException("right");
+
+            DBComparison comp = DBComparison.Compare(left, op, right);
             return Where(comp);
         }
 
@@ -211,6 +216,8 @@ namespace Perceiveit.Data.Query
 
         public static DBFilterSet Where(DBComparison compare)
         {
+            if (null == compare)
+                throw new ArgumentNullException("compare");
             DBFilterSet fs = new DBFilterSet();
             fs.Filters = compare;
 
