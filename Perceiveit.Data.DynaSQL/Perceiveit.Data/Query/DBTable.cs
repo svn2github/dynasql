@@ -136,7 +136,7 @@ namespace Perceiveit.Data.Query
         {
             DBTable tbl = Table(table);
             DBField parent = DBField.Field(this.Owner, this.Name, parentfield);
-            DBField child = DBField.Field(table, parentfield);
+            DBField child = DBField.Field(table, childfield);
 
             return InnerJoin(tbl, parent, child);
         }
