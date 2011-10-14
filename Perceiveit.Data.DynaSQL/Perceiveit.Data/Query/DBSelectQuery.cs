@@ -1905,15 +1905,14 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
-        /// Appends the WHERE [table].[field] IN ( [value1], .... ) to the select statement
+        /// Appends the WHERE DBField IN ( [value1], .... ) to the select statement
         /// </summary>
         /// <param name="table"></param>
         /// <param name="field"></param>
         /// <param name="values"></param>
         /// <returns></returns>
-        public DBSelectQuery WhereIn(string table, string field, params DBClause[] values)
+        public DBSelectQuery WhereIn(DBField fld, params DBClause[] values)
         {
-            DBField fld = DBField.Field(table, field);
             DBComparison compare = DBComparison.In(fld, values);
             DBFilterSet fs = DBFilterSet.Where(compare);
             this._where = fs;
@@ -1922,24 +1921,7 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
-        /// <summary>
-        /// Appends the WHERE [owner].[table].[field] IN ( [value1], .... ) to the select statement
-        /// </summary>
-        /// <param name="owner"></param>
-        /// <param name="table"></param>
-        /// <param name="field"></param>
-        /// <param name="values"></param>
-        /// <returns></returns>
-        public DBSelectQuery WhereIn(string owner, string table, string field, params DBClause[] values)
-        {
-            DBField fld = DBField.Field(owner, table, field);
-            DBComparison compare = DBComparison.In(fld, values);
-            DBFilterSet fs = DBFilterSet.Where(compare);
-            this._where = fs;
-            this._last = fs;
-
-            return this;
-        }
+        
 
         /// <summary>
         /// Appends the WHERE [table].[field] IN (SELECT ... ) to the select statement

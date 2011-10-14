@@ -844,19 +844,19 @@ namespace Perceiveit.Data.DynaSql.Tests
                                             .OrderBy("total", Order.Descending);
             //write the SQL to the console
 
-            bool supportsPercent = true;
+            bool supportsPercent = false;
+
+            TopType[] all = db.GetProperties().SupportedTopTypes;
+            if (Array.IndexOf<TopType>(all, TopType.Percent) > -1)
+                supportsPercent = true;
 
             OutputCommand(db, count);
             OutputCommand(db, topfour);
-            try
-            {
+
+            if (supportsPercent)
                 OutputCommand(db, toppercent);
-            }
-            catch (NotSupportedException) 
-            { 
-                Console.Write("Provider Does not support percent");
-                supportsPercent = false;
-            }
+            else
+                Console.WriteLine("Not executing Top Percent as it is not supported in the Provider");
 
             OutputCommand(db, topwithSubSelect);
 
@@ -913,7 +913,7 @@ namespace Perceiveit.Data.DynaSql.Tests
 
         }
 
-
+       
 
         [NUnit.Framework.Test()]
         public void Northwind_13_SelectLeftAndRightJoin()
@@ -1049,6 +1049,54 @@ namespace Perceiveit.Data.DynaSql.Tests
                 Console.WriteLine(string.Format("Employee id '{0}' returned '{1}' orders within the date", kvp.Key, kvp.Value < 0 ? "NULL" : kvp.Value.ToString()));
             }
 
+        }
+
+        [NUnit.Framework.Test(Description="Executes a stored procedure and loads the results")]
+        public void Northwind_14_StoredProcedure()
+        {
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+            //Execute a stored procedure with a single parameter
+            DBQuery exec = DBQuery.Exec("CustOrderHist")
+                                  .WithParamValue("CustomerID", DbType.String, "ALFKI");
+
+            Dictionary<string, int> totals = new Dictionary<string, int>();
+
+            db.ExecuteRead(exec, delegate(DbDataReader reader)
+            {
+                int nameOrd = reader.GetOrdinal("ProductName");
+                int totalOrd = reader.GetOrdinal("Total");
+                while (reader.Read())
+                {
+                    string name = reader.GetString(nameOrd);
+                    int total = reader.GetInt32(totalOrd);
+
+                    totals.Add(name, total);
+                }
+            });
+
+            List<string> names = new List<string>(totals.Keys);
+            names.Sort();
+
+            const int MaxLength = 50;
+
+            Console.Write("Product".PadRight(MaxLength));
+            Console.WriteLine(" Total");
+            foreach (string name in names)
+            {
+                if (name.Length > 50)
+                {
+                    Console.Write(name.Substring(MaxLength - 3));
+                    Console.Write("...");
+                }
+                else
+                    Console.Write(name.PadRight(MaxLength));
+                Console.Write(" ");
+
+                Console.WriteLine(totals[name]);
+
+            }
         }
 
 

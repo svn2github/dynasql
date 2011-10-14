@@ -140,6 +140,24 @@ namespace Perceiveit.Data.MySqlClient
             //this.Writer.WriteLine("END");
         }
 
+        public override void BeginExecuteStatement()
+        {
+            if (!this.DatabaseProperties.CheckSupports(DBSchemaTypes.StoredProcedure))
+                throw new System.Data.DataException("Current database does not support stored procedures");
+
+            this.Writer.Write("CALL ");
+        }
+
+        public override void BeginExecuteParameters()
+        {
+            this.Writer.Write(" (");
+        }
+
+        public override void EndExecuteParameters()
+        {
+            this.Writer.Write(")");
+        }
+
         //
         // generate CREATE scripts
         //

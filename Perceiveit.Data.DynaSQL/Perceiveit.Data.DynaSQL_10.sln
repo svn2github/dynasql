@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Perceiveit.Data", "Perceiveit.Data\Perceiveit.Data.csproj", "{5A3E3137-F7D8-4416-B6A0-2F5902F5754D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Perceiveit.Data.DynaSQL.Tests", "Perceiveit.Data.DynaSQL.Tests\Perceiveit.Data.DynaSQL.Tests.csproj", "{C4A1D2B6-5D5E-476C-8324-376DDD1CE69A}"
@@ -8,6 +8,21 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Perceiveit.Data.SchemaTests", "Perceiveit.Data.SchemaTests\Perceiveit.Data.SchemaTests.csproj", "{470DF7E2-7AC0-4D32-A091-EA4CF050CFE1}"
 EndProject
 Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 4
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs01
+		SccProjectUniqueName0 = Perceiveit.Data\\Perceiveit.Data.csproj
+		SccProjectName0 = Perceiveit.Data
+		SccLocalPath0 = Perceiveit.Data
+		SccProjectUniqueName1 = Perceiveit.Data.DynaSQL.Tests\\Perceiveit.Data.DynaSQL.Tests.csproj
+		SccProjectName1 = Perceiveit.Data.DynaSQL.Tests
+		SccLocalPath1 = Perceiveit.Data.DynaSQL.Tests
+		SccProjectUniqueName2 = Perceiveit.Data.SchemaTests\\Perceiveit.Data.SchemaTests.csproj
+		SccProjectName2 = Perceiveit.Data.SchemaTests
+		SccLocalPath2 = Perceiveit.Data.SchemaTests
+		SccLocalPath3 = .
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x86 = Debug|x86

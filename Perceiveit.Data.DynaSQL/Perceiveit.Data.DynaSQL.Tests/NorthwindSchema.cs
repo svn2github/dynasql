@@ -11,7 +11,7 @@ namespace Perceiveit.Data.DynaSql.Tests
     public static class Nw
     {
 
-        /* ----------  MS SQL Server Northwind Schema -------------- */
+        /* ----------  MS SQL Server Northwind Schema --------------
 
         public const string DbConnection = @"Data Source=.\SQLEXPRESS;Initial Catalog=Northwind;Integrated Security=True;Pooling=False";
         public const string DbProvider = "System.Data.SqlClient";
@@ -73,7 +73,7 @@ namespace Perceiveit.Data.DynaSql.Tests
         /* -------------------------- End MS SQL Server Schema ------------------------- */
 
 
-        /* ----------  MySQL Northwind Schema -------------- 
+        /* ----------  MySQL Northwind Schema -------------- */
 
 
         public const string DbConnection = "server=172.16.56.1;User Id=testaccount;Password=test;Persist Security Info=True;database=northwind";
@@ -108,7 +108,7 @@ namespace Perceiveit.Data.DynaSql.Tests
         public static class OrderDetails
         {
             //only change from MSSql in current schema
-            public const string Table = "Order_Details";
+            public const string Table = "OrderDetails";
             public const string ID = "ID";
             public const string OrderID = "OrderID";
             public const string ProductID = "ProductID";

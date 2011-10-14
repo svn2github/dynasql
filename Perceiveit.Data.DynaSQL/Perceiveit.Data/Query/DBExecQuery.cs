@@ -106,7 +106,7 @@ namespace Perceiveit.Data.Query
         /// <returns></returns>
         protected internal override System.Data.CommandType GetCommandType()
         {
-            return System.Data.CommandType.StoredProcedure;
+            return System.Data.CommandType.Text;
         }
 
         #endregion
