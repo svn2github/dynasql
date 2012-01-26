@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F6546015-207A-497B-84CB-0A98514C377C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Scryber</RootNamespace>
+    <AssemblyName>Scryber.Drawing</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Scryber.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Resources\PDFPattern.cs" />
+    <Compile Include="Drawing\Imaging\ImageFormatParser.cs" />
+    <Compile Include="Drawing\Imaging\PDF1BppImageData.cs" />
+    <Compile Include="Drawing\Imaging\PDF24BppRGBImageData.cs" />
+    <Compile Include="Drawing\Imaging\PDF32BppARGBImageData.cs" />
+    <Compile Include="Drawing\Imaging\PDFIndexedImageData.cs" />
+    <Compile Include="Drawing\Imaging\PDFJpegImageData.cs" />
+    <Compile Include="Drawing\Imaging\_Delegates.cs" />
+    <Compile Include="Drawing\Path.cs" />
+    <Compile Include="Drawing\PathData.cs" />
+    <Compile Include="Drawing\PathDataType.cs" />
+    <Compile Include="Drawing\PDFBrush.cs" />
+    <Compile Include="Drawing\PDFDash.cs" />
+    <Compile Include="Drawing\PDFFontFactory.cs" />
+    <Compile Include="Drawing\PDFFontMetrics.cs" />
+    <Compile Include="Drawing\PDFFont_c.cs" />
+    <Compile Include="Drawing\PDFGraphics.cs" />
+    <Compile Include="Drawing\PDFGraphicsAdapter.cs" />
+    <Compile Include="Drawing\PDFGraphicsPath.cs" />
+    <Compile Include="Drawing\PDFGraphics_Curves.cs" />
+    <Compile Include="Drawing\PDFGraphics_Grid.cs" />
+    <Compile Include="Drawing\PDFGraphics_Rect.cs" />
+    <Compile Include="Drawing\PDFImageData.cs" />
+    <Compile Include="Drawing\PDFPen.cs" />
+    <Compile Include="Drawing\PDFPoint.cs" />
+    <Compile Include="Drawing\PDFRect.cs" />
+    <Compile Include="Drawing\PDFSize.cs" />
+    <Compile Include="Drawing\PDFThickness_c.cs" />
+    <Compile Include="Drawing\PDFTransformationMatrix.cs" />
+    <Compile Include="Drawing\PDFUnit.cs" />
+    <Compile Include="Drawing\_Enumerations.cs" />
+    <Compile Include="Drawing\PDFColor.cs" />
+    <Compile Include="Drawing\PDFColors.cs" />
+    <Compile Include="Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PDFFonts.cs" />
+    <Compile Include="Drawing\PDFGraphics_Text.cs" />
+    <Compile Include="Resources\PDFExtGSState.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\PDFFontDefinition.cs" />
+    <Compile Include="Resources\PDFFontDescriptor.cs" />
+    <Compile Include="Resources\PDFFontResource.cs" />
+    <Compile Include="Resources\PDFFontWidths.cs" />
+    <Compile Include="Resources\PDFImageXObject.cs" />
+    <Compile Include="Text\PDFPlainTextReader.cs" />
+    <Compile Include="Text\PDFTextBlock.cs" />
+    <Compile Include="Text\PDFTextBlockOp.cs" />
+    <Compile Include="Text\PDFTextClassOp.cs" />
+    <Compile Include="Text\PDFTextDrawOp.cs" />
+    <Compile Include="Text\PDFTextFontOp.cs" />
+    <Compile Include="Text\PDFTextLayout.cs" />
+    <Compile Include="Text\PDFTextLineOp.cs" />
+    <Compile Include="Text\PDFTextOp.cs" />
+    <Compile Include="Text\PDFTextReader.cs" />
+    <Compile Include="Text\PDFTextRenderOptions.cs" />
+    <Compile Include="Text\PDFXMLTextReader.cs" />
+    <Compile Include="Text\TextBlock.cs" />
+    <Compile Include="Text\TextBlockBuilder.cs" />
+    <Compile Include="Text\TextConst.cs" />
+    <Compile Include="Text\TextData.cs" />
+    <Compile Include="Text\TextLine.cs" />
+    <Compile Include="Text\TextParagraph.cs" />
+    <Compile Include="Text\TextSpan.cs" />
+    <Compile Include="Text\_Enumerations.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scryber.snk" />
+    <None Include="Text\Scryber.Text.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Errors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Scryber.Common\Scryber.Common.csproj">
+      <Project>{31910223-9840-4423-9F7A-4C9096D85E64}</Project>
+      <Name>Scryber.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Configuration\Scryber.Configuration.csproj">
+      <Project>{A753363B-0993-4E14-8E60-4DF35A0FB92F}</Project>
+      <Name>Scryber.Configuration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.OpenType\Scryber.OpenType.csproj">
+      <Project>{E9F73D0E-2584-4DCC-BC80-3D7A607843A7}</Project>
+      <Name>Scryber.OpenType</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

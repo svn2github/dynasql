@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{31910223-9840-4423-9F7A-4C9096D85E64}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Scryber</RootNamespace>
+    <AssemblyName>Scryber.Common</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\Documentation\Scryber.Common.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Scryber.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Native\PDFArray.cs" />
+    <Compile Include="Native\PDFBoolean.cs" />
+    <Compile Include="Native\PDFDictionary.cs" />
+    <Compile Include="Native\PDFIndirectObject.cs" />
+    <Compile Include="Native\PDFName.cs" />
+    <Compile Include="Native\PDFNull.cs" />
+    <Compile Include="Native\PDFNumber.cs" />
+    <Compile Include="Native\PDFObject.cs" />
+    <Compile Include="Native\PDFObjectRef.cs" />
+    <Compile Include="Native\PDFReal.cs" />
+    <Compile Include="Native\PDFStream.cs" />
+    <Compile Include="Native\PDFString.cs" />
+    <Compile Include="Native\PDFXRefTable.cs" />
+    <Compile Include="PDFContextBase.cs" />
+    <Compile Include="PDFDataContext.cs" />
+    <Compile Include="PDFDataHelper.cs" />
+    <Compile Include="PDFDataStack.cs" />
+    <Compile Include="PDFException.cs" />
+    <Compile Include="PDFInitContext.cs" />
+    <Compile Include="PDFItemCollection.cs" />
+    <Compile Include="PDFLoadContext.cs" />
+    <Compile Include="PDFObjectType.cs" />
+    <Compile Include="PDFObjectTypes.cs" />
+    <Compile Include="PDFOpCodes.cs" />
+    <Compile Include="PDFPageReferenceCollection.cs" />
+    <Compile Include="PDFTraceLog.cs" />
+    <Compile Include="PDFWriter.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\PDFProcSet.cs" />
+    <Compile Include="Resources\PDFResource.cs" />
+    <Compile Include="Resources\PDFResourceCollection.cs" />
+    <Compile Include="Resources\PDFResourceList.cs" />
+    <Compile Include="_Attributes.cs" />
+    <Compile Include="_DelegatesAndEventHandlers.cs" />
+    <Compile Include="_Enumerations.cs" />
+    <Compile Include="_Interfaces.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Errors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scryber.snk" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

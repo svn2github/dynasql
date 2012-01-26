@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Scryber.PDFObject">
+    <Position X="4" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Components.PDFComponent">
+    <Position X="1" Y="3.5" Width="2" />
+    <InheritanceLine Type="Scryber.PDFObject" ManuallyRouted="true">
+      <Path>
+        <Point X="4.75" Y="2.192" />
+        <Point X="4.75" Y="2.745" />
+        <Point X="2" Y="2.745" />
+        <Point X="2" Y="3.5" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>gAEisEAAACQQgAIoAARASARIBACEBECCGAAWCIBOARA=</HashCode>
+      <FileName>Components\PDFComponent.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Components.PDFVisualComponent">
+    <Position X="6.25" Y="3.5" Width="2" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAACDBAAAAAAAAAAAAmAAAACAAAAABAAAACAAYAA=</HashCode>
+      <FileName>Components\PDFVisualComponent.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Components.PDFContainerComponent">
+    <Position X="3.75" Y="3.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAEQAEAABiAAAAACAAAAAATEABCAAAAABBAAAAAAAAA=</HashCode>
+      <FileName>Components\PDFContainerComponent.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Components.PDFTemplateComponent">
+    <Position X="8.75" Y="3.5" Width="2" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAACAAAAAAAAAAACAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Components\PDFTemplateComponent.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

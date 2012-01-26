@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="Scryber.Components, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    elementFormDefault="qualified"
+    xmlns="Scryber.Components, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    xmlns:mstns="Scryber.Components, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:data="Scryber.Data, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    xmlns:style="Scryber.Styles, Scryber.Styles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+>
+
+  <xs:include schemaLocation="Scryber.Types.xsd" />
+  <xs:include schemaLocation="Scryber.Components.xsd" />
+  <xs:import namespace="Scryber.Styles, Scryber.Styles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe" schemaLocation="Scryber.Styles.xsd" />
+  <xs:import namespace="Scryber.Data, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe" schemaLocation="Scryber.Data.xsd" />
+
+  <!-- 
+    Root Document type
+  -->
+
+  <xs:complexType name="DocumentDefnType" >
+    <xs:sequence >
+      <xs:element name="Info" minOccurs="0" maxOccurs="1"
+                  type="InfoTypeList" form="unqualified" />
+      <xs:element name="Styles" minOccurs="0" maxOccurs="1"
+                  type="style:StyleListType" form="unqualified" ></xs:element>
+      <xs:element name="Pages" minOccurs="0" maxOccurs="1"
+                  type="PageListType" form="unqualified" ></xs:element>
+    </xs:sequence>
+    <xs:attribute name="auto-bind" type="xs:boolean" use="optional" default="false" />
+    <xs:attributeGroup ref="CodeClassAttributes" />
+    <xs:attributeGroup ref="ElementEventAttributes" />
+  </xs:complexType>
+
+  <xs:element name="Document" type="DocumentDefnType" />
+
+  <xs:complexType name="InfoTypeList" >
+    <xs:sequence >
+      <xs:element name="Title" form="unqualified" ></xs:element>
+      <xs:element name="Subject" form="unqualified" ></xs:element>
+      <xs:element name="Keywords" form="unqualified" ></xs:element>
+      <xs:element name="Author" form="unqualified" ></xs:element>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+        <xs:element name="Extra" form="qualified" >
+          <xs:complexType mixed="true" >
+            <xs:attribute name="name" type="IDType" ></xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:sequence>
+    <xs:attribute name="modified-date" type="BindableStringType" />
+    <xs:attribute name="created-date" type="BindableStringType" />
+    <xs:attribute name="producer" type="BindableStringType" />
+    <xs:attribute name="creator" type="BindableStringType" />
+    <xs:attribute name="trapped" type="BindableBooleanType" />
+  </xs:complexType>
+
+  <!-- 
+    Root Page Type
+  -->
+
+  <xs:complexType name="PageDefnType" >
+    <xs:complexContent >
+      <xs:extension base="PageType" >
+        <xs:choice minOccurs="0" maxOccurs="1" >
+          <xs:element name="Styles" minOccurs="0" maxOccurs="1"
+                  type="style:StyleListType" form="unqualified" ></xs:element>
+          <xs:element name="DataSources" minOccurs="0" maxOccurs="1"
+                 type="data:DataSourceListType" form="unqualified" />
+        </xs:choice>
+        <xs:attributeGroup ref="CodeClassAttributes" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="Page" type="PageDefnType" />
+
+  <!-- 
+    Root Section Type
+  -->
+
+  <xs:complexType name="SectionDefnType" >
+    <xs:complexContent >
+      <xs:extension base="SectionType" >
+        <xs:attributeGroup ref="CodeClassAttributes" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="Section" type="SectionDefnType" />
+
+  <!-- 
+    Root element Type
+  -->
+
+  <xs:complexType name="UserComponentDefnType" mixed="true" >
+    <xs:sequence maxOccurs="1"  >
+      <xs:element name="Style" type="style:StyleItemType" minOccurs="0" maxOccurs="1" form="unqualified" />
+      <xs:element name="Content" minOccurs="0" maxOccurs="1" type="AnyPageContentType" form="unqualified" />
+    </xs:sequence>
+    <xs:attributeGroup ref="style:InlineElementStyleAttributes" />
+    <xs:attributeGroup ref="ElementAttributes" />
+    <xs:attributeGroup ref="ElementSizeAttributes" />
+    <xs:attributeGroup ref="CodeClassAttributes" />
+  </xs:complexType>
+
+  <xs:element name="UserComponent" type="UserComponentDefnType" />
+
+  <!-- 
+    CodeClass attribute group
+    Common to all root elements
+  -->
+
+  <xs:attributeGroup name="CodeClassAttributes" >
+    <xs:attribute name="code-file" type="xs:string" use="optional" />
+    <xs:attribute name="inherits" type="xs:string" use="optional" />
+  </xs:attributeGroup>
+  
+</xs:schema>

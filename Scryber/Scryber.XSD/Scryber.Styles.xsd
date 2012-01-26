@@ -1,0 +1,357 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="Scryber.Styles, Scryber.Styles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+           elementFormDefault="qualified"
+    xmlns="Scryber.Styles, Scryber.Styles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    xmlns:mstns="Scryber.Styles, Scryber.Styles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:pdf="Scryber.Components, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe"
+    >
+
+  <xs:import namespace="Scryber.Components, Scryber.Components, Version=1.0.0.0, Culture=neutral, PublicKeyToken=872cbeb81db952fe" schemaLocation="Scryber.Types.xsd" />
+  
+  <xs:complexType name="StyleDefinitonListType" >
+    <xs:complexContent>
+      <xs:extension base="StyleListType" >
+        <xs:attribute name="code-file" type="xs:string" use="optional" />
+        <xs:attribute name="inherits" type="xs:string" use="optional" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name="Styles" type="StyleDefinitonListType" />
+
+  <xs:complexType name="StyleListType" >
+    <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+      <xs:element name="Style" type="StyleDefinitionType" minOccurs="0" maxOccurs="unbounded" ></xs:element>
+      <xs:element name="Styles-Ref" type="StyleRefType" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StyleRefType" >
+    <xs:attribute name="source" use="optional" type="xs:anyURI" />
+    <xs:attribute name="type" use="optional" type="xs:string" />
+    <xs:attribute name="id" use="optional" type="pdf:IDType" />
+  </xs:complexType>
+
+  <xs:complexType name="StyleDefinitionType" >
+    <xs:complexContent>
+      <xs:extension base="StyleItemType" >
+        <xs:attribute name="applied-class" type="pdf:BindableClassNameType" />
+        <xs:attribute name="applied-type" type="pdf:BindableObjectTypeEnum" />
+        <xs:attribute name="applied-id" type="pdf:BindableIDType" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="StyleItemType" >
+    <xs:sequence minOccurs="0" maxOccurs="unbounded" >
+      <xs:choice minOccurs="0" maxOccurs="1" >
+        <xs:element name="Background" type="Style-BackgroundType" ></xs:element>
+        <xs:element name="Border" type="Style-BorderType" ></xs:element>
+        <xs:element name="Stroke" type="Style-PenType" ></xs:element>
+        <xs:element name="Fill" type="Style-FillType" ></xs:element>
+        <xs:element name="Font" type="Style-FontType" ></xs:element>
+        <xs:element name="Text" type="Style-TextType" ></xs:element>
+        <xs:element name="Overflow" type="Style-OverflowType" ></xs:element>
+        <xs:element name="Page" type="Style-PaperType" ></xs:element>
+        <xs:element name="Clip" type="Style-ClipType" ></xs:element>
+        <xs:element name="Transform" type="Style-TransformType" />
+        <xs:element name="Margins" type="Style-ThicknessType" />
+        <xs:element name="Padding" type="Style-ThicknessType" />
+        <xs:element name="Position" type="Style-PositionType" />
+        <xs:element name="Outline" type="Style-OutlineType" />
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="id" use="optional" type="pdf:IDType" />
+    <xs:attribute name="on-databinding" use="optional" type="pdf:MethodNameType" />
+    <xs:attribute name="on-databound" use="optional" type="pdf:MethodNameType" />
+  </xs:complexType>
+
+  <!-- complex sub-type definitions -->
+
+  <xs:complexType name="Style-PositionType" >
+    <xs:attribute name="v-align" type="pdf:BindableVerticalAlignEnum" use="optional" />
+    <xs:attribute name="h-align" type="pdf:BindableHorizontalAlignEnum" use="optional" />
+    <xs:attribute name="position" type="pdf:BindablePositionModeEnum" use="optional" />
+    <xs:attribute name="layout" type="pdf:BindableDisplayModeEnum" use="optional" />
+    <xs:attribute name="x" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="y" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="width" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="height" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="fill-width" type="pdf:BindableBooleanType" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-ThicknessType" >
+    <xs:attributeGroup ref="ThicknessStyleAttributes" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-BackgroundType" >
+    <!-- <xs:group ref="PatternGroup" />-->
+    <xs:attributeGroup ref="ContentStyleAttributes" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-BorderType" >
+    <!-- <xs:group ref="PatternGroup" />-->
+    <xs:attributeGroup ref="LineStyleAttributes" ></xs:attributeGroup>
+    <xs:attribute name="corner-radius" type="pdf:BindableUnitType" use="optional" default="0.0" />
+    <xs:attribute name="sides" use="optional" type="pdf:BindableSideFlagsEnum" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-PenType" >
+    <!--<xs:group ref="PatternGroup" /> -->
+    <xs:attributeGroup ref="LineStyleAttributes" ></xs:attributeGroup>
+  </xs:complexType>
+
+  <xs:complexType name="Style-FillType" >
+    <!-- <xs:group ref="PatternGroup" />-->
+    <xs:attributeGroup ref="ContentStyleAttributes" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-FontType" >
+    <xs:sequence minOccurs="0" maxOccurs="1" >
+      <xs:element name="FontDescriptor" ></xs:element>
+    </xs:sequence>
+    <xs:attributeGroup ref="FontAttributes" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-TextType" >
+    <xs:attribute name="leading" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="wrap" type="pdf:BindableTextWrapEnum" use="optional" default="Auto" />
+    <xs:attribute name="word-spacing" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="first-indent" type="pdf:UnitType" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-OverflowType" >
+    <xs:attribute name="action" type="pdf:BindableOverflowActionEnum" use="optional" />
+    <xs:attribute name="split" type="pdf:BindableOverflowSplitEnum" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-OutlineType" >
+    <xs:attribute name="color" type="pdf:BindableColorEnum" use="optional" />
+    <xs:attribute name="bold" type="pdf:BindableBooleanType" use="optional" />
+    <xs:attribute name="italic" type="pdf:BindableBooleanType" use="optional" />
+    <xs:attribute name="open" type="pdf:BindableBooleanType" use="optional" />
+    <xs:attribute name="fit" type="pdf:BindablePageFitEnum" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-PaperType" >
+    <xs:attribute name="size" type="pdf:BindablePageSizeEnum" use="optional" default="A4" />
+    <xs:attribute name="orientation" type="pdf:BindablePageOrientationEnum" use="optional" default="Portrait" />
+    <xs:attribute name="width" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="height" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="number-style" type="pdf:BindablePageNumberingEnum" use="optional" />
+    <xs:attribute name="number-start-index" type="pdf:BindableIntgerType" use="optional" default="1" />
+    <xs:attribute name="number-prefix" type="pdf:BindableStringType" use="optional" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-ClipType" >
+    <xs:sequence minOccurs="0" maxOccurs="1" >
+      <xs:element name="Path" ></xs:element>
+    </xs:sequence>
+    <xs:attribute name="mode" type="pdf:BindablePositionModeEnum" use="optional" />
+    <xs:attribute name="x" type="pdf:BindableUnitType" />
+    <xs:attribute name="y" type="pdf:BindableUnitType" />
+    <xs:attribute name="width" type="pdf:BindableUnitType" />
+    <xs:attribute name="height" type="pdf:BindableUnitType" />
+  </xs:complexType>
+
+  <xs:complexType name="Style-TransformType" >
+    <xs:attributeGroup ref="TransformAttributes" />
+  </xs:complexType>
+
+  <xs:attributeGroup name="InlineElementStyleAttributes" >
+    <!-- Intentionally blank-->
+    <xs:attribute name="fill" form="qualified" use="optional" type="xs:string" />
+  </xs:attributeGroup>
+  
+  <xs:attributeGroup name="InlineElementStyleAttributes_Ignore" >
+
+    <!-- auto | no-wrap | character | word -->
+    <xs:attribute name="text-wrap" use="optional" type="pdf:BindableTextWrapEnum" form="qualified" >
+      <xs:annotation>
+        <xs:documentation>
+          {Auto | No-Wrap | Character | Word}
+          'Auto' - best judgement with hyphenation where appropriate.
+          'No-Wrap' - no wrapping and lines will be truncated.
+          'Character' - breaks on any character except the first or last in a word and hyphenates.
+          'Word' - will never break and hyphenate a word only wrapping on full words.
+          Supports data binding
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    
+    <!-- [solid | none] [,color] -->
+    <xs:attribute name="bg-color" use="optional" type="pdf:BindableColorEnum" form="qualified" >
+      <xs:annotation>
+        <xs:documentation >[color]
+          The color to use as a background. Supports data binding
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!-- [solid | dash | none,] [color,] [width,] [dash] -->
+    <xs:attribute name="border-color" use="optional" type="pdf:BindableColorEnum" form="qualified" >
+      <xs:annotation >
+        <xs:documentation >[color]
+          The color to use as the border.
+          Supports data binding
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    
+    <!-- ([top [radius],] [left [radius],] [bottom [radius],] [right [radius]]) | all [radius] -->
+    <xs:attribute name="border-sides" use="optional" type="pdf:BindableSideFlagsEnum" default="All"  form="qualified" >
+      <xs:annotation>
+        <xs:documentation>All | [Left, Right, Top, Bottom]
+        Either the 'All' value (default) or one or more of the left, right, top and bottom enumeration flags.
+          Supports data-binding.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="border-width" use="optional" type="pdf:BindableUnitType" form="qualified" >
+      <xs:annotation >
+        <xs:documentation>[unit]
+          A unit of measurement (2pt, 1in, 4cm) for the width of the border..
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!-- [solid | dash | none,] [width] [,dash]-->
+    <xs:attribute name="stroke-color" use="optional" type="pdf:BindableColorEnum" form="qualified" >
+      <xs:annotation>
+        <xs:documentation>[color]
+          One of the known colors or a custom colour in the hexa-decimal format with a pre-ceeding # eg #1100FF.
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!-- [solid | dash | none,] [width] [,dash]-->
+    <xs:attribute name="stroke-width" use="optional" type="pdf:BindableUnitType" form="qualified" >
+      <xs:annotation>
+        <xs:documentation>
+          [unit]
+          A unit of measurement (2pt, 1in, 4cm) for the width of the stroke.
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!-- [font family,] [size,] [bold,] [italic]-->
+    <xs:attribute name="font-family" use="optional" type="pdf:BindableFontFamilyEnum" form="qualified" >
+      <xs:annotation>
+        <xs:documentation >
+          One of the standard fonts, or a known system font resource.
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="font-size" use="optional" type="pdf:BindableUnitType" form="qualified" >
+      <xs:annotation>
+        <xs:documentation >
+          The size of the font as a unit of measurement
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <xs:attribute name="margin-all" use="optional" type="pdf:BindableUnitType" form="qualified" >
+      <xs:annotation>
+        <xs:documentation >
+          A single unit (2pt etc) that applies a margin to all sides of the shape.
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!-- all | top, left, bottom, right -->
+    <xs:attribute name="padding-all" use="optional" type="pdf:BindableUnitType" form="qualified" >
+      <xs:annotation>
+        <xs:documentation>
+          A single unit (2pt etc) that applies a padding to all sides of the shape.
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+    <!-- solid | none, color -->
+    <xs:attribute name="fill-color" use="optional" type="pdf:BindableColorEnum" form="qualified" >
+      <xs:annotation>
+        <xs:documentation>
+          One of the known colors or a custom colour in the hexa-decimal format with a pre-ceeding # eg #1100FF.
+          Supports data-binding.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+
+  </xs:attributeGroup>
+
+  
+
+
+
+  <!-- 
+  -
+  attribute groups
+  -
+   -->
+
+  <xs:attributeGroup name="TransformAttributes" >
+    <xs:attribute name="scale-x" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="scale-y" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="rotate" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="skew-x" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="skew-y" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="offset-h" type="pdf:BindableFloatType" use="optional" />
+    <xs:attribute name="offset-v" type="pdf:BindableFloatType" use="optional" />
+  </xs:attributeGroup>
+
+
+  <xs:attributeGroup name="ThicknessStyleAttributes" >
+    <xs:attribute name="top" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="left" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="bottom" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="right" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="all" type="pdf:BindableUnitType" use="optional" />
+  </xs:attributeGroup>
+
+
+
+  <xs:attributeGroup name="FontAttributes">
+    <xs:attribute name="family" type="pdf:BindableFontFamilyEnum" use="optional" />
+    <xs:attribute name="bold" type="pdf:BindableBooleanType" use="optional" />
+    <xs:attribute name="italic" type="pdf:BindableBooleanType" use="optional" />
+    <xs:attribute name="size" type="pdf:BindableUnitType" use="optional" />
+  </xs:attributeGroup>
+
+
+  <xs:attributeGroup name="LineStyleAttributes" >
+    <xs:attribute name="style" type="pdf:BindableLineStyleEnum" use="optional" />
+    <xs:attribute name="color" type="pdf:BindableColorEnum" use="optional" />
+    <xs:attribute name="width" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="dash" type="pdf:BindableDashType" use="optional" />
+    <xs:attribute name="ending" type="pdf:BindableLineEndingEnum" use="optional" default="Round" />
+    <xs:attribute name="join" type="pdf:BindableLineJoinEnum" use="optional" default="Round" />
+    <xs:attribute name="mitre" type="pdf:BindableFloatType" use="optional" default="2.0" />
+    <xs:attribute name="opacity" type="pdf:BindableFloatType" use="optional" default="1.0" />
+  </xs:attributeGroup>
+
+
+
+  <xs:attributeGroup name="ContentStyleAttributes">
+    <xs:attribute name="style" type="pdf:BindableFillStyleEnum" use="optional" />
+    <xs:attribute name="color" type="pdf:BindableColorEnum" use="optional" />
+    <xs:attribute name="opacity" type="pdf:BindableFloatType" use="optional" default="1.0" />
+    <xs:attribute name="img-src" type="pdf:BindableFilePathType" use="optional" />
+    <xs:attribute name="repeat" type="pdf:BindableImageRepeatEnum" use="optional" default="RepeatBoth" />
+    <xs:attribute name="x-pos" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="y-pos" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="x-step" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="y-step" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="x-size" type="pdf:BindableUnitType" use="optional" />
+    <xs:attribute name="y-size" type="pdf:BindableUnitType" use="optional" />
+  </xs:attributeGroup>
+
+</xs:schema>

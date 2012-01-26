@@ -1,0 +1,235 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{84BE8719-F852-4779-974D-44AEA4437921}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Scryber</RootNamespace>
+    <AssemblyName>Scryber.Components</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Scryber.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Caching\PDFCacheProvider.cs" />
+    <Compile Include="Caching\PDFStaticCacheProvider.cs" />
+    <Compile Include="Components\PDFHeadings.cs" />
+    <Compile Include="Components\PDFCanvas.cs" />
+    <Compile Include="Components\PDFComponent.cs" />
+    <Compile Include="Components\PDFComponentList.cs" />
+    <Compile Include="Components\PDFComponentWrappingList.cs" />
+    <Compile Include="Components\PDFContainerComponent.cs" />
+    <Compile Include="Components\PDFDataTemplateComponent.cs" />
+    <Compile Include="Components\PDFDocument.cs" />
+    <Compile Include="Components\PDFImage.cs" />
+    <Compile Include="Components\PDFLabel.cs" />
+    <Compile Include="Components\PDFLayer.cs" />
+    <Compile Include="Components\PDFLayerGroup.cs" />
+    <Compile Include="Components\PDFLine.cs" />
+    <Compile Include="Components\PDFLink.cs" />
+    <Compile Include="Components\PDFPage.cs" />
+    <Compile Include="Components\PDFPageBreak.cs" />
+    <Compile Include="Components\PDFPageHeader.cs" />
+    <Compile Include="Components\PDFPageNumberLabel.cs" />
+    <Compile Include="Components\PDFPanel.cs" />
+    <Compile Include="Components\PDFSection.cs" />
+    <Compile Include="Components\PDFShapeComponent.cs" />
+    <Compile Include="Components\PDFTable.cs" />
+    <Compile Include="Components\PDFTableCell.cs" />
+    <Compile Include="Components\PDFTableRow.cs" />
+    <Compile Include="Components\PDFBindingTemplateComponent.cs" />
+    <Compile Include="Components\PDFTextBase.cs" />
+    <Compile Include="Components\PDFTextLiteral.cs" />
+    <Compile Include="Components\PDFUserComponent.cs" />
+    <Compile Include="Components\PDFVisualComponent.cs" />
+    <Compile Include="Components\Support\ContainerLayoutEngine.cs" />
+    <Compile Include="Components\Support\CanvasLayoutEngine.cs" />
+    <Compile Include="Components\Support\DocumentLayoutEngine.cs" />
+    <Compile Include="Components\Support\PageLayoutEngine.cs" />
+    <Compile Include="Components\Support\PageRenderSpan.cs" />
+    <Compile Include="Components\Support\PositionOptions.cs" />
+    <Compile Include="Components\Support\SectionLayoutEngine.cs" />
+    <Compile Include="Components\Support\SectionPage.cs" />
+    <Compile Include="Components\Support\TableCellContentRef.cs" />
+    <Compile Include="Components\Support\TableCellEmptyRef.cs" />
+    <Compile Include="Components\Support\TableCellRef.cs" />
+    <Compile Include="Components\Support\TableCellSpannedRef.cs" />
+    <Compile Include="Components\Support\TableColumn.cs" />
+    <Compile Include="Components\Support\TableGrid.cs" />
+    <Compile Include="Components\Support\TableGridSizes.cs" />
+    <Compile Include="Components\Support\TableLayoutEngine.cs" />
+    <Compile Include="Components\Support\TableLayoutStrategy.cs" />
+    <Compile Include="Components\PDFTopAndTailPanel.cs" />
+    <Compile Include="Components\Support\_Enumerations.cs" />
+    <Compile Include="Const.cs" />
+    <Compile Include="Data\PDFChoose.cs" />
+    <Compile Include="Data\PDFChooseOtherwise.cs" />
+    <Compile Include="Data\PDFChooseTemplateContainer.cs" />
+    <Compile Include="Data\PDFChooseWhen.cs" />
+    <Compile Include="Data\PDFCodeDomTemplateGenerator.cs" />
+    <Compile Include="Data\PDFDataSourceBase.cs" />
+    <Compile Include="Data\PDFForEach.cs" />
+    <Compile Include="Data\PDFIf.cs" />
+    <Compile Include="Data\PDFTemplateInstance.cs" />
+    <Compile Include="Data\PDFParsableTemplateGenerator.cs" />
+    <Compile Include="Data\PDFXMLDataSource.cs" />
+    <Compile Include="Licensing.cs" />
+    <Compile Include="PDFAction.cs" />
+    <Compile Include="PDFAnnotationCollection.cs" />
+    <Compile Include="PDFAnnotationEntry.cs" />
+    <Compile Include="PDFArtefactCollectionSet.cs" />
+    <Compile Include="PDFArtefactTypes.cs" />
+    <Compile Include="PDFComponentArrangement.cs" />
+    <Compile Include="Components\PDFDocumentInfo.cs" />
+    <Compile Include="PDFContextStyleBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PDFDestination.cs" />
+    <Compile Include="PDFLayoutContext.cs" />
+    <Compile Include="PDFNameDictionary.cs" />
+    <Compile Include="PDFOutline.cs" />
+    <Compile Include="PDFOutlineStack.cs" />
+    <Compile Include="PDFRegistrationContext.cs" />
+    <Compile Include="PDFRenderContext.cs" />
+    <Compile Include="Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PDFAttributeCollection.cs" />
+    <Compile Include="PDFTraceContext.cs" />
+    <Compile Include="PDFVirtualPathUtility.cs" />
+    <Compile Include="PDFWriter14.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TempIDFactory.cs" />
+    <Compile Include="_Attributes.cs" />
+    <Compile Include="_DelegatesAndEventHandlers.cs" />
+    <Compile Include="_Enumerations.cs" />
+    <Compile Include="_Exceptions.cs" />
+    <Compile Include="_Interface.cs" />
+    <Compile Include="_RecordAndRaise.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Components\Support\TableGrid.cd" />
+    <None Include="InheritanceTree.cd" />
+    <None Include="Scryber.snk" />
+    <None Include="_ClassDiagrams\Interfaces.cd" />
+    <None Include="_ClassDiagrams\PDFDocument.cd" />
+    <None Include="_ClassDiagrams\PDFPageElements.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Errors.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Scryber.Common\Scryber.Common.csproj">
+      <Project>{31910223-9840-4423-9F7A-4C9096D85E64}</Project>
+      <Name>Scryber.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Configuration\Scryber.Configuration.csproj">
+      <Project>{A753363B-0993-4E14-8E60-4DF35A0FB92F}</Project>
+      <Name>Scryber.Configuration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Drawing\Scryber.Drawing.csproj">
+      <Project>{F6546015-207A-497B-84CB-0A98514C377C}</Project>
+      <Name>Scryber.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Generation\Scryber.Generation.csproj">
+      <Project>{5AF064D4-AFAA-467C-B6C0-9B7F2E49FE00}</Project>
+      <Name>Scryber.Generation</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Styles\Scryber.Styles.csproj">
+      <Project>{C469795B-FC0E-4EA1-BBBA-35604B906E06}</Project>
+      <Name>Scryber.Styles</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.OpenType\Scryber.OpenType.csproj">
+      <Project>{E9F73D0E-2584-4DCC-BC80-3D7A607843A7}</Project>
+      <Name>Scryber.OpenType</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+</Project>

@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C469795B-FC0E-4EA1-BBBA-35604B906E06}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Scryber</RootNamespace>
+    <AssemblyName>Scryber.Styles</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Scryber.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <DelaySign>false</DelaySign>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Errors.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Errors.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PDFPageNumbering.cs" />
+    <Compile Include="PDFPageSize_c.cs" />
+    <Compile Include="PDFPapers.cs" />
+    <Compile Include="PDFStyleConst.cs" />
+    <Compile Include="StyleKeys.cs">
+      <LastGenOutput>StyleKeys.Designer.cs</LastGenOutput>
+    </Compile>
+    <Compile Include="Styles\PDFBackgroundStyle.cs" />
+    <Compile Include="Styles\PDFBorderStyle.cs" />
+    <Compile Include="Styles\PDFClipStyle.cs" />
+    <Compile Include="Styles\PDFFillStyle.cs" />
+    <Compile Include="Styles\PDFFontStyle.cs" />
+    <Compile Include="Styles\PDFMarginsStyle.cs" />
+    <Compile Include="Styles\PDFMergedListStyleItem.cs" />
+    <Compile Include="Styles\PDFOutlineStyle.cs" />
+    <Compile Include="Styles\PDFOverflowStyle.cs" />
+    <Compile Include="Styles\PDFPaddingStyle.cs" />
+    <Compile Include="Styles\PDFPageStyle.cs" />
+    <Compile Include="Styles\PDFPositionStyle.cs" />
+    <Compile Include="Styles\PDFStrokeStyle.cs" />
+    <Compile Include="Styles\PDFStyle.cs" />
+    <Compile Include="Styles\PDFStyleBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Styles\PDFStyleCollection.cs" />
+    <Compile Include="Styles\PDFStyleDefn.cs" />
+    <Compile Include="Styles\PDFStyleFactory.cs" />
+    <Compile Include="Styles\PDFStyleGroup.cs" />
+    <Compile Include="Styles\PDFStyleItem.cs" />
+    <Compile Include="Styles\PDFStyleItemCollection.cs" />
+    <Compile Include="Styles\PDFStyleRef.cs" />
+    <Compile Include="Styles\PDFStylesDocument.cs" />
+    <Compile Include="Styles\PDFStyleStack.cs" />
+    <Compile Include="Styles\PDFStyleValue.cs" />
+    <Compile Include="Styles\PDFTextStyle.cs" />
+    <Compile Include="Styles\PDFThicknessStyle.cs" />
+    <Compile Include="Styles\PDFTransformStyle.cs" />
+    <Compile Include="_Enumerations.cs" />
+    <Compile Include="_Interfaces.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scryber.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Scryber.Common\Scryber.Common.csproj">
+      <Project>{31910223-9840-4423-9F7A-4C9096D85E64}</Project>
+      <Name>Scryber.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Configuration\Scryber.Configuration.csproj">
+      <Project>{A753363B-0993-4E14-8E60-4DF35A0FB92F}</Project>
+      <Name>Scryber.Configuration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Scryber.Drawing\Scryber.Drawing.csproj">
+      <Project>{F6546015-207A-497B-84CB-0A98514C377C}</Project>
+      <Name>Scryber.Drawing</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Errors.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Errors.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

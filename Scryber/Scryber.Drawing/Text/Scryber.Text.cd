@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Font Name="Tahoma" Size="8.25" />
+  <Class Name="Scryber.Text.PDFTextBlock">
+    <Position X="1" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextBlock.cs</FileName>
+      <HashCode>AAAAAABABBAAgAAAAAAAAEAAAAAAAEAIAAAAAAAABAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="InnerBlock" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.TextBlock">
+    <Position X="3.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\TextBlock.cs</FileName>
+      <HashCode>AAAAAAAQBASAAAAAAAAEAEAAAAAgAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="RootRenderOptions" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Paragraphs" />
+    </ShowAsCollectionAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.TextBlockBuilder">
+    <Position X="0.75" Y="8" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>Text\TextBlockBuilder.cs</FileName>
+      <HashCode>BQEUSEAEACAAAggABAAFADAgiAAAAQggEBAAQAKgBAg=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Reader" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="Scryber.Text.TextBlockBuilder.TextState" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Text\TextBlockBuilder.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Text.PDFTextRenderOptions">
+    <Position X="5" Y="5" Width="2.25" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextRenderOptions.cs</FileName>
+      <HashCode>ACAAAAACAAAAAAIIAAAAIAAAAAiAACAIAAAgAAACABA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Layout" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Text.TextParagraph">
+    <Position X="6.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\TextParagraph.cs</FileName>
+      <HashCode>AAgCAAAABAAAAAAAAAABAEQAQAAAAAACAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Lines" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.TextLine">
+    <Position X="9.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\TextLine.cs</FileName>
+      <HashCode>AAAAAAAAAAAABICAAAAAAEACAAAgSAAAACAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="TextSpans" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.TextSpan">
+    <Position X="12" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\TextSpan.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.TextData">
+    <Position X="7.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\TextData.cs</FileName>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAEAAABAAAAAAAAAACAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFTextReader">
+    <Position X="4" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextReader.cs</FileName>
+      <HashCode>AAAAAAAEBCAAFAAAAAAAAABgAAAAAEAAAAAgAEAAQAg=</HashCode>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Value" />
+      <Property Name="OpType" />
+    </ShowAsAssociation>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Scryber.Text.PDFTextOp">
+    <Position X="10.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextOp.cs</FileName>
+      <HashCode>AAACAACAAAAAEAAAADAAAAAAAAAAAAAAAAACAAAAAIA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFTextClassOp">
+    <Position X="8" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextClassOp.cs</FileName>
+      <HashCode>AAAAAAAAAACAEAAAAAAAAAAAAAAAAAAAAAAAAAAAABA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFTextDrawOp">
+    <Position X="9.75" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextDrawOp.cs</FileName>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAAAAIAAAAAAAQAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFTextFontOp">
+    <Position X="11.5" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextFontOp.cs</FileName>
+      <HashCode>AACAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAACAAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFTextNewLineOp">
+    <Position X="13.25" Y="13" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextLineOp.cs</FileName>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Scryber.Text.PDFPlainTextReader">
+    <Position X="3" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFPlainTextReader.cs</FileName>
+      <HashCode>AAAAAAAABAAAAAAAAAAhAABwAAAAAAAAAAAgAAAAQAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFXMLTextReader">
+    <Position X="5.25" Y="11.75" Width="1.75" />
+    <TypeIdentifier>
+      <FileName>Text\PDFXMLTextReader.cs</FileName>
+      <HashCode>AAAAAAAABCAIgAAAAAAACABgAAAAEABIAAAgCIAAQAA=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Class Name="Scryber.Text.PDFTextLayout">
+    <Position X="8" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextLayout.cs</FileName>
+      <HashCode>EBACQAAAAAAABAkAIAAAAAAAgAAAAAAAAAAAAAAiAAw=</HashCode>
+    </TypeIdentifier>
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+  </Class>
+  <Enum Name="Scryber.Text.PDFTextOpType">
+    <Position X="7.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <FileName>Text\PDFTextReader.cs</FileName>
+      <HashCode>AAAAAAAAAAAAAAAQAAAEIAAAEAAAAAAAAAAQAAEAABA=</HashCode>
+    </TypeIdentifier>
+  </Enum>
+</ClassDiagram>
