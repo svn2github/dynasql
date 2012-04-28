@@ -1643,6 +1643,34 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of OR'd clauses e.g WHERE (A=1) OR (A=2) OR (A=3) OR....
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBSelectQuery WhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return this.Where(joined);
+        }
+
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of AND'd clauses e.g WHERE (A=1) AND (B=2) AND (C=3) AND...
+        /// </summary>
+        /// <param name="all"></param>
+        /// <returns></returns>
+        public DBSelectQuery WhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return this.Where(joined);
+        }
+
+        public DBSelectQuery WhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return this.Where(joined);
+        }
+
         #endregion
 
         #region public DBSelectQuery WhereFieldEquals(string field, DBClause value) + 1 overload
@@ -1795,6 +1823,72 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+        /// <summary>
+        /// Appends to the WHERE with an AND (compare OR compare OR compare)
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBSelectQuery AndWhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return AndWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND (compare AND compare AND compare)
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBSelectQuery AndWhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return AndWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND ((NOT compare) AND (NOT compare) AND (NOT compare))
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBSelectQuery AndWhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return AndWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an OR (compare OR compare OR compare)
+        /// </summary>
+        /// <param name="any">All the comparisons to join into a single or statement</param>
+        /// <returns></returns>
+        public DBSelectQuery OrWhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return OrWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND (compare AND compare AND compare)
+        /// </summary>
+        /// <param name="any">All the comparisons to join into a single or statement</param>
+        /// <returns></returns>
+        public DBSelectQuery OrWhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return OrWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND ((NOT compare) AND (NOT compare) AND (NOT compare))
+        /// </summary>
+        /// <param name="any">All the comparisons to join into a single or statement</param>
+        /// <returns></returns>
+        public DBSelectQuery OrWhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return OrWhere(joined);
+        }
 
         #region public DBSelectQuery OrWhere(DBClause left, ComparisonOperator op, DBClause right) + 4 overloads
 

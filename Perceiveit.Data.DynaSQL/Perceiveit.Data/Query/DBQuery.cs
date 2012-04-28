@@ -237,7 +237,7 @@ namespace Perceiveit.Data.Query
         // DBExecQuery factory methods
         //
 
-        #region public static DBExecQuery Exec(string name)
+        #region public static DBExecQuery Exec(string name) + 1 overload
 
         /// <summary>
         /// Begins a new 'EXEC [procedure name]' statement
@@ -248,6 +248,14 @@ namespace Perceiveit.Data.Query
         {
             DBExecQuery exec = new DBExecQuery();
             exec.SprocName = name;
+            return exec;
+        }
+
+        public static DBExecQuery Exec(string owner, string name)
+        {
+            DBExecQuery exec = new DBExecQuery();
+            exec.SprocName = name;
+            exec.Owner = owner;
             return exec;
         }
 

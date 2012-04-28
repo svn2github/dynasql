@@ -405,6 +405,7 @@ namespace Perceiveit.Data.Query
         public const string Declare = "declaration";
         public const string Returns = "return";
         public const string Set = "set";
+        public const string Multiple = "multi";
 
     }
 }

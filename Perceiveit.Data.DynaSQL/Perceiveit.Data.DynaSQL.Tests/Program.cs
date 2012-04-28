@@ -35,6 +35,10 @@ namespace Perceiveit.Data.DynaSql.Tests
                     dsql.Northwind_12_SelectTopN();
                     dsql.Northwind_13_SelectLeftAndRightJoin();
                     dsql.Northwind_14_StoredProcedure();
+                    dsql.Northwind_15_FullyQualifiedReferences();
+                    dsql.Northwind_16_NotClause();
+                    dsql.Northwind_17_MultiParamSproc();
+                    dsql.Northwind_18_MultipleComparisonJoin();
                     
                 }
                 catch (Exception ex)

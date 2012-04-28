@@ -502,6 +502,7 @@ namespace Perceiveit.Data.Query
         {
             DBParam pref = new DBParamRef();
             pref.Value = paramValue;
+            pref.DbType = type;
             return pref;
         }
 
@@ -639,6 +640,7 @@ namespace Perceiveit.Data.Query
 
             DBDelegateParam del = new DBDelegateParam(valueprovider);
             del.DbType = type;
+            del.Size = size;
             del.Name = genericName;
             return del;
         }

@@ -166,6 +166,75 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public static DBComparison Any(DBComparison[] any)
+
+        /// <summary>
+        /// Creates an OR'd collection of comparisons
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public static DBComparison Any(DBComparison[] any)
+        {
+            DBMultiComparisonRef multi = new DBMultiComparisonRef();
+            multi.All = any;
+            multi.Operation = Operator.Or;
+            return multi;
+        }
+
+        #endregion
+
+        #region public static DBComparison All(DBComparison[] all)
+
+        /// <summary>
+        /// Creates an AND'd collection of comparisons
+        /// </summary>
+        /// <param name="all"></param>
+        /// <returns></returns>
+        public static DBComparison All(DBComparison[] all)
+        {
+            DBMultiComparisonRef multi = new DBMultiComparisonRef();
+            multi.All = all;
+            multi.Operation = Operator.And;
+            return multi;
+        }
+
+        #endregion
+
+        #region public static DBComparison None(DBComparison[] all)
+
+        /// <summary>
+        /// Creates an AND'd collection of comparisons
+        /// </summary>
+        /// <param name="none"></param>
+        /// <returns></returns>
+        public static DBComparison None(DBComparison[] none)
+        {
+            DBMultiComparisonRef multi = new DBMultiComparisonRef();
+            List<DBComparison> not = new List<DBComparison>(none.Length);
+            foreach (DBComparison one in none)
+            {
+                not.Add(DBComparison.Not(one));
+            }
+            multi.All = not.ToArray();
+            multi.Operation = Operator.And;
+            return multi;
+        }
+
+        #endregion
+
+        #region internal static DBComparison Many()
+
+        /// <summary>
+        /// Internal method that returns a new uninitialised comparison
+        /// </summary>
+        /// <returns></returns>
+        internal static DBComparison Many()
+        {
+            return new DBMultiComparisonRef();
+        }
+
+        #endregion
+
         //
         // internal parameterless factory methods
         //
@@ -641,4 +710,190 @@ namespace Perceiveit.Data.Query
         #endregion
 
     }
+
+    /// <summary>
+    /// Represents a collection of comparisons that are under all the same operation
+    /// </summary>
+    internal class DBMultiComparisonRef : DBComparison
+    {
+
+        #region public DBComparison[] All {get;set;}
+
+        private List<DBComparison> _all;
+
+        /// <summary>
+        /// Gets the array of comparisons to include under a single operation
+        /// </summary>
+        public DBComparison[] All
+        {
+            get { return _all.ToArray(); }
+            set { _all = new List<DBComparison>(value); }
+        }
+
+        #endregion
+
+        #region public Operator Operation {get;set;}
+
+        private Operator _op;
+
+        /// <summary>
+        /// Gets or sets the operation for all the comparisons to be joined
+        /// </summary>
+        public Operator Operation
+        {
+            get { return _op; }
+            set { _op = value; }
+        }
+
+        #endregion
+
+        //
+        // ctors
+        //
+
+        #region public DBMultiComparisonRef()
+
+        /// <summary>
+        /// Creates a new instance of the multiple comparison
+        /// </summary>
+        public DBMultiComparisonRef() : base()
+        {
+        }
+
+        #endregion
+
+        //
+        // SQL Statement building
+        //
+
+        #region public override bool BuildStatement(DBStatementBuilder builder)
+
+        public override bool BuildStatement(DBStatementBuilder builder)
+        {
+            if (null != this.All && this.All.Length > 0)
+            {
+                builder.BeginBlock();
+                bool first = true;
+                foreach (DBComparison comp in this.All)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        builder.WriteOperator(this.Operation);
+
+                    comp.BuildStatement(builder);
+                }
+
+                builder.EndBlock();
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
+
+
+        //
+        // XML Serialization
+        //
+
+        #region protected override string XmlElementName
+
+        /// <summary>
+        /// Gets the name of this element in an XML file
+        /// </summary>
+        protected override string XmlElementName
+        {
+            get { return XmlHelper.Multiple; }
+        }
+
+        #endregion
+
+
+        #region protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
+        {
+            this.WriteAttribute(writer, XmlHelper.Operator, this.Operation.ToString(), context);
+
+            return base.WriteAllAttributes(writer, context);
+        }
+
+        #endregion
+
+        #region protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
+        {
+            foreach (var item in this.All)
+            {
+                item.WriteXml(writer, context);
+            }
+            return true;
+        }
+
+        #endregion
+
+
+        #region protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
+        {
+            Operator op;
+            if (reader.LocalName == XmlHelper.Operator)
+            {
+                object value = Enum.Parse(typeof(Operator), reader.LocalName, true);
+                op = (Operator)value;
+                this.Operation = op;
+            }
+
+            return base.ReadAnAttribute(reader, context);
+        }
+
+        #endregion
+
+        #region protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
+        {
+            DBClause clause = context.Factory.Read(reader.LocalName, reader, context);
+            if (clause is DBComparison)
+            {
+                if (null == _all)
+                    this._all = new List<DBComparison>();
+
+                this._all.Add((DBComparison)clause);
+                return true;
+            }
+            else
+                return base.ReadAnInnerElement(reader, context);
+        }
+
+        #endregion
+    }
+
 }

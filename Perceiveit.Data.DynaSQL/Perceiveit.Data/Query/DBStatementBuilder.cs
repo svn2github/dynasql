@@ -954,26 +954,38 @@ namespace Perceiveit.Data.Query
 
         #region public virtual void BeginExecuteParameters() + EndExecuteParameters()
 
+        bool hasparameter = false;
+
         public virtual void BeginExecuteParameters()
         {
             this.Writer.Write(" ");
+            hasparameter = false;
         }
         
         public virtual void EndExecuteParameters()
         {
+            hasparameter = false;
         }
 
         #endregion
 
-        #region public virtual void BeginExecuteAParameter() + EndExecuteAParameter()
+        #region public virtual void BeginExecuteAParameter() + EndExecuteAParameter() + AppendParameterSeparator
 
         public virtual void BeginExecuteAParameter()
         {
+            if (hasparameter)
+                this.AppendParameterSeparator();
+        }
+
+        protected virtual void AppendParameterSeparator()
+        {
+            this.Writer.Write(",");
         }
 
         public virtual void EndExecuteAParameter()
         {
             this.Writer.Write(" ");
+            hasparameter = true;
         }
 
         #endregion
@@ -1151,19 +1163,31 @@ namespace Perceiveit.Data.Query
             p.ParameterName = this.GetNativeParameterName(name);
 
             object value = sparam.ValueSource.Value;
+            if (value is DBConst)
+            {
+                DBConst constant = (DBConst)value;
 
+                if (sparam.ValueSource.HasType)
+                    p.DbType = sparam.ValueSource.DbType;
+                else
+                    p.DbType = constant.Type;
 
-            if (sparam.ValueSource.HasType)
-                p.DbType = sparam.ValueSource.DbType;
+                value = constant.Value;
+            }
             else
-                p.DbType = this.GetDbType(value);
+            {
+                if (sparam.ValueSource.HasType)
+                    p.DbType = sparam.ValueSource.DbType;
+                else
+                    p.DbType = this.GetDbType(value);
 
-            if (sparam.ValueSource.Size > 0)
-                p.Size = sparam.ValueSource.Size;
-            else
-                p.Size = 0;
+                if (sparam.ValueSource.Size > 0)
+                    p.Size = sparam.ValueSource.Size;
+                else
+                    p.Size = 0;
 
-            value = ConvertParamValueToNativeValue(p.DbType, value);
+                value = ConvertParamValueToNativeValue(p.DbType, value);
+            }
             p.Direction = sparam.ValueSource.Direction;
             p.Value = value;
         }
@@ -1723,7 +1747,9 @@ namespace Perceiveit.Data.Query
         #endregion
 
 
-
+        //
+        // Generate CREATE XXX Statements
+        //
 
         public virtual void GenerateCreateTableScript(Perceiveit.Data.Schema.DBSchemaTable schemaTable)
         {

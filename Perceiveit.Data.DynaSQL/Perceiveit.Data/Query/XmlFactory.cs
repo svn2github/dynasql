@@ -176,7 +176,9 @@ namespace Perceiveit.Data.Query
                 case(XmlHelper.InnerSelect):
                     c = DBSubQuery.SubSelect();
                     break;
-
+                case(XmlHelper.Multiple):
+                    c = DBMultiComparisonRef.Many();
+                    break;
                 default:
                     throw XmlHelper.CreateException(Errors.CantDeserializeXML, reader, null, element);
 

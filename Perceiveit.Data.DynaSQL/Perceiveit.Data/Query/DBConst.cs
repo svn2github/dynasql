@@ -156,7 +156,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public static DBConst DateTime(DateTime value)
+        #region public static DBConst DateTime(DateTime value) + 3 overloads
+
         /// <summary>
         /// Creates a new DateTime typed constant
         /// </summary>
@@ -165,6 +166,30 @@ namespace Perceiveit.Data.Query
         public static DBConst DateTime(DateTime value)
         {
             return Const(DbType.DateTime, value);
+        }
+
+        /// <summary>
+        /// Creates a new DateTime typed constant
+        /// </summary>
+        public static DBConst DateTime(int year, int month, int day)
+        {
+            return DBConst.DateTime(new DateTime(year, month, day));
+        }
+
+        /// <summary>
+        /// Creates a new DateTime typed constant
+        /// </summary>
+        public static DBConst DateTime(int year, int month, int day, int hour, int min, int sec)
+        {
+            return DBConst.DateTime(new DateTime(year, month, day, hour, min, sec));
+        }
+
+        /// <summary>
+        /// Creates a new DateTime typed constant
+        /// </summary>
+        public static DBConst DateTime(long ticks)
+        {
+            return DBConst.DateTime(new DateTime(ticks));
         }
 
         #endregion
@@ -178,6 +203,14 @@ namespace Perceiveit.Data.Query
         public static DBConst Guid(Guid value)
         {
             return Const(DbType.Object, value);
+        }
+
+        /// <summary>
+        /// Creates a new Guid typed constant
+        /// </summary>
+        public static DBConst Guid(string guidstring)
+        {
+            return DBConst.Guid(new Guid(guidstring));
         }
 
         #endregion

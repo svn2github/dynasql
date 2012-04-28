@@ -11,9 +11,9 @@ namespace Perceiveit.Data.DynaSql.Tests
     public static class Nw
     {
 
-        /* ----------  MS SQL Server Northwind Schema --------------
+        /* ----------  MS SQL Server Northwind Schema -------------- */
 
-        public const string DbConnection = @"Data Source=.\SQLEXPRESS;Initial Catalog=Northwind;Integrated Security=True;Pooling=False";
+        public const string DbConnection = @"Data Source=localhost;Initial Catalog=Northwind;Integrated Security=True;Pooling=False";
         public const string DbProvider = "System.Data.SqlClient";
 
         public static class Customers
@@ -40,6 +40,9 @@ namespace Perceiveit.Data.DynaSql.Tests
             public const string CustomerID = "CustomerID";
             public const string EmployeeID = "EmployeeID";
             public const string OrderDate = "OrderDate";
+            public const string ShippedDate = "ShippedDate";
+            public const string ShipCountry = "ShipCountry";
+            public const string ShippedVia = "ShipVia";
         }
 
         public static class OrderDetails
@@ -73,7 +76,7 @@ namespace Perceiveit.Data.DynaSql.Tests
         /* -------------------------- End MS SQL Server Schema ------------------------- */
 
 
-        /* ----------  MySQL Northwind Schema -------------- */
+        /* ----------  MySQL Northwind Schema -------------- 
 
 
         public const string DbConnection = "server=172.16.56.1;User Id=testaccount;Password=test;Persist Security Info=True;database=northwind";

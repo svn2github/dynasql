@@ -1099,6 +1099,136 @@ namespace Perceiveit.Data.DynaSql.Tests
             }
         }
 
+        
+
+        [NUnit.Framework.Test()]
+        public void Northwind_15_FullyQualifiedReferences()
+        {
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+            //TODO: Implement a full reference.
+            DBQuery sel = DBQuery.SelectAll().From(DBTable.Table(Nw.Customers.Table));
+
+
+
+        }
+
+
+        public void Northwind_16_NotClause()
+        {
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+
+            DBQuery sel = DBQuery.SelectAll()
+                                 .From(Nw.Customers.Table)
+                                 .Where(
+                                        DBComparison.Not(
+                                            DBComparison.Compare(DBField.Field(Nw.Customers.CompanyName), Compare.Like, DBConst.String("ABC%"))));
+        }
+
+        [NUnit.Framework.Test(Description = "Executes as multiple parameter stored procedure against the Nortwind Database")]
+        public void Northwind_17_MultiParamSproc()
+        {
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+            Dictionary<string, decimal> totals = new Dictionary<string, decimal>();
+
+            DBConst begin = DBConst.DateTime(1900, 1, 1);
+            DBConst end = DBConst.DateTime(2012, 1, 1);
+
+            //Execute a stored procedure with a single parameter
+            DBQuery exec = DBQuery.Exec("Employee Sales by Country")
+                                  .WithParamValue("Beginning_Date", begin)
+                                  .WithParamValue("Ending_Date", end);
+            decimal grandtotal = 0;
+            db.ExecuteRead(exec, reader =>
+             {
+                 int amountindex = reader.GetOrdinal("SaleAmount");
+
+                 while (reader.Read())
+                 {
+                     decimal amount = reader.GetDecimal(amountindex);
+                     grandtotal += amount;
+                 }
+
+             });
+
+             Console.WriteLine("Grand Total:{0}", grandtotal);
+        }
+
+
+        [NUnit.Framework.Test()]
+        public void Northwind_18_MultipleComparisonJoin()
+        {
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+            DBComparison country = DBComparison.Equal(DBField.Field(Nw.Orders.ShipCountry),DBConst.String("France"));
+            DBComparison country2 = DBComparison.Equal(DBField.Field(Nw.Orders.ShipCountry), DBConst.String("Germany"));
+            DBComparison country3 = DBComparison.Equal(DBField.Field(Nw.Orders.ShipCountry), DBConst.String("Spain"));
+            DBComparison country4 = DBComparison.Equal(DBField.Field(Nw.Orders.ShipCountry), DBConst.String("Italy"));
+            DBComparison shipdate = DBComparison.Compare(DBField.Field(Nw.Orders.ShippedDate), Compare.LessThan, DBConst.DateTime(DateTime.Now));
+            DBComparison shipvia = DBComparison.Equal(DBField.Field(Nw.Orders.ShippedVia), DBConst.Int32(3));
+
+            //where all
+
+            DBQuery sel = DBQuery.SelectCount()
+                                .From(Nw.Orders.Table)
+                                .WhereAll(country, country2, country3, country4);
+
+            int count = (int)db.ExecuteScalar(sel);
+
+            // and where all
+
+            sel = DBQuery.SelectCount()
+                .From(Nw.Orders.Table)
+                .WhereField(Nw.Orders.ShippedDate, Compare.Is, DBConst.Null())
+                .AndWhereAll(country, country2, country3, country4);
+
+            count = (int)db.ExecuteScalar(sel);
+
+            // where none
+
+            sel = DBQuery.SelectCount()
+                        .From(Nw.Orders.Table)
+                        .WhereNone(country, country2, country3, country4);
+
+            count = (int)db.ExecuteScalar(sel);
+
+            // and where none
+
+            sel = DBQuery.SelectCount()
+                .From(Nw.Orders.Table)
+                .WhereField(Nw.Orders.ShippedDate, Compare.Is, DBConst.Null())
+                .AndWhereNone(country, country2, country3, country4);
+
+            // where all
+
+            count = (int)db.ExecuteScalar(sel);
+
+            sel = DBQuery.SelectCount()
+                        .From(Nw.Orders.Table)
+                        .WhereAll(country, shipdate, shipvia);
+
+            count = (int)db.ExecuteScalar(sel);
+
+            // and where all
+
+            sel = DBQuery.SelectCount()
+                         .From(Nw.Orders.Table)
+                         .Where(Nw.Orders.CustomerID, Compare.Equals, DBConst.String("LAMAI"))
+                         .AndWhereAll(country, shipvia, shipdate);
+
+            count = (int)db.ExecuteScalar(sel);
+
+
+
+        }
+
+
 
         [NUnit.Framework.TestFixtureTearDown()]
         public void DumpSummary()
