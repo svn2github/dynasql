@@ -37,7 +37,7 @@ namespace Perceiveit.Data.Schema
         /// <summary>
         /// Flag to output all the received collection data from any call to con.GetSchema()
         /// </summary>
-        private const bool OUTPUTCOLLECTIONDATA = true;
+        private const bool OUTPUTCOLLECTIONDATA = false;
 
         /// <summary>
         /// The path to the directory where the schema data should be stored
