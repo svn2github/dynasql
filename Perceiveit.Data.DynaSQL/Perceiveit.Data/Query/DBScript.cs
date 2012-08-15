@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -26,7 +26,7 @@ namespace Perceiveit.Data.Query
     /// Represents a batch of DBStatement statements that can be passed to the 
     /// database engine in one command and executed
     /// </summary>
-    public class DBScript : DBQuery
+    public abstract class DBScript : DBQuery, IEnumerable<DBStatement>
     {
 
         #region internal List<DBQuery> Inner {get;}
@@ -58,6 +58,21 @@ namespace Perceiveit.Data.Query
             {
                 return null != this._inner && this._inner.Count > 0;
             }
+        }
+
+        #endregion
+
+        #region protected DBScript Last {get;set;}
+
+        private DBScript _last = null;
+
+        /// <summary>
+        /// Gets or sets the last inner script for nesting
+        /// </summary>
+        protected DBScript Last
+        {
+            get { return _last; }
+            set { _last = value; }
         }
 
         #endregion
@@ -101,23 +116,74 @@ namespace Perceiveit.Data.Query
         /// <returns></returns>
         public DBScript Then(DBStatement query)
         {
-            this.Inner.Add(query);
+            if (Last != null)
+                this.Last.Then(query);
+            else
+                this.Inner.Add(query);
             return this;
         }
 
         #endregion
 
+        #region public DBScript Begin()
+
+        /// <summary>
+        /// Begins a new Inner Statement block
+        /// </summary>
+        /// <returns></returns>
+        public DBScript Begin()
+        {
+            if (Last != null)
+                return Last.Begin();
+            else
+            {
+                DBScript inner = DBQuery.Begin();
+                this.Inner.Add(inner);
+                this.Last = inner;
+                return this;
+            }
+        }
+
+        #endregion
+
         #region public DBScript End()
+
         /// <summary>
         /// Closes the script
         /// </summary>
         /// <returns></returns>
         public DBScript End()
         {
+            DBScript toclear = this.GetLastParentBlock();
+            if (null != toclear)
+                toclear.Last = null;
+
             return this;
         }
 
+        /// <summary>
+        /// Returns the parent block that has only 1 nested script
+        /// </summary>
+        /// <returns></returns>
+        protected virtual DBScript GetLastParentBlock()
+        {
+            if (null == Last)
+                return null;
+            else if (null == Last.Last)
+            {
+                //we have an inner script, but are the last parent
+                return this;
+            }
+            else
+            {
+                //Our inner script has inner scripts so get them to do the work.
+                return Last.GetLastParentBlock();
+            }
+        }
+
         #endregion
+
+        #region public DBScript Declare(DBParam param)
 
         /// <summary>
         /// creates a parameter Declaration in this script
@@ -131,6 +197,9 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
+        #endregion
+
+        #region public DBScript Set(DBAssign assignment)
 
         /// <summary>
         /// creates a parameter assignment in this script
@@ -155,6 +224,10 @@ namespace Perceiveit.Data.Query
             DBAssign assign = DBAssign.Set(param, clause);
             return this.Set(assign);
         }
+
+        #endregion
+
+        #region public DBScript Return() + 3 overloads
 
         /// <summary>
         /// Creates a return statement in this script
@@ -190,6 +263,7 @@ namespace Perceiveit.Data.Query
             return Return(p);
         }
 
+
         /// <summary>
         /// Creates a return statement with the parameter in this script
         /// </summary>
@@ -198,8 +272,83 @@ namespace Perceiveit.Data.Query
         public DBStatement Return(DBParam param)
         {
             DBReturn ret = DBReturn.Return(param);
+            this.Then(ret);
             return ret;
         }
+
+        #endregion 
+
+        #region private class StatementEnumerator : IEnumerator<DBStatement>
+
+        /// <summary>
+        /// private wrapper of the base classes DBClause enumerator to return only DBStatements
+        /// </summary>
+        private class StatementEnumerator : IEnumerator<DBStatement>
+        {
+            private IEnumerator<DBClause> _baseEnum;
+
+            public StatementEnumerator(IEnumerator<DBClause> baseEnum)
+            {
+                this._baseEnum = baseEnum;
+            }
+
+            public DBStatement Current
+            {
+                get { return _baseEnum.Current as DBStatement; }
+            }
+
+            public void Dispose()
+            {
+                _baseEnum.Dispose();
+            }
+
+            object System.Collections.IEnumerator.Current
+            {
+                get { return _baseEnum.Current; }
+            }
+
+            public bool MoveNext()
+            {
+                return _baseEnum.MoveNext();
+            }
+
+            public void Reset()
+            {
+                _baseEnum.Reset();
+            }
+        }
+
+        #endregion
+
+        #region public IEnumerator<DBStatement> GetEnumerator()
+
+        /// <summary>
+        /// Returns a statement enumerator that will 
+        /// traverse across all the DBStatements in this script
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerator<DBStatement> GetEnumerator()
+        {
+            return new StatementEnumerator(this.Inner.GetEnumerator());
+        }
+
+        /// <summary>
+        /// Explicit interface implementation
+        /// </summary>
+        /// <returns></returns>
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+
+        #endregion
+
+    }
+
+
+
+    public class DBScriptRef : DBScript
+    {
 
         //
         // SQL Statement builder
@@ -214,15 +363,11 @@ namespace Perceiveit.Data.Query
         /// <returns></returns>
         public override bool BuildStatement(DBStatementBuilder builder)
         {
-            if (this._inner != null && this._inner.Count > 0)
+            if (this.HasInnerStatements)
             {
                 //confirm that this data provider can support multiple 
                 //SQL statements
-                if (_inner.Count > 1)
-                {
-                    if (builder.SupportsMultipleStatements == false)
-                        throw new InvalidOperationException("The current database does not support multiple statements within a single command");
-                }
+                ValidateScriptExecution(builder);
                 builder.BeginScript();
                 foreach (DBStatement q in this.Inner)
                 {
@@ -233,6 +378,18 @@ namespace Perceiveit.Data.Query
             }
             else
                 return false;
+        }
+
+        private void ValidateScriptExecution(DBStatementBuilder builder)
+        {
+
+#if STRICT_SQL
+            if (_inner.Count > 1)
+            {
+                if (builder.SupportsMultipleStatements == false)
+                    throw new InvalidOperationException("The current database does not support multiple statements within a single command");
+            }
+#endif
         }
 
         #endregion
@@ -294,6 +451,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
     }
 
     internal class DBQueryList : DBClauseList<DBQuery>
@@ -302,5 +460,6 @@ namespace Perceiveit.Data.Query
 
     internal class DBStatementList : DBClauseList<DBStatement>
     {
+
     }
 }

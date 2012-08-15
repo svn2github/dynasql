@@ -222,4 +222,37 @@
   <data name="ProviderNameNotSetInProviderImplementation" xml:space="preserve">
     <value>The provider name for a configured implementation is not set, or is an emty value. Please check the configuration section 'Perceiveit.Data/Implementations'</value>
   </data>
+  <data name="NoDefaultForColumn" xml:space="preserve">
+    <value>Last item added to the create statement does not support default values</value>
+  </data>
+  <data name="DatabaseEngineDoesntSupportType" xml:space="preserve">
+    <value>This database engine does not support the schema type '{0}'.</value>
+  </data>
+  <data name="DBDoesntSupportIfExistsForThisType" xml:space="preserve">
+    <value>The {0} database does not support the IF EXISTS or IF NOT EXISTS constructs for the schema type '{1}'</value>
+  </data>
+  <data name="OLEDbDoesNotSupportDefaultValues" xml:space="preserve">
+    <value>The Ole Db Create Table statement does not support default values on a column.</value>
+  </data>
+  <data name="SqlLiteDoesntSupportOnReferencesForIndexes" xml:space="preserve">
+    <value>SQLite does not support the ON construct when dropping table indexes. You must simply use the DROP INDEX on it's own without a table reference.</value>
+  </data>
+  <data name="SequenceCreationIsNotSupportedOnThisEngine" xml:space="preserve">
+    <value>The creation and use of sequences is not supported on this database engine</value>
+  </data>
+  <data name="CannotUseTopAsInnerWriterNotSupportPosition" xml:space="preserve">
+    <value>The Top N functions cannot be used as the inner text writers positon cannot be modified. </value>
+  </data>
+  <data name="CannotBuildCreateType" xml:space="preserve">
+    <value>This database statement builder cannot build CREATE statements for type '{0}'</value>
+  </data>
+  <data name="CheckExistsIsNotSupported" xml:space="preserve">
+    <value>Check Exists is not supported by this database engine implementation</value>
+  </data>
+  <data name="CheckNotExistsIsNotSupported" xml:space="preserve">
+    <value>Check NotExists is not supported by this Database engine implementation.</value>
+  </data>
+  <data name="CannotUseClusteredOrNonClustered" xml:space="preserve">
+    <value>The database engine does not support CLUSTERED or NON CLUSTERED indexes</value>
+  </data>
 </root>

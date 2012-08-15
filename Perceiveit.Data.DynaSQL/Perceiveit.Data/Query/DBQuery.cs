@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -26,7 +26,7 @@ namespace Perceiveit.Data.Query
     /// DBQuery.Select, Update, Delete, Insert, Exec and Begin all return specific DBQuery 
     /// instances that enable the building of SQL Statements to be executed on a Relational Database.
     /// </summary>
-    public abstract class DBQuery : DBStatement, System.Xml.Serialization.IXmlSerializable
+    public abstract partial class DBQuery : DBStatement, System.Xml.Serialization.IXmlSerializable
     {
 
         #region internal bool IsInnerQuery {get;set;}
@@ -167,7 +167,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public static DBSelectQuery Select(DBClause field)
+        #region public static DBSelectQuery Select(DBClause field) + 1 Overload
         /// <summary>
         /// Begins a new SELECT statement with the clause as the first value returned.
         /// </summary>
@@ -179,6 +179,23 @@ namespace Perceiveit.Data.Query
             q.SelectSet = DBSelectSet.Select(clause);
             q.Last = q.SelectSet;
             return q;
+        }
+
+        /// <summary>
+        /// Begins a new SELECT statement with the clauses as the first values returned
+        /// </summary>
+        /// <param name="clauses">Any valid clause (DBConst, DBParam, etc)</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
+        public static DBSelectQuery Select(params DBClause[] clauses)
+        {
+            DBSelectQuery q = new DBSelectQuery();
+            q.SelectSet = DBSelectSet.Select();
+            foreach (DBClause c in clauses)
+            {
+                q.SelectSet.And(c);
+            }
+            q.Last = q.SelectSet;
+            return q;            
         }
 
         #endregion
@@ -445,7 +462,7 @@ namespace Perceiveit.Data.Query
         /// <returns>A new DBScript for statement chaining</returns>
         public static DBScript Begin()
         {
-            DBScript s = new DBScript();
+            DBScript s = new DBScriptRef();
             return s;
         }
 
@@ -455,7 +472,7 @@ namespace Perceiveit.Data.Query
         /// </summary>
         /// <param name="query">The first statement in the script</param>
         /// <returns>A new DBScript for statement chaining</returns>
-        public static DBScript Begin(DBQuery query)
+        public static DBScript Begin(DBStatement query)
         {
             DBScript s = Begin();
             s.Then(query);
@@ -467,7 +484,7 @@ namespace Perceiveit.Data.Query
         /// </summary>
         /// <param name="querys">The statements in the script</param>
         /// <returns>A new DBScript for statement chaining</returns>
-        public static DBScript Begin(params DBQuery[] querys)
+        public static DBScript Begin(params DBStatement[] querys)
         {
             DBScript s = Begin();
 
@@ -503,6 +520,19 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public static DBDeclaration Declare(DBParam param)
+
+        /// <summary>
+        /// Creates a declaration statement e.g. DECLARE @p1 INT;
+        /// </summary>
+        /// <param name="param">The parameter to declare</param>
+        /// <returns>The declaration</returns>
+        public static DBDeclaration Declare(DBParam param)
+        {
+            return DBDeclaration.Declare(param);
+        }
+
+        #endregion
 
         //
         // Build statement methods
@@ -521,23 +551,6 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        //
-        // SQL String methods
-        //
-
-        #region public string ToSQLString(DBDatabase fordatabase)
-        
-        /// <summary>
-        /// Generates the implementation specific sql statement for this query. 
-        /// </summary>
-        /// <param name="fordatabase">The DBDatabase to use for generation of the SQL statement</param>
-        /// <returns>This SQL statement as a string</returns>
-        public string ToSQLString(DBDatabase fordatabase)
-        {
-            return fordatabase.GetCommandText(this);
-        }
-
-        #endregion
 
         //
         // writeXml methods
@@ -568,7 +581,7 @@ namespace Perceiveit.Data.Query
             XmlWriterContext context = new XmlWriterContext(ns, prefix);
             writer.WriteStartElement(XmlHelper.Statement, ns);
             this.WriteXml(writer, context);
-            if (context.Parameters.Count > 0)
+            if (this.IsInnerQuery == false && context.Parameters.Count > 0)
             {
                 writer.WriteStartElement(XmlHelper.Parameters);
                 foreach (DBParam p in context.Parameters)

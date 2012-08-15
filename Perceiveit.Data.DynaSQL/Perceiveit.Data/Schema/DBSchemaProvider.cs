@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -117,7 +117,7 @@ namespace Perceiveit.Data.Schema
         // .ctor
         //
 
-        #region internal DBSchemaProvider(DBDatabase database)
+        #region internal DBSchemaProvider(DBDatabase database, DBDatabaseProperties properties)
 
         /// <summary>
         /// Creates a new instance of the DBSchemaProvider
@@ -1143,12 +1143,12 @@ namespace Perceiveit.Data.Schema
                 this.AssertGetCollectionForType(DBMetaDataCollectionType.ForeignKeys);
             DataTable data = this.GetCollectionData(con, viewcollection, fortable.Catalog, fortable.Schema, fortable.Name, null);
 
-            DataColumn catalogcol = GetColumn(data, "constraint_catalog", true);
-            DataColumn schemacol = GetColumn(data, "constraint_schema", true);
+            DataColumn catalogcol = GetColumn(data, "constraint_catalog", false);
+            DataColumn schemacol = GetColumn(data, "constraint_schema", false);
             DataColumn namecol = GetColumn(data, "constraint_name", true);
 
-            DataColumn containercatalogcol = GetColumn(data, "table_catalog", true);
-            DataColumn containerschemacol = GetColumn(data, "table_schema", true);
+            DataColumn containercatalogcol = GetColumn(data, "table_catalog", false);
+            DataColumn containerschemacol = GetColumn(data, "table_schema", false);
             DataColumn containernamecol = GetColumn(data, "table_name", true);
 
             this.LoadItemRefsWithContainer(data, intoCollection,
@@ -1265,6 +1265,7 @@ namespace Perceiveit.Data.Schema
             DataColumn IsNullableColumn = GetColumn(dtColumns, "IS_NULLABLE", true);
             DataColumn DataTypeColumn = GetColumn(dtColumns, "DATA_TYPE", true);
             DataColumn MaxCharacterLengthColumn = GetColumn(dtColumns, "CHARACTER_MAXIMUM_LENGTH", false);
+            DataColumn CharacterSetColumn = GetColumn(dtColumns, "CHARACTER_SET_NAME", false); 
             DataColumn AutoNumberColumn = GetColumn(dtColumns, "AUTOINCREMENT", false);
             DataColumn PrimaryKeyColumn = GetColumn(dtColumns, "PRIMARY_KEY", false);
 
@@ -1275,8 +1276,9 @@ namespace Perceiveit.Data.Schema
                 col.OrdinalPosition = GetColumnIntValue(row, OrdinalPositionColumn);
                 col.DefaultValue = GetColumnStringValue(row, DefaultValueColumn);
                 col.Nullable = GetColumnBoolValue(row, IsNullableColumn);
-                col.DbType = GetDbTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
-                col.Type = GetSystemTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
+                col.NativeType = GetColumnStringValue(row, DataTypeColumn);
+                col.DbType = GetDbTypeForNativeType(col.NativeType, GetColumnStringValue(row, CharacterSetColumn));
+                col.Type = GetSystemTypeForNativeType(col.NativeType);
                 col.Size = GetColumnIntValue(row,MaxCharacterLengthColumn);
                 col.AutoAssign = GetColumnBoolValue(row, AutoNumberColumn);
                 col.PrimaryKey = GetColumnBoolValue(row, PrimaryKeyColumn);
@@ -1545,6 +1547,7 @@ namespace Perceiveit.Data.Schema
             DataColumn DefaultValueColumn = GetColumn(dtColumns, "COLUMN_DEFAULT", false);
             DataColumn IsNullableColumn = GetColumn(dtColumns, "IS_NULLABLE", true);
             DataColumn DataTypeColumn = GetColumn(dtColumns, "DATA_TYPE", true);
+            DataColumn CharacterSetColumn = GetColumn(dtColumns, "CHARACTER_SET_NAME", false);
             DataColumn MaxCharacterLengthColumn = GetColumn(dtColumns, "CHARACTER_MAXIMUM_LENGTH", false);
             DataColumn IsReadOnly = GetColumn(dtColumns, "ISREADONLY", false);
 
@@ -1555,8 +1558,9 @@ namespace Perceiveit.Data.Schema
                 col.OrdinalPosition = GetColumnIntValue(row, OrdinalPositionColumn);
                 col.DefaultValue = GetColumnStringValue(row, DefaultValueColumn);
                 col.Nullable = GetColumnBoolValue(row, IsNullableColumn);
-                col.DbType = GetDbTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
-                col.Type = GetSystemTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
+                col.NativeType = GetColumnStringValue(row, DataTypeColumn);
+                col.DbType = GetDbTypeForNativeType(col.NativeType, GetColumnStringValue(row, CharacterSetColumn));
+                col.Type = GetSystemTypeForNativeType(col.NativeType);
                 col.Size = GetColumnIntValue(row, MaxCharacterLengthColumn);
                 col.ReadOnly = GetColumnBoolValue(row, IsReadOnly);
                 col.HasDefault = !string.IsNullOrEmpty(col.DefaultValue);
@@ -1854,6 +1858,7 @@ namespace Perceiveit.Data.Schema
             DataColumn name = GetColumn(dtSprocParams, "PARAMETER_NAME", true);
             DataColumn type = GetColumn(dtSprocParams, "DATA_TYPE", true);
             DataColumn strSize = GetColumn(dtSprocParams, "CHARACTER_MAXIMUM_LENGTH", false);
+            DataColumn CharacterSetColumn = GetColumn(dtSprocParams, "CHARACTER_SET_NAME", false);
 
             foreach (DataRow row in dtSprocParams.Rows)
             {
@@ -1865,8 +1870,9 @@ namespace Perceiveit.Data.Schema
                 param.Direction = GetParameterDirectionFromSchemaValue(dirvalue);
                 if (GetColumnBoolValue(row, isResult))
                     param.Direction = ParameterDirection.ReturnValue;
-                param.DbType = GetDbTypeForNativeType(GetColumnStringValue(row, type));
-                param.RuntimeType = GetSystemTypeForNativeType(GetColumnStringValue(row, type));
+                param.NativeType = GetColumnStringValue(row, type);
+                param.DbType = GetDbTypeForNativeType(param.NativeType, GetColumnStringValue(row, CharacterSetColumn));
+                param.RuntimeType = GetSystemTypeForNativeType(param.NativeType);
                 param.ParameterSize = GetColumnIntValue(row, strSize, -1);
 
                 aroutine.Parameters.Add(param);
@@ -1954,7 +1960,7 @@ namespace Perceiveit.Data.Schema
         /// </summary>
         /// <param name="providerDataType"></param>
         /// <returns></returns>
-        protected virtual DbType GetDbTypeForNativeType(string providerDataType)
+        protected virtual DbType GetDbTypeForNativeType(string providerDataType, string characterset)
         {
             DbType dbtype = DbType.Object;
             if (string.IsNullOrEmpty(providerDataType))
@@ -1996,9 +2002,9 @@ namespace Perceiveit.Data.Schema
                         dbtype = DbType.Boolean;
                         break;
                     case ("real"):
+                    case ("float"):
                         dbtype = DbType.Single;
                         break;
-                    case ("float"):
                     case ("double"):
                         dbtype = DbType.Double;
                         break;
@@ -2024,12 +2030,16 @@ namespace Perceiveit.Data.Schema
                         break;
                     case ("char"):
                         dbtype = DbType.AnsiStringFixedLength;
+                        if (null != characterset && string.Equals(characterset, "utf8", StringComparison.OrdinalIgnoreCase))
+                            dbtype = DbType.StringFixedLength;
                         break;
                     case ("varchar"):
                     case ("text"):
                     case ("enum"):
                     case ("set"):
                         dbtype = DbType.AnsiString;
+                        if (null != characterset && string.Equals(characterset, "utf8", StringComparison.OrdinalIgnoreCase))
+                            dbtype = DbType.String;
                         break;
                     case ("nchar"):
                         dbtype = DbType.StringFixedLength;
@@ -2368,17 +2378,18 @@ namespace Perceiveit.Data.Schema
         /// <returns></returns>
         protected virtual DataTable GetCollectionData(DbConnection con, DBSchemaMetaDataCollection collection, params string[] restrictions)
         {
-            //convert empty strings to null
+            
             if (null != restrictions)
             {
                 for (int i = 0; i < restrictions.Length; i++)
                 {
                     string s = restrictions[i];
                     if (string.IsNullOrEmpty(s))
-                        s = null;
+                        restrictions[i] = null;
                 }
             }
 
+            
             DataTable data = con.GetSchema(collection.CollectionName, restrictions);
             if (null != data)
             {
@@ -2474,8 +2485,10 @@ namespace Perceiveit.Data.Schema
                 case ("indexes"):
                     type = DBMetaDataCollectionType.Indexes;
                     break;
-                //case("foreign key columns"):
-                //    type = DBMetaDataCollectionType.ForeignKeys
+                case("foreign key columns"):
+                case("foreignkeycolumns"):
+                    type = DBMetaDataCollectionType.ForeignKeyColumns;
+                    break;
 
                 case ("indexcolumns"):
                     type = DBMetaDataCollectionType.IndexColumns;
@@ -2666,6 +2679,8 @@ namespace Perceiveit.Data.Schema
                 return pname.Substring(1);
             else if (pname.StartsWith("?"))
                 return pname.Substring(1);
+            else if (pname.StartsWith(":"))
+                return pname.Substring(1);
             else
                 return pname;
         }
@@ -2848,7 +2863,11 @@ namespace Perceiveit.Data.Schema
                 return value;
             else if (String.Equals(str, "YES", StringComparison.OrdinalIgnoreCase))
                 return true;
+            else if (String.Equals(str, "Y", StringComparison.OrdinalIgnoreCase))
+                return true;
             else if (String.Equals(str, "NO", StringComparison.OrdinalIgnoreCase))
+                return false;
+            else if (String.Equals(str, "N", StringComparison.OrdinalIgnoreCase))
                 return false;
             else
                 return defaultValue;

@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -28,10 +28,11 @@ namespace Perceiveit.Data
     /// <remarks>Use the DBDatabase.GetProperties() method to get the fully populated instance for a specific connection</remarks>
     public class DBDatabaseProperties
     {
+        
         /// <summary>
         /// Empty unknown database properties.
         /// </summary>
-        public static readonly DBDatabaseProperties Unknown = new DBDatabaseProperties("Unknown", "Unknown", "Unknown", "Unknown", "{0}", new Version(0, 0), (DBSchemaTypes)0, true, DBParameterLayout.Named, null, null);
+        public static readonly DBDatabaseProperties Unknown = new DBDatabaseProperties("Unknown", "Unknown", "Unknown", "Unknown", "{0}", new Version(0, 0), (DBSchemaTypes)0, true, DBParameterLayout.Named, null, null, Schema.DBSchemaInformation.CreateDefault(), new TypedOperationCollection());
 
         //
         // properties
@@ -187,6 +188,65 @@ namespace Perceiveit.Data
 
         #endregion
 
+        #region public string TemporaryTableConstruct {get;set;}
+
+        /// <summary>
+        /// Gets or sets the identifer name used when creating temporary tables
+        /// </summary>
+        public string TemporaryTableConstruct
+        {
+            get { return _tempconstruct; }
+            set { _tempconstruct = value; }
+        }
+        
+        private string _tempconstruct = "TEMPORARY";
+
+        #endregion
+
+        #region public string TemporaryTablePrefix {get;set;}
+
+        /// <summary>
+        /// Gets or sets the name prefix for a temporary table
+        /// </summary>
+        public string TemporaryTablePrefix
+        {
+            get { return _tempprefix; }
+            set { _tempprefix = value; }
+        }
+
+        private string _tempprefix = "";
+
+        #endregion
+
+        #region public Schema.DBSchemaInformation SchemaInformation {get;}
+
+        private Schema.DBSchemaInformation _schemainfo;
+
+        /// <summary>
+        /// Gets the information schema lookups that can be used to check the existance of
+        /// objects in the database
+        /// </summary>
+        public Schema.DBSchemaInformation SchemaInformation
+        {
+            get { return _schemainfo; }
+        }
+
+        #endregion
+
+        #region protected TypedOperationCollection UnsupportedOps
+
+        private TypedOperationCollection _unsupportedOps;
+
+        /// <summary>
+        /// Gets the collection of Operations that are NOT supported in this provider
+        /// </summary>
+        protected TypedOperationCollection UnsupportedOps
+        {
+            get { return _unsupportedOps; }
+        }
+
+        #endregion
+
         //
         // .ctor
         //
@@ -217,7 +277,9 @@ namespace Perceiveit.Data
             bool caseSensitive, 
             DBParameterLayout layout,
             System.Data.DbType[] supportedDbTypes,
-            TopType[] supportedTopTypes)
+            TopType[] supportedTopTypes,
+            Schema.DBSchemaInformation schemaInfo,
+            TypedOperationCollection unsupportedOps)
         {
             this._vers = version;
             this._edition = serverEdition;
@@ -229,6 +291,8 @@ namespace Perceiveit.Data
             this.ParameterLayout = layout;
             this.SupportedDbTypes = supportedDbTypes;
             this.SupportedTopTypes = supportedTopTypes;
+            this._schemainfo = schemaInfo;
+            this._unsupportedOps = unsupportedOps;
         }
 
         #endregion
@@ -251,6 +315,24 @@ namespace Perceiveit.Data
 
         #endregion
 
+        #region public bool CheckSupports(DBSchemaTypes schema, DBSchemaOperation op)
+
+        /// <summary>
+        /// Check if this database supports a specific operation on the database.
+        /// </summary>
+        /// <param name="schema"></param>
+        /// <param name="op"></param>
+        /// <returns></returns>
+        public bool CheckSupports(DBSchemaTypes schema, DBSchemaOperation op)
+        {
+            if (this.UnsupportedOps.Contains(schema,op))
+                return false;
+            else
+                return CheckSupports(schema);
+        }
+
+        #endregion
+
         #region public bool CheckSupportsType(System.Data.DbType type)
 
         /// <summary>
@@ -258,7 +340,7 @@ namespace Perceiveit.Data
         /// </summary>
         /// <param name="type">The data type to check</param>
         /// <returns>True if it is supported</returns>
-        public bool CheckSupportsType(System.Data.DbType type)
+        public bool CheckSupportsDataType(System.Data.DbType type)
         {
             return Array.IndexOf<System.Data.DbType>(SupportedDbTypes, type) > -1;
         }
@@ -300,4 +382,7 @@ namespace Perceiveit.Data
         #endregion
 
     }
+
+
+    
 }

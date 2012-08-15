@@ -1,0 +1,8 @@
+﻿ID, Location, Days, Time
+CPPG, North Wing, 15, 09:00:00
+CPL2, North Wing, 30, 13:00:00
+CPNN, North Wing, 30, 09:00:00
+ENGM, West Wing, 15, 10:00:00
+ENGE, West Wing, 15, 10:00:00
+ENGF, West Wing, 30, 13:00:00
+MSPS, Media Room, 15, 11:00:00

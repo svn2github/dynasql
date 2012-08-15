@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml;
 
 namespace Perceiveit.Data.Query
 {
@@ -154,6 +155,21 @@ namespace Perceiveit.Data.Query
         {
             get { return _size; }
             set { _size = value; }
+        }
+
+        #endregion
+
+        #region public int Precision {get;set;}
+
+        private int _precision;
+
+        /// <summary>
+        /// Gets or sets the precision of this data type
+        /// </summary>
+        public int Precision
+        {
+            get { return _precision; }
+            set { _precision = value; }
         }
 
         #endregion
@@ -537,6 +553,24 @@ namespace Perceiveit.Data.Query
             return pref;
         }
 
+        /// <summary>
+        /// Creates a new DBParam with the specified name, type, length and value
+        /// </summary>
+        /// <param name="genericName"></param>
+        /// <param name="type"></param>
+        /// <param name="length"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static DBParam ParamWithValue(string genericName, System.Data.DbType type, int length, object value)
+        {
+            DBParam pref = new DBParamRef();
+            pref.Name = genericName;
+            pref.DbType = type;
+            pref.Value = value;
+            pref.Size = length;
+            return pref;
+        }
+
 
         #endregion
 
@@ -681,7 +715,7 @@ namespace Perceiveit.Data.Query
         {
             this.Name = builder.RegisterParameter(this);
 
-            builder.WriteParameterReference(this.Name);
+            builder.WriteNativeParameterReference(this.Name);
 
             return true;
 
@@ -752,7 +786,7 @@ namespace Perceiveit.Data.Query
         {
             this.Name = builder.RegisterParameter(this);
 
-            builder.WriteParameterReference(this.Name);
+            builder.WriteNativeParameterReference(this.Name);
 
             return true;
 
@@ -890,6 +924,67 @@ namespace Perceiveit.Data.Query
             }
             else
                 return this.Dictionary.TryGetValue(name, out aparam);
+        }
+
+        public bool BuildStatement(DBStatementBuilder builder, bool newline, bool indent)
+        {
+            bool outputseparator = false;
+            int count = 0;
+            foreach (DBParam param in this)
+            {
+                if (outputseparator)
+                {
+                    builder.AppendReferenceSeparator();
+
+                    if (newline)
+                        builder.BeginNewLine();
+                }
+
+                outputseparator = param.BuildStatement(builder);
+
+                if (outputseparator)
+                    count++;
+            }
+
+            return count > 0;
+        }
+
+        public bool ReadXml(string endElement, XmlReader reader, XmlReaderContext context)
+        {
+            bool isEmpty = reader.IsEmptyElement && XmlHelper.IsElementMatch(endElement, reader, context);
+
+            do
+            {
+                if (reader.NodeType == System.Xml.XmlNodeType.Element)
+                {
+
+                    DBParam p = DBParam.Param();
+                        this.Add(p);
+
+                    if (isEmpty)
+                        return true;
+                }
+
+                if (reader.NodeType == System.Xml.XmlNodeType.EndElement && XmlHelper.IsElementMatch(endElement, reader, context))
+                    break;
+            }
+            while (reader.Read());
+
+            return true;
+        }
+
+        public bool WriteXml(XmlWriter writer, XmlWriterContext context)
+        {
+            if (this.Count > 0)
+            {
+                foreach (DBClause tkn in this)
+                {
+                    tkn.WriteXml(writer, context);
+                }
+                return true;
+            }
+            else
+                return false;
         }
     }
 

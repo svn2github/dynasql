@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -37,6 +37,49 @@ namespace Perceiveit.Data
     /// <para>You can then call any of the ExecXXX methods with DBQuery's, SQL strings or actual commands.</para></remarks>
     public partial class DBDatabase
     {
+        //
+        // inner classes
+        //
+
+        #region protected enum ReThrowAction
+
+        /// <summary>
+        /// Defines the action that should be taken
+        /// when an exception is caught.
+        /// </summary>
+        protected enum ReThrowAction
+        {
+            /// <summary>
+            /// Simply throw the exception back up
+            /// </summary>
+            Original,
+            /// <summary>
+            /// Throw a wrapped exception
+            /// </summary>
+            Wrapped,
+            /// <summary>
+            /// This has been handled and no action needs to be taken
+            /// </summary>
+            None
+        }
+
+        #endregion
+
+        //
+        // instance vars
+        //
+
+
+        #region public event DBExceptionHandler HandleException
+
+        public event DBExceptionHandler HandleException;
+
+        protected virtual void OnHandleException(DBExceptionEventArgs args)
+        {
+            if (null != HandleException)
+                this.HandleException(this, args);
+        }
+        #endregion
 
         #region ivars
 
@@ -388,7 +431,18 @@ namespace Perceiveit.Data
             }
             catch (Exception ex)
             {
-                this.HandleExecutionError(ex);
+                ReThrowAction action;
+                this.HandleExecutionError(ref ex, out action);
+
+                if (action == ReThrowAction.Original)
+                    throw;
+                else if (action == ReThrowAction.Wrapped)
+                    throw ex;
+                else if (action == ReThrowAction.None)
+                    ; //consume it.
+                else
+                    throw new ArgumentOutOfRangeException("Unknown action to perform", ex);
+
             }
             finally
             {
@@ -617,7 +671,17 @@ namespace Perceiveit.Data
             }
             catch (Exception ex)
             {
-                this.HandleExecutionError(ex);
+                ReThrowAction action;
+                this.HandleExecutionError(ref ex, out action);
+
+                if (action == ReThrowAction.Original)
+                    throw;
+                else if (action == ReThrowAction.Wrapped)
+                    throw ex;
+                else if (action == ReThrowAction.None)
+                    ; //consume it.
+                else
+                    throw new ArgumentOutOfRangeException("Unknown action to perform", ex);
             }
             finally
             {
@@ -787,7 +851,17 @@ namespace Perceiveit.Data
             }
             catch (Exception ex)
             {
-                this.HandleExecutionError(ex);
+                ReThrowAction action;
+                this.HandleExecutionError(ref ex, out action);
+
+                if (action == ReThrowAction.Original)
+                    throw;
+                else if (action == ReThrowAction.Wrapped)
+                    throw ex;
+                else if (action == ReThrowAction.None)
+                    ; //consume it.
+                else
+                    throw new ArgumentOutOfRangeException("Unknown action to perform", ex);
             }
             finally
             {
@@ -987,7 +1061,17 @@ namespace Perceiveit.Data
             }
             catch (Exception ex)
             {
-                this.HandleExecutionError(ex);
+                ReThrowAction action;
+                this.HandleExecutionError(ref ex, out action);
+
+                if (action == ReThrowAction.Original)
+                    throw;
+                else if (action == ReThrowAction.Wrapped)
+                    throw ex;
+                else if (action == ReThrowAction.None)
+                    ; //consume it.
+                else
+                    throw new ArgumentOutOfRangeException("Unknown action to perform", ex);
             }
             finally
             {
@@ -1190,7 +1274,17 @@ namespace Perceiveit.Data
             }
             catch (Exception ex)
             {
-                this.HandleExecutionError(ex);
+                ReThrowAction action;
+                this.HandleExecutionError(ref ex, out action);
+
+                if (action == ReThrowAction.Original)
+                    throw;
+                else if (action == ReThrowAction.Wrapped)
+                    throw ex;
+                else if (action == ReThrowAction.None)
+                    ; //consume it.
+                else
+                    throw new ArgumentOutOfRangeException("Unknown action to perform", ex);
             }
             finally
             {
@@ -1472,7 +1566,7 @@ namespace Perceiveit.Data
 
                 if (sb.HasParameters)
                 {
-                    foreach (DBStatementBuilder.StatementParameter sparam in sb.Parameters)
+                    foreach (DBStatementBuilder.StatementParameter sparam in sb.GetPassingParameters())
                     {
                         DbParameter param = sb.CreateCommandParameter(cmd, sparam);
                         cmd.Parameters.Add(param);
@@ -1508,7 +1602,7 @@ namespace Perceiveit.Data
 
                 if (sb.HasParameters)
                 {
-                    foreach (DBStatementBuilder.StatementParameter sparam in sb.Parameters)
+                    foreach (DBStatementBuilder.StatementParameter sparam in sb.GetPassingParameters())
                     {
                         DbParameter param = sb.CreateCommandParameter(cmd, sparam);
                         cmd.Parameters.Add(param);
@@ -1524,16 +1618,16 @@ namespace Perceiveit.Data
         /// <summary>
         /// Returns the implementation specific SQL text for the specified query
         /// </summary>
-        /// <param name="query">The query to get the text for</param>
+        /// <param name="statement">The query to get the text for</param>
         /// <returns>The implementation specific string</returns>
-        public string GetCommandText(DBQuery query)
+        public string GetCommandText(DBStatement statement)
         {
-            if (null == query)
+            if (null == statement)
                 throw new ArgumentNullException("query");
 
             using (DBStatementBuilder sb = this.CreateStatementBuilder())
             {
-                query.BuildStatement(sb);
+                statement.BuildStatement(sb);
                 string text = sb.ToString().Trim();
                 return text;
             }
@@ -1542,24 +1636,24 @@ namespace Perceiveit.Data
         /// <summary>
         /// Returns the implementation specific SQL text for the specified query and also populates any parameters in the query
         /// </summary>
-        /// <param name="query">The DBQuery to get the text for</param>
+        /// <param name="statement">The DBQuery to get the text for</param>
         /// <param name="parameters">Set to a list of any parameters used in teh query</param>
         /// <returns>The implementation specific SQL text</returns>
-        public string GetCommandText(DBQuery query, out List<DbParameter> parameters)
+        public string GetCommandText(DBStatement statement, out List<DbParameter> parameters)
         {
-            if (null == query)
+            if (null == statement)
                 throw new ArgumentNullException("query");
 
             parameters = new List<DbParameter>();
 
             using (DBStatementBuilder sb = this.CreateStatementBuilder())
             {
-                query.BuildStatement(sb);
+                statement.BuildStatement(sb);
                 string text = sb.ToString().Trim();
 
                 if (sb.HasParameters)
                 {
-                    foreach (DBStatementBuilder.StatementParameter sparam in sb.Parameters)
+                    foreach (DBStatementBuilder.StatementParameter sparam in sb.GetPassingParameters())
                     {
 
                         DbParameter param = this.Factory.CreateParameter();
@@ -1626,7 +1720,7 @@ namespace Perceiveit.Data
         /// <param name="dbType">The DbType of the parameters value.</param>
         /// <param name="direction">The direction of the parameter.</param>
         /// <returns>The parameter that was added to the command</returns>
-        public DbParameter AddCommandParameter(DbCommand cmd, string genericParameterName,
+        public virtual DbParameter AddCommandParameter(DbCommand cmd, string genericParameterName,
                                                DbType dbType, ParameterDirection direction)
         {
             if (null == cmd)
@@ -1635,7 +1729,11 @@ namespace Perceiveit.Data
                 throw new ArgumentNullException("genericParameterName");
 
             DbParameter p = cmd.CreateParameter();
-            p.ParameterName = this.GetParameterName(genericParameterName);
+            if (cmd.CommandType == CommandType.StoredProcedure
+                && String.Equals(this.ProviderName, "System.Data.OracleClient", StringComparison.OrdinalIgnoreCase))
+                p.ParameterName = genericParameterName;
+            else
+                p.ParameterName = this.GetParameterName(genericParameterName);
             p.DbType = dbType;
             p.Direction = direction;
             cmd.Parameters.Add(p);
@@ -1866,6 +1964,8 @@ namespace Perceiveit.Data
         // support methods
         //
 
+        #region protected virtual void HandleExecutionError(Exception ex)
+
         /// <summary>
         /// Method called if there was an error generated dring the execution of a database command.
         /// </summary>
@@ -1874,13 +1974,29 @@ namespace Perceiveit.Data
         /// However if the compilation constant 'WRAP_EXCEPTIONS' is defined then all errors that occur 
         /// during execution will be wrapped in a generic exception message.<br/>
         /// Inheritors can also override this method to provide their own error handling</remarks>
-        protected virtual void HandleExecutionError(Exception ex)
+        protected virtual void HandleExecutionError(ref Exception ex, out ReThrowAction rethrow)
         {
-            if(Configuration.DBConfigurationSection.GetSection().WrapExceptions)
-                throw new DataException(Errors.ExecutionFailedAgainstDatabase, ex);
+            DBConfigurationSection section = Configuration.DBConfigurationSection.GetSection();
+
+            DBExceptionEventArgs args = new DBExceptionEventArgs(ex);
+            this.OnHandleException(args);
+
+            if (args.Handled)
+            {
+                rethrow = ReThrowAction.None;
+                ex = null;
+            }
+            else if (section.WrapExceptions)
+            {
+                rethrow = ReThrowAction.Wrapped;
+                ex = new DataException(args.Message, ex);
+            }
             else
-                throw ex;
+                rethrow = ReThrowAction.Original;
+
         }
+
+        #endregion
 
         #region protected string[] ExtractTableNames(DataSet ds)
         /// <summary>
@@ -1913,11 +2029,16 @@ namespace Perceiveit.Data
         private static void DisposeCommandOwnedConnection(object sender, EventArgs e)
         {
             DbCommand cmd = (DbCommand)sender;
-            if (cmd.Connection != null)
+            try
             {
-                //System.Diagnostics.Trace.WriteLine("Disposing owned connection for command created by DBDatabase");
-                cmd.Connection.Dispose();
+                if (cmd.Connection != null)
+                {
+                    //System.Diagnostics.Trace.WriteLine("Disposing owned connection for command created by DBDatabase");
+                    cmd.Connection.Dispose();
+
+                }
             }
+            catch { }
         }
 
         #endregion

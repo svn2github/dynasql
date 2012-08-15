@@ -97,6 +97,9 @@
     <Compile Include="Configuration\DBProfilerConfigElement.cs" />
     <Compile Include="Configuration\DBProfilerConfigSection.cs" />
     <Compile Include="Configuration\DBProfilerConfigSettingElement.cs" />
+    <Compile Include="Oracle\DBOracleImplementation.cs" />
+    <Compile Include="Oracle\DBOracleSchemaProvider.cs" />
+    <Compile Include="Oracle\DBOracleStatementBuilder.cs" />
     <Compile Include="Profile\DBCollectionProfiler.cs" />
     <Compile Include="Profile\DBConsoleProfiler.cs" />
     <Compile Include="Profile\DBProfilerBase.cs" />
@@ -107,8 +110,27 @@
     <Compile Include="Profile\ProfilerExecData.cs" />
     <Compile Include="Profile\ProfilerExecSummary.cs" />
     <Compile Include="Profile\ProfileDataSummaryCollection.cs" />
+    <Compile Include="Query\DBColumn.cs" />
+    <Compile Include="Query\DBConstraint.cs" />
+    <Compile Include="Query\DBCreateIndexQuery.cs" />
+    <Compile Include="Query\DBCreateProcedureQuery.cs" />
+    <Compile Include="Query\DBCreateQuery.cs" />
+    <Compile Include="Query\DBCreateSequenceQuery.cs" />
+    <Compile Include="Query\DBCreateTableQuery.cs" />
+    <Compile Include="Query\DBCreateViewQuery.cs" />
     <Compile Include="Query\DBDeclaration.cs" />
     <Compile Include="DBProviderImplementation.cs" />
+    <Compile Include="Query\DBDropIndexQuery.cs" />
+    <Compile Include="Query\DBDropProcedureQuery.cs" />
+    <Compile Include="Query\DBDropQuery.cs" />
+    <Compile Include="Query\DBDropSequenceQuery.cs" />
+    <Compile Include="Query\DBDropTableQuery.cs" />
+    <Compile Include="Query\DBDropViewQuery.cs" />
+    <Compile Include="Query\DBForeignKey.cs" />
+    <Compile Include="Query\DBPrimaryKey.cs" />
+    <Compile Include="Query\DBTableIndex.cs" />
+    <Compile Include="Query\DBQuery+Create.cs" />
+    <Compile Include="Query\DBQuery+Drop.cs" />
     <Compile Include="Query\DBReturn.cs" />
     <Compile Include="Query\DBSet.cs" />
     <Compile Include="Query\DBStatement.cs" />
@@ -125,6 +147,7 @@
     <Compile Include="Schema\DBSchemaFunction.cs" />
     <Compile Include="Schema\DBSchemaIndex.cs" />
     <Compile Include="Schema\DBSchemaIndexColumn.cs" />
+    <Compile Include="Schema\DBSchemaInformation.cs" />
     <Compile Include="Schema\DBSchemaItem.cs" />
     <Compile Include="Schema\DBSchemaItemCollection.cs" />
     <Compile Include="Schema\DBSchemaItemRef.cs" />
@@ -178,6 +201,7 @@
     <Compile Include="Query\DBTop.cs" />
     <Compile Include="Query\DBUpdateQuery.cs" />
     <Compile Include="Query\Internal\DBValueSet.cs" />
+    <Compile Include="TypedOperation.cs" />
     <Compile Include="_Delegates.cs" />
     <Compile Include="Query\_Interfaces.cs" />
     <Compile Include="Query\XmlHelper.cs" />
@@ -200,6 +224,7 @@
     <Content Include="COPYING.txt" />
     <Content Include="Sample.config.xml" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="_NotSupported.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
@@ -240,6 +265,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -14,22 +14,6 @@ namespace Perceiveit.Data.SchemaTests
 {
     public partial class SchemaExplorer : Form
     {
-        /* ----------  SQLite Northwind Schema -------------- */
-        //public const string SqliteDbConnection = @"data source=C:\Development\Perceiveit.Data.DynaSQL\Northwind_sqlite\Northwind.sl3";
-        //public const string SqliteDbProvider = "System.Data.SQLite";
-
-        /* ----------  Access 2007 Northwind Schema -------------- */
-        //NOTE: x86 compilation only and script execution is not supported
-        //public const string AccessDbConnection = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=""C:\Users\Richard Hewitson\Documents\Northwind07.accdb"";Persist Security Info=False;";
-        //public const string AccessDbProvider = "System.Data.OleDb";
-
-         /* ----------  MySQL Northwind Schema -------------- */
-        //public const string MySQLDbConnection = "server=172.16.56.1;User Id=xan;Password=xan;Persist Security Info=True;database=xan";
-        //public const string MySQLDbProvider = "MySql.Data.MySqlClient";
-        
-        /* ----------  MS SQL Server Northwind Schema -------------- */
-        //public const string MsSQLDbConnection = @"Data Source=.\SQLEXPRESS;Initial Catalog=Northwind;Integrated Security=True;Pooling=False";
-        //public const string MsSQLDbProvider = "System.Data.SqlClient";
 
         private static DBDatabase database = null;
 
@@ -65,7 +49,7 @@ namespace Perceiveit.Data.SchemaTests
 
         private void LoadSchemaTree()
         {
-            Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> schema = new Dictionary<DBSchemaTypes, List<DBSchemaItemRef>>();
+            Dictionary<string, Dictionary<DBSchemaTypes, List<DBSchemaItemRef>>> schema = new Dictionary<string, Dictionary<DBSchemaTypes, List<DBSchemaItemRef>>>();
             this.FillSchema(schema);
 
             TreeNode db = new TreeNode(database.ConnectionString, ImageIndexes.DatabaseIndex, ImageIndexes.DatabaseIndex);
@@ -88,8 +72,11 @@ namespace Perceiveit.Data.SchemaTests
                 return false;
         }
 
-        private void FillSchema(Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> schema)
+        private void FillSchema(Dictionary<string, Dictionary<DBSchemaTypes, List<DBSchemaItemRef>>> byschema)
         {
+            Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> schema;
+
+
             List<DBSchemaItemRef> items = new List<DBSchemaItemRef>();
 
             IEnumerable<DBSchemaItemRef> tbls = FillAllReferencesAndReturnTables(items);
@@ -97,6 +84,19 @@ namespace Perceiveit.Data.SchemaTests
             foreach (DBSchemaItemRef item in items)
             {
                 System.Diagnostics.Debug.WriteLine(item.ToString());
+                string schemaname;
+
+                if (string.IsNullOrEmpty(item.Schema))
+                    schemaname = string.Empty;
+                else
+                    schemaname = item.Schema;
+
+                if (byschema.TryGetValue(schemaname, out schema) == false)
+                {
+                    schema = new Dictionary<DBSchemaTypes, List<DBSchemaItemRef>>();
+                    byschema.Add(schemaname, schema);
+                }
+
                 DBSchemaTypes type = item.Type;
                 List<DBSchemaItemRef> all;
                 if (!schema.TryGetValue(type, out all))
@@ -107,23 +107,14 @@ namespace Perceiveit.Data.SchemaTests
                 all.Add(item);
             }
 
-            foreach (DBSchemaItemRef tbl in tbls)
+            foreach (Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> package in byschema.Values)
             {
-                if (tbl.Name.Equals("Customers", StringComparison.OrdinalIgnoreCase))
+
+                foreach (List<DBSchemaItemRef> value in package.Values)
                 {
-                    IEnumerable<DBSchemaItemRef> customerindexes = provider.GetAllIndexs(tbl);
-                    foreach (DBSchemaItemRef idx in customerindexes)
-                    {
-                        System.Diagnostics.Debug.WriteLine(idx);
-                    }
+                    value.Sort(delegate(DBSchemaItemRef one, DBSchemaItemRef two) { return one.Name.CompareTo(two.Name); });
                 }
             }
-
-            foreach (List<DBSchemaItemRef> value in schema.Values)
-            {
-                value.Sort(delegate(DBSchemaItemRef one, DBSchemaItemRef two) { return one.Name.CompareTo(two.Name); });
-            }
-
             
 
         }
@@ -131,19 +122,27 @@ namespace Perceiveit.Data.SchemaTests
         private IEnumerable<DBSchemaItemRef> FillAllReferencesAndReturnTables(List<DBSchemaItemRef> items)
         {
             System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
-            IEnumerable<DBSchemaItemRef> tbls = null;
+            IEnumerable<DBSchemaItemRef> refs = null;
 
             try
             {
-                tbls = provider.GetAllTables();
-                items.AddRange(tbls);
-                items.AddRange(provider.GetAllViews());
-                items.AddRange(provider.GetAllIndexs());
+                refs = provider.GetAllTables();
+                items.AddRange(refs);
 
-                if((provider.SupportedSchemaTypes & DBSchemaTypes.StoredProcedure) > 0)
-                    items.AddRange(provider.GetAllRoutines());
+                refs = provider.GetAllViews();
+                items.AddRange(refs);
 
-                items.AddRange(provider.GetAllForeignKeys());
+                refs = provider.GetAllIndexs();
+                items.AddRange(refs);
+
+                if ((provider.SupportedSchemaTypes & DBSchemaTypes.StoredProcedure) > 0)
+                {
+                    refs = provider.GetAllRoutines();
+                    items.AddRange(refs);
+                }
+
+                refs = provider.GetAllForeignKeys();
+                items.AddRange(refs);
             }
             catch (Exception ex)
             {
@@ -154,9 +153,35 @@ namespace Perceiveit.Data.SchemaTests
             sw.Stop();
             System.Diagnostics.Debug.WriteLine("Total load time: " + sw.Elapsed);
 
-            return tbls;
+            return items;
         }
 
+        private void PopulateTree(TreeNodeCollection addTo, Dictionary<string, Dictionary<DBSchemaTypes, List<DBSchemaItemRef>>> schema)
+        {
+            List<string> sorted = new List<string>(schema.Keys);
+            sorted.Sort();
+
+            Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> nopack = null;
+
+            foreach (string pack in sorted)
+            {
+                if (string.IsNullOrEmpty(pack))
+                    nopack = schema[pack];
+                else
+                {
+                    Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> found = schema[pack];
+                    TreeNode folder = GetFolderNode(pack);
+                    addTo.Add(folder);
+                    this.PopulateTree(folder.Nodes, found);
+                }
+            }
+
+            if (null != nopack)
+            {
+                this.PopulateTree(addTo, nopack);
+            }
+        }
+            
         private void PopulateTree(TreeNodeCollection addTo, Dictionary<DBSchemaTypes, List<DBSchemaItemRef>> schema)
         {
             TreeNode node;
@@ -217,6 +242,12 @@ namespace Perceiveit.Data.SchemaTests
         private TreeNode GetFolderNode(DBSchemaTypes type)
         {
             TreeNode node = new TreeNode(type.ToString() + "s", ImageIndexes.FolderIndex, ImageIndexes.FolderIndex);
+            return node;
+        }
+
+        private TreeNode GetFolderNode(string name)
+        {
+            TreeNode node = new TreeNode(name, ImageIndexes.FolderIndex, ImageIndexes.FolderIndex);
             return node;
         }
 

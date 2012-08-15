@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -135,6 +135,7 @@ namespace Perceiveit.Data.MySqlClient
             DataColumn IsNullableColumn = GetColumn(dtColumns, "IS_NULLABLE", true);
             DataColumn DataTypeColumn = GetColumn(dtColumns, "DATA_TYPE", true);
             DataColumn MaxCharacterLengthColumn = GetColumn(dtColumns, "CHARACTER_MAXIMUM_LENGTH", false);
+            DataColumn CharacterSetColumn = GetColumn(dtColumns, "CHARACTER_SET_NAME", false);
             DataColumn KeyColumn = GetColumn(dtColumns, "COLUMN_KEY", false);
             DataColumn ExtraColumn = GetColumn(dtColumns, "EXTRA", false);
 
@@ -144,9 +145,10 @@ namespace Perceiveit.Data.MySqlClient
                 col.Name = GetColumnStringValue(row, ColumnNameColumn);
                 col.OrdinalPosition = GetColumnIntValue(row, OrdinalPositionColumn);
                 col.DefaultValue = GetColumnStringValue(row, DefaultValueColumn);
+                col.NativeType = GetColumnStringValue(row, DataTypeColumn);
                 col.Nullable = GetColumnBoolValue(row, IsNullableColumn);
-                col.DbType = GetDbTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
-                col.Type = GetSystemTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
+                col.DbType = GetDbTypeForNativeType(col.NativeType, GetColumnStringValue(row, CharacterSetColumn));
+                col.Type = GetSystemTypeForNativeType(col.NativeType);
                 col.Size = GetColumnIntValue(row, MaxCharacterLengthColumn);
 
                 string extra = GetColumnStringValue(row, ExtraColumn,"");
@@ -187,12 +189,18 @@ namespace Perceiveit.Data.MySqlClient
                     col.DbType = DBHelper.GetDBTypeForRuntimeType(t);
                     col.Type = t;
                 }
+                col.NativeType = type;
                 col.Size = GetColumnIntValue(row, MaxCharacterLengthColumn);
                 col.ReadOnly = GetColumnBoolValue(row, IsReadOnly);
                 col.HasDefault = !string.IsNullOrEmpty(col.DefaultValue);
 
                 asproc.Results.Add(col);
             }
+        }
+
+        protected override DataTable GetSprocResultSchema(DbConnection con, DBSchemaRoutine routine)
+        {
+            return null; //Doesn't support the SchemaOnly option on the command
         }
 
         protected override void FillIndexData(DBSchemaIndex anindex, DataRow dataRow)
@@ -290,204 +298,5 @@ namespace Perceiveit.Data.MySqlClient
         }
 
 
-        //
-        // DoGenerateCreateScript
-        //
-
-        //#region protected override string DoGenerateCreateScript(DBSchemaTypes type, DBSchemaItem schema, DBQuery script, DBStatementBuilder builder)
-
-        //protected override string DoGenerateCreateScript(DBSchemaTypes type, DBSchemaItem schema, DBQuery script, DBStatementBuilder builder)
-        //{
-        //    string sql;
-        //    switch (type)
-        //    {
-        //        case DBSchemaTypes.Table:
-        //            builder.GenerateCreateTableScript((DBSchemaTable)schema);
-        //            break;
-        //        case DBSchemaTypes.View:
-        //            builder.GenerateCreateViewScript((DBSchemaView)schema, script);
-        //            break;
-        //        case DBSchemaTypes.StoredProcedure:
-        //            builder.GenerateCreateProcedureScript((DBSchemaSproc)schema,(DBScript)script);
-        //            break;
-        //        case DBSchemaTypes.Function:
-        //            builder.GenerateCreateFunctionScript((DBSchemaFunction)schema, (DBScript) script);
-        //            break;
-        //        case DBSchemaTypes.Index:
-        //            builder.GenerateCreateIndexScript((DBSchemaIndex)schema);
-        //            break;
-
-        //        default:
-        //            throw new ArgumentOutOfRangeException("type");
-        //            break;
-        //    }
-        //    MySqlClient.DBMySqlStatementBuilder mysqlbuilder = (MySqlClient.DBMySqlStatementBuilder)builder;
-
-        //    sql = builder.ToString();
-
-        //    return sql;
-        //}
-
-        //#endregion
-
-        //
-        // DoGenerateDropScript
-        //
-
-        //#region protected override string DoGenerateDropScript(DBSchemaItemRef itemRef, DBStatementBuilder builder)
-
-        //protected override string DoGenerateDropScript(DBSchemaItemRef itemRef, DBStatementBuilder builder)
-        //{
-        //    string sql;
-        //    switch (itemRef.Type)
-        //    {
-        //        case DBSchemaTypes.Table:
-        //            builder.GenerateDropTableScript(itemRef);
-        //            break;
-        //        case DBSchemaTypes.View:
-        //            builder.GenerateDropViewScript(itemRef);
-        //            break;
-        //        case DBSchemaTypes.StoredProcedure:
-        //            builder.GenerateDropProcedureScript(itemRef);
-        //            break;
-        //        case DBSchemaTypes.Function:
-        //            builder.GenerateDropFunctionScript(itemRef);
-        //            break;
-        //        case DBSchemaTypes.Index:
-        //            builder.GenerateDropIndexScript(itemRef);
-        //            break;
-
-        //        default:
-        //            throw new ArgumentOutOfRangeException("itemRef.Type");
-        //            break;
-        //    }
-        //    sql = builder.ToString();
-
-        //    return sql;
-        //}
-
-        //#endregion
-
-        //
-        // support methods
-        //
-
-        // <summary>
-        // Gets the correct DbType for the MySql DTD_IDENTIFIER type e.g 'int(4) UNSIGNED'
-        // </summary>
-        // <param name="type"></param>
-        // <returns></returns>
-        //#region private DbType GetDbTypeForMySqlDtd(string type)
-
-        //private DbType GetDbTypeForMySqlDtd(string type)
-        //{
-        //    if (type.IndexOf(' ') > -1)
-        //    {
-        //        type = type.Split(' ')[0];
-        //    }
-        //    if (type.IndexOf('(') > -1)
-        //    {
-        //        type = type.Split('(')[0];
-        //    }
-        //    return GetDbTypeForSqlType(type);
-        //}
-
-        //#endregion
-
-
-        // <summary>
-        // Gets the correct DbType for a MySql column type.
-        // </summary>
-        //#region protected override DbType GetDbTypeForSqlType(string type)
-
-        ///// <param name="type"></param>
-        ///// <returns></returns>
-        //protected override DbType GetDbTypeForSqlType(string type)
-        //{
-        //    DbType dbtype = DbType.Object;
-        //    if (string.IsNullOrEmpty(type))
-        //        dbtype = DbType.Object;
-        //    else
-        //    {
-        //        switch (type.ToLower())
-        //        {
-        //            case ("tinyint"):
-        //                dbtype = DbType.SByte;
-        //                break;
-        //            case ("smallint"):
-        //                dbtype = DbType.Int16;
-        //                break;
-        //            case ("mediumint"):
-        //            case ("int"):
-        //                dbtype = DbType.Int32;
-        //                break;
-        //            case ("bigint"):
-        //                dbtype = DbType.Int64;
-        //                break;
-
-        //            case ("tinyint unsigned"):
-        //                dbtype = DbType.Byte;
-        //                break;
-        //            case ("smallint unsigned"):
-        //                dbtype = DbType.UInt16;
-        //                break;
-        //            case ("mediumint unsigned"):
-        //            case ("int unsigned"):
-        //                dbtype = DbType.UInt32;
-        //                break;
-        //            case ("bigint unsigned"):
-        //                dbtype = DbType.UInt64;
-        //                break;
-        //            case ("bit"):
-        //                dbtype = DbType.Boolean;
-        //                break;
-        //            case ("float"):
-        //                dbtype = DbType.Single;
-        //                break;
-        //            case ("double"):
-        //                dbtype = DbType.Double;
-        //                break;
-        //            case ("decimal"):
-        //            case ("numeric"):
-        //                dbtype = DbType.Decimal;
-        //                break;
-        //            case ("date"):
-        //                dbtype = DbType.Date;
-        //                break;
-        //            case ("datetime"):
-        //                dbtype = DbType.DateTime;
-        //                break;
-        //            case ("time"):
-        //                dbtype = DbType.Time;
-        //                break;
-        //            case ("timestamp"):
-        //                dbtype = DbType.DateTimeOffset;
-        //                break;
-        //            case ("year"):
-        //                dbtype = DbType.UInt16;
-        //                break;
-        //            case ("char"):
-        //                dbtype = DbType.StringFixedLength;
-        //                break;
-        //            case ("varchar"):
-        //            case ("text"):
-        //            case ("enum"):
-        //            case ("set"):
-        //                dbtype = DbType.String;
-        //                break;
-        //            case ("binary"):
-        //            case ("varbinary"):
-        //            case ("blob"):
-        //                dbtype = DbType.Binary;
-        //                break;
-        //            default:
-        //                dbtype = DbType.Object;
-        //                break;
-        //        }
-        //    }
-        //    return dbtype;
-        //}
-
-        //#endregion
     }
 }

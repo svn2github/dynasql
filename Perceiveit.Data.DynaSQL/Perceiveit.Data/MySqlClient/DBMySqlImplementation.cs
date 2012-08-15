@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -71,14 +71,19 @@ namespace Perceiveit.Data.MySqlClient
                         vers = vers.Substring(0, index - 1);
                     }
                 }
+                TypedOperationCollection unsupported = new TypedOperationCollection();
+                                                
 
                 props = new DBDatabaseProperties(db, "MySql",
-                                                string.Empty, 
-                                                edition, "?{0}", 
-                                                new Version(vers), 
-                                                SupportedSchemaOptions.All, 
+                                                string.Empty,
+                                                edition, "?{0}",
+                                                new Version(vers),
+                                                SupportedSchemaOptions.All,
                                                 false, DBParameterLayout.Named,
-                                                SUPPORTED_TYPES, SUPPORTED_TOPTYPES);
+                                                SUPPORTED_TYPES, SUPPORTED_TOPTYPES,
+                                                DBSchemaInformation.CreateDefault(),
+                                                unsupported
+                                                );
             }
             catch (Exception ex)
             {
@@ -87,6 +92,14 @@ namespace Perceiveit.Data.MySqlClient
             return props;
 
 
+        }
+
+        protected override void FillNotSupported(TypedOperationCollection all)
+        {
+            base.FillNotSupported(all);
+            all.Add(new TypedOperation(DBSchemaTypes.Index,DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Index,DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.View, DBSchemaOperation.CheckNotExists));
         }
 
         protected override DBStatementBuilder CreateStatementBuilder(DBDatabase forDatabase, DBDatabaseProperties withProperties, System.IO.TextWriter writer, bool ownsWriter)

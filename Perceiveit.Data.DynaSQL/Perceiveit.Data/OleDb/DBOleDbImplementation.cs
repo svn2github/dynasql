@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -78,13 +78,17 @@ namespace Perceiveit.Data.OleDb
                     return props;
             }
 
+            TypedOperationCollection unsupported = new TypedOperationCollection();
+            this.FillNotSupported(unsupported);
             string datasource = GetDataSourceNameFromConnection(forDatabase, ';', '=', "data source");
-            props = new DBDatabaseProperties(datasource,"OleDb", "?", "?", "?", new Version("0.0"),
+            props = new DBDatabaseProperties(datasource,"OleDb","?", "?", "?{0}", new Version("0.0"),
                 SupportedSchemaOptions.TablesViewsAndIndexes, false, DBParameterLayout.Positional,
-                SUPPORTED_TYPES, new TopType[] { TopType.Count });
+                SUPPORTED_TYPES, new TopType[] { TopType.Count },
+                DBSchemaInformation.CreateDefault(), unsupported);
             return props;
 
         }
+
 
         protected virtual bool TryGetProviderSpecificProperties(string provider, DBDatabase database, out DBDatabaseProperties props)
         {
@@ -93,17 +97,54 @@ namespace Perceiveit.Data.OleDb
             {
                 case("microsoft.ace.oledb.12.0"):
                     string datasource = GetDataSourceNameFromConnection(database, ';', '=', "data source");
-                    if (!string.IsNullOrEmpty(datasource))
-                        datasource = System.IO.Path.GetFileNameWithoutExtension(datasource);
 
+                    if (!string.IsNullOrEmpty(datasource))
+                    {
+                        if (datasource.StartsWith("\""))
+                            datasource = datasource.Substring(1, datasource.Length - 2);
+
+                        datasource = System.IO.Path.GetFileNameWithoutExtension(datasource);
+                    }
+                    TypedOperationCollection unsupported = new TypedOperationCollection();
+                    this.FillNotSupported(unsupported);
+                                                   
                     props = new DBDatabaseProperties(datasource, MSAccessProductName, "Microsoft", "OLEDB", "?", new Version("12.0"),
                             SupportedSchemaOptions.TablesViewsAndIndexes | DBSchemaTypes.StoredProcedure, false, DBParameterLayout.Positional,
-                            SUPPORTED_ACCESS_TYPES, new TopType[] { TopType.Count });
+                            SUPPORTED_ACCESS_TYPES, new TopType[] { TopType.Count },
+                            Schema.DBSchemaInformation.CreateDefault(), unsupported);
                     break;
                 default:
                     break;
             }
             return props != null;
+        }
+
+        
+        protected override void FillNotSupported(TypedOperationCollection all)
+        {
+            all.Add(new TypedOperation(DBSchemaTypes.CommandScripts, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Database, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.ForeignKey, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Function, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Group, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Index, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.StoredProcedure, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Table, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.User, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.View, DBSchemaOperation.CheckExists));
+
+            all.Add(new TypedOperation(DBSchemaTypes.CommandScripts, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Database, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.ForeignKey, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Function, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Group, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Index, DBSchemaOperation.CheckExists));
+            all.Add(new TypedOperation(DBSchemaTypes.StoredProcedure, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.Table, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.User, DBSchemaOperation.CheckNotExists));
+            all.Add(new TypedOperation(DBSchemaTypes.View, DBSchemaOperation.CheckNotExists));
+
+            base.FillNotSupported(all);
         }
 
         protected override DBStatementBuilder CreateStatementBuilder(DBDatabase forDatabase, DBDatabaseProperties withProperties, System.IO.TextWriter writer, bool ownsWriter)

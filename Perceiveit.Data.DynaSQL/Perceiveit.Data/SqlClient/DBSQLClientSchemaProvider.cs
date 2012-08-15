@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -133,7 +133,7 @@ namespace Perceiveit.Data.SqlClient
             DataColumn pos = GetColumn(dtColumns, "ColumnOrdinal", true);
             DataColumn size = GetColumn(dtColumns, "ColumnSize", true);
             DataColumn dataType = GetColumn(dtColumns, "DataTypeName", true);
-
+            DataColumn CharacterSetColumn = GetColumn(dtColumns, "CHARACTER_SET_NAME", false);
             foreach (DataRow coldef in dtColumns.Rows)
             {
                 DBSchemaViewColumn tcol = new DBSchemaViewColumn();
@@ -144,7 +144,7 @@ namespace Perceiveit.Data.SqlClient
                 tcol.ReadOnly = GetColumnBoolValue(coldef, isRO);
                 tcol.Size = GetColumnIntValue(coldef, size);
                 tcol.Type = Type.GetType(GetColumnStringValue(coldef, type));
-                tcol.DbType = this.GetDbTypeForNativeType(GetColumnStringValue(coldef, dataType));
+                tcol.DbType = this.GetDbTypeForNativeType(GetColumnStringValue(coldef, dataType), GetColumnStringValue(coldef, CharacterSetColumn));
 
                 aview.Add(tcol);
             }
@@ -183,6 +183,7 @@ namespace Perceiveit.Data.SqlClient
             DataColumn pos = GetColumn(dtColumns, "ColumnOrdinal", true);
             DataColumn size = GetColumn(dtColumns, "ColumnSize", true);
             DataColumn dataType = GetColumn(dtColumns, "DataTypeName", true);
+            DataColumn CharacterSetColumn = GetColumn(dtColumns, "CHARACTERSET", false);
 
             foreach (DataRow coldef in dtColumns.Rows)
             {
@@ -196,7 +197,8 @@ namespace Perceiveit.Data.SqlClient
                 tcol.ReadOnly = GetColumnBoolValue(coldef, isRO);
                 tcol.Size = GetColumnIntValue(coldef, size);
                 tcol.Type = Type.GetType(GetColumnStringValue(coldef, type));
-                tcol.DbType = this.GetDbTypeForNativeType(GetColumnStringValue(coldef, dataType));
+                tcol.NativeType = GetColumnStringValue(coldef, dataType);
+                tcol.DbType = this.GetDbTypeForNativeType(tcol.NativeType, GetColumnStringValue(coldef, CharacterSetColumn));
 
                 atablecolumns.Add(tcol);
             }

@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -571,7 +571,117 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        
+        #region DBDeleteQuery WhereAny/All/None(....)
+
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of OR'd clauses e.g WHERE (A=1) OR (A=2) OR (A=3) OR....
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBDeleteQuery WhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return this.Where(joined);
+        }
+
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of AND'd clauses e.g WHERE (A=1) AND (B=2) AND (C=3) AND...
+        /// </summary>
+        /// <param name="all"></param>
+        /// <returns></returns>
+        public DBDeleteQuery WhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return this.Where(joined);
+        }
+
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of AND NOT'd clause WHERE (NOT (A=1)) AND (NOT (A=3)) AND (NOT ...
+        /// </summary>
+        /// <param name="none"></param>
+        /// <returns></returns>
+        public DBDeleteQuery WhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return this.Where(joined);
+        }
+
+        #endregion
+
+        #region DBDeleteQuery AndWhereAny/All/None(....)
+
+        /// <summary>
+        /// Appends to the WHERE with an AND (compare OR compare OR compare)
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBDeleteQuery AndWhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return AndWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND (compare AND compare AND compare)
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBDeleteQuery AndWhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return AndWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND ((NOT compare) AND (NOT compare) AND (NOT compare))
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBDeleteQuery AndWhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return AndWhere(joined);
+        }
+
+        #endregion
+
+        #region  DBDeleteQuery OrWhereAny/All/None(....)
+
+        /// <summary>
+        /// Appends to the WHERE with an OR (compare OR compare OR compare)
+        /// </summary>
+        /// <param name="any">All the comparisons to join into a single or statement</param>
+        /// <returns></returns>
+        public DBDeleteQuery OrWhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return OrWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND (compare AND compare AND compare)
+        /// </summary>
+        /// <param name="any">All the comparisons to join into a single or statement</param>
+        /// <returns></returns>
+        public DBDeleteQuery OrWhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return OrWhere(joined);
+        }
+
+        /// <summary>
+        /// Appends to the WHERE with an AND ((NOT compare) AND (NOT compare) AND (NOT compare))
+        /// </summary>
+        /// <param name="any">All the comparisons to join into a single or statement</param>
+        /// <returns></returns>
+        public DBDeleteQuery OrWhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return OrWhere(joined);
+        }
+
+        #endregion
+
 
         //
         // static factory

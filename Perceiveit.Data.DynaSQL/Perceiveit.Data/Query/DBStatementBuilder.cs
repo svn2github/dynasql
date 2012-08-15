@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -92,11 +92,6 @@ namespace Perceiveit.Data.Query
             {
                 return item.ParameterName;
             }
-
-            protected override void RemoveItem(int index)
-            {
-                throw new NotSupportedException("Cannot remove items from this collection");
-            }
         }
 
         #endregion
@@ -105,6 +100,33 @@ namespace Perceiveit.Data.Query
         // properties
         // 
 
+        #region public List<string> ParameterExclusions {get;}
+
+        private List<string> _exclusions;
+
+        /// <summary>
+        /// Gets the list of all the names of parameters that should not be generated.
+        /// (i.e. Those that have been declared within the statement)
+        /// </summary>
+        public List<string> ParameterExclusions
+        {
+            get
+            {
+                if (null == _exclusions)
+                    _exclusions = new List<string>();
+                return _exclusions;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if there are registered parameters that should be excluded from passing on the command
+        /// </summary>
+        public bool HasExclusionParameters
+        {
+            get { return null != _exclusions && _exclusions.Count > 0; }
+        }
+
+        #endregion
 
         #region public System.IO.TextWriter Writer {get;}
 
@@ -143,14 +165,14 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region protected public virtual StatementParameterList Parameters {get;}
+        #region protected virtual StatementParameterList Parameters {get;}
 
         private StatementParameterList _params;
 
         /// <summary>
         /// Gets the list of parameters in the built statement
         /// </summary>
-        public StatementParameterList Parameters
+        protected StatementParameterList Parameters
         {
             get
             {
@@ -162,7 +184,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region protected public virtual bool HasParameters {get;}
+        #region public virtual bool HasParameters {get;}
 
         public virtual bool HasParameters
         {
@@ -199,6 +221,7 @@ namespace Perceiveit.Data.Query
         public int StatementDepth
         {
             get { return _depth; }
+            protected set { _depth = value; }
         }
 
         #endregion
@@ -235,9 +258,24 @@ namespace Perceiveit.Data.Query
         /// <summary>
         /// Gets the set of Database Properties that this builder is writing a statement for
         /// </summary>
-        protected DBDatabaseProperties DatabaseProperties
+        public DBDatabaseProperties DatabaseProperties
         {
             get { return this._dbprops; }
+        }
+
+        #endregion
+
+        #region protected DBSchemaTypes CurrentlyCreating {get;set;}
+
+        private DBSchemaTypes _currentCreation = DBSchemaTypes.None; //Not true but not used.
+
+        /// <summary>
+        /// Defines the type of object this builder is generating the CREATE statement for
+        /// </summary>
+        protected DBSchemaTypes CurrentlyCreating
+        {
+            get { return _currentCreation; }
+            set { _currentCreation = value; }
         }
 
         #endregion
@@ -246,7 +284,7 @@ namespace Perceiveit.Data.Query
         // .ctor(s)
         //
 
-        #region protected DBStatementBuilder(System.IO.TextWriter writer, bool ownsWriter)
+        #region protected DBStatementBuilder(DBDatabase database, DBDatabaseProperties properties, System.IO.TextWriter writer, bool ownsWriter)
 
         protected DBStatementBuilder(DBDatabase database, DBDatabaseProperties properties, System.IO.TextWriter writer, bool ownsWriter)
         {
@@ -376,6 +414,52 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        //
+        // checking support
+        //
+
+        #region public bool SupportsStatement(DBSchemaTypes type, DBSchemaOperation operation)
+
+        /// <summary>
+        /// Checks if a particular operation is supported
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="operation"></param>
+        /// <returns></returns>
+        public bool SupportsStatement(DBSchemaTypes type, DBSchemaOperation operation)
+        {
+            return this.DatabaseProperties.CheckSupports(type, operation);
+        }
+
+        #endregion
+
+        #region public StatementParameterList GetPassingParameters()
+
+        /// <summary>
+        /// Gets the collection of parameters that should be passed by the DbCommand
+        /// to the database engine. Rather than any declared parameters within the statement
+        /// </summary>
+        /// <returns></returns>
+        public StatementParameterList GetPassingParameters()
+        {
+            if (this.HasParameters == false)
+                return null;
+            else if (this.HasExclusionParameters == false)
+                return this.Parameters;
+            else
+            {
+                StatementParameterList topass = new StatementParameterList();
+                foreach (StatementParameter p in this.Parameters)
+                {
+                    if (!this.ParameterExclusions.Contains(p.ParameterName))
+                        topass.Add(p);
+                }
+                return topass;
+            }
+
+        }
+
+        #endregion
 
         //
         // builder begin end section methods - public virtual
@@ -399,6 +483,16 @@ namespace Perceiveit.Data.Query
             this.Writer.Write(") ");
         }
 
+        public virtual void BeginFunctionParameter(int index)
+        {
+            if (index > 0)
+                this.AppendReferenceSeparator();
+        }
+
+        public virtual void EndFunctionParameter(int index)
+        {
+        }
+
         /// <summary>
         /// Appends an individual separator to the statement ', '
         /// </summary>
@@ -413,13 +507,23 @@ namespace Perceiveit.Data.Query
 
         public virtual void BeginSubStatement()
         {
-            this.Writer.Write(" (");
+            //We need to check that we are not in a CREATE PROCEDURE ... state
+            if (this.StatementDepth <= 1 && this.CurrentlyCreating == DBSchemaTypes.StoredProcedure)
+                return;
+            else
+                this.Writer.Write(" (");
         }
 
         public virtual void EndSubStatement()
         {
-            this.Writer.Write(") ");
-            this.BeginNewLine();
+            //We need to check that we are not in a CREATE PROCEDURE ... state
+            if (this.StatementDepth <= 2 && this.CurrentlyCreating == DBSchemaTypes.StoredProcedure)
+                return;
+            else
+            {
+                this.Writer.Write(") ");
+                this.BeginNewLine();
+            }
         }
 
         #endregion
@@ -467,7 +571,6 @@ namespace Perceiveit.Data.Query
 
             this.Writer.Write("SELECT ");
             this.IncrementStatementDepth();
-            
         }
 
         public virtual void EndSelectStatement()
@@ -484,6 +587,24 @@ namespace Perceiveit.Data.Query
         public virtual void WriteStatementTerminator()
         {
             this.WriteRaw(";");
+        }
+
+        #endregion
+
+        #region public virtual void BeginSelectList() + EndSelectList()
+
+        /// <summary>
+        /// Begins the list of select fields and clauses
+        /// </summary>
+        public virtual void BeginSelectList()
+        {
+        }
+
+        /// <summary>
+        /// Ends the list of selected fields and clauses
+        /// </summary>
+        public virtual void EndSelectList()
+        {
         }
 
         #endregion
@@ -506,6 +627,13 @@ namespace Perceiveit.Data.Query
 
         #region public virtual void BeginBlock() + EndBlock()
 
+        public void BeginBlock(bool indent)
+        {
+            this.BeginBlock();
+            if (indent)
+                this.IncrementStatementDepth();
+        }
+
         public virtual void BeginBlock()
         {
             this.Writer.Write(" (");
@@ -514,6 +642,33 @@ namespace Perceiveit.Data.Query
         public virtual void EndBlock()
         {
             this.Writer.Write(") ");
+        }
+
+        public void EndBlock(bool outdent)
+        {
+            this.EndBlock();
+            if (outdent)
+                this.DecrementStatementDepth();
+
+        }
+
+        #endregion
+
+        #region public virtual void BeginEntityDefinition() + EndEntityDefinition()
+        /// <summary>
+        /// Starts the actual definition of an entity such as a View or Stored Procedure after declaring the name
+        /// </summary>
+        public virtual void BeginEntityDefinition()
+        {
+            this.WriteRaw(" AS "); 
+            this.BeginNewLine();
+        }
+
+        /// <summary>
+        /// Ends the definition of an entity such as a View or Stored Procedure
+        /// </summary>
+        public virtual void EndEntityDefinition()
+        {
         }
 
         #endregion
@@ -553,7 +708,7 @@ namespace Perceiveit.Data.Query
 
         #region public void BeginOrderClause(Order order) + EndOrderClause(Order order)
 
-        public void BeginOrderClause(Order order)
+        public virtual void BeginOrderClause(Order order)
         {
 
         }
@@ -575,7 +730,7 @@ namespace Perceiveit.Data.Query
                 default:
                     throw new ArgumentOutOfRangeException("The value of the order by enumeration '" + order.ToString() + "' could not be recognised");
             }
-            this.Writer.Write(o);
+            this.WriteRaw(o);
         }
 
         #endregion
@@ -690,10 +845,15 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        //
+        // update
+        //
+
         #region public void BeginUpdateStatement() + EndUpdateStatement()
 
         public virtual void BeginUpdateStatement()
         {
+            this.BeginNewLine();
             if (this.StatementDepth > 0)
                 this.BeginSubStatement();
             this.IncrementStatementDepth();
@@ -720,8 +880,8 @@ namespace Perceiveit.Data.Query
 
         public virtual void BeginSetValueList()
         {
-            this.Writer.WriteLine();
-            this.Writer.Write(" SET ");
+            this.BeginNewLine();
+            this.WriteRaw(" SET ");
         }
 
         public virtual void EndSetValueList()
@@ -743,6 +903,22 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+        public virtual void WriteAssignValue(DBClause receiver, DBClause value)
+        {
+            receiver.BuildStatement(this);
+            this.WriteAssignmentOperator();
+            value.BuildStatement(this);
+        }
+
+        protected virtual void WriteAssignmentOperator()
+        {
+            this.WriteOperator(Operator.Equals);
+        }
+
+        //
+        // insert
+        //
 
         #region public virtual void BeginInsertStatement() + EndInsertStatement()
 
@@ -802,6 +978,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        //
+        // delete
+        //
+
         #region public virtual void BeginDeleteStatement() + EndDeleteStatement()
 
         public virtual void BeginDeleteStatement()
@@ -841,6 +1021,9 @@ namespace Perceiveit.Data.Query
                     break;
                 case Function.IsNull:
                     name = "ISNULL";
+                    break;
+                case Function.Concatenate:
+                    name = "CONCAT";
                     break;
                 case Function.Unknown:
                 default:
@@ -887,15 +1070,15 @@ namespace Perceiveit.Data.Query
         public virtual void BeginScript()
         {
             this.Writer.Write("BEGIN");
-            this.IncrementStatementBlock();
             this.BeginNewLine();
         }
 
         public virtual void EndScript()
         {
-            this.DecrementStatementBlock();
             this.BeginNewLine();
             this.Writer.WriteLine("END");
+            if (this.StatementDepth <= 1)
+                this.WriteStatementTerminator();
         }
 
         #endregion
@@ -990,85 +1173,662 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region protected virtual void BeginDrop(DBSchemaTypes type) + EndDrop(type)
+        //
+        // create / drop
+        //
 
-        protected virtual void BeginDrop(DBSchemaTypes type)
+        #region public virtual void BeginDrop(DBSchemaTypes type, string owner, string name, bool checkExists) + EndDrop(type)
+
+        public virtual void BeginDropStatement(DBSchemaTypes type, string owner, string name, bool checkExists)
         {
+            
+            if (checkExists)
+            {
+                this.BeginCheckExists(type, owner, name);
+            }
+            this.BeginDropStatement(type);
+            this.WriteSourceTable(owner, name, string.Empty);
+            if (checkExists)
+            {
+                this.EndCheckExists(type, owner, name);
+            }
+
+            
+        }
+
+        public virtual void BeginDropStatement(DBSchemaTypes type)
+        {
+            this.BeginNewLine();
+            this.IncrementStatementDepth();
+
             this.WriteRaw("DROP ");
+            WriteDropType(type);
+        }
+
+        protected virtual void WriteDropType(DBSchemaTypes type)
+        {
             switch (type)
             {
                 case DBSchemaTypes.Table:
-                    this.WriteRaw("TABLE ");
+                    this.WriteDropType("TABLE");
                     break;
                 case DBSchemaTypes.View:
-                    this.WriteRaw("VIEW ");
+                    this.WriteDropType("VIEW");
                     break;
                 case DBSchemaTypes.StoredProcedure:
-                    this.WriteRaw("PROCEDURE ");
+                    this.WriteDropType("PROCEDURE");
                     break;
                 case DBSchemaTypes.Function:
-                    this.WriteRaw("FUNCTION ");
+                    this.WriteDropType("FUNCTION");
                     break;
                 case DBSchemaTypes.Index:
-                    this.WriteRaw("INDEX ");
+                    this.WriteDropType("INDEX");
                     break;
                 case (DBSchemaTypes)0:
                 default:
                     throw new ArgumentOutOfRangeException("type");
-                    
+
             }
+            this.WriteSpace();
         }
 
-        protected virtual void EndDrop(DBSchemaTypes type)
+        protected void WriteDropType(string type)
         {
+            this.WriteRaw(type);
+        }
+
+        public virtual void EndDrop(DBSchemaTypes type, bool checkExists)
+        {
+            //this.WriteStatementTerminator(); //Not sure why - validate removal against unit tests
+            this.DecrementStatementDepth();
+        }
+
+
+        #endregion
+
+        #region public virtual void BeginReferenceOn() + EndReferenceOn()
+        /// <summary>
+        /// Starts the ON section of a SQL statement e.g CREATE INDEX [name] ON .....
+        /// </summary>
+        public virtual void BeginReferenceOn()
+        {
+            this.WriteRaw(" ON ");
+        }
+
+        /// <summary>
+        /// Ends the ON section of a SQL statement after all the ON parts have been added.
+        /// </summary>
+        public virtual void EndReferenceOn()
+        { }
+
+        #endregion
+
+        #region public virtual string GetCreateOption(CreateOptions option)
+
+        /// <summary>
+        /// Gets the implementation specific string for the CREATE ... options including identifiers for unique contraints and temportary tables
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public virtual string GetCreateOption(CreateOptions option)
+        {
+            List<string> all = new List<string>();
+            if ((option & CreateOptions.Unique) > 0)
+                all.Add("UNIQUE");
+            if ((option & CreateOptions.Temporary) > 0)
+                all.Add("TEMP");
+            if ((option & CreateOptions.Clustered) > 0)
+                all.Add("CLUSTERED");
+            if ((option & CreateOptions.NonClustered) > 0)
+                all.Add("NONCLUSTERED");
+
+            return string.Join(" ", all.ToArray());
+
         }
 
         #endregion
 
         #region protected virtual void BeginCreate(DBSchemaTypes type) + EndCreate(type)
 
-        protected virtual void BeginCreate(DBSchemaTypes type, string options)
+       
+        /// <summary>
+        /// Starts a new CREATE ... statement with the owner.name any options (from the GetCreateOptions) 
+        /// and a flag to identifiy if this should be checked for non existance first
+        /// </summary>
+        /// <param name="type">The type of schema object to create</param>
+        /// <param name="owner">The shema owner for the database object that will be created</param>
+        /// <param name="name">The name for the database object that will ber created</param>
+        /// <param name="options"></param>
+        /// <param name="checknotexists"></param>
+        public virtual void BeginCreate(DBSchemaTypes type, string owner, string name, string options, bool checknotexists)
         {
-            this.WriteRaw("CREATE ");
-            if (string.IsNullOrEmpty(options) == false)
-            {
-                this.WriteRaw(options);
-                if (!options.EndsWith(" "))
-                    this.WriteRaw(" ");
-            }
+            this.CurrentlyCreating = type;
 
+            if (checknotexists)
+                this.BeginCheckNotExists(type, owner, name);
+
+            //If the Foreign Key has a name it generally  comes before the FOREIGN KEY declaration but behind a CONSTRAINT marker.
+            //CONSTRAINT is not required otherwise.
+            bool isconstraint = IsConstraintType(type);
+            if (isconstraint)
+            {
+                if (!string.IsNullOrEmpty(name))
+                {
+                    this.WriteRaw("CONSTRAINT ");
+                    this.BeginIdentifier();
+                    this.WriteRaw(name);
+                    this.EndIdentifier();
+                    this.WriteRaw(" ");
+                }
+            }
+            else
+                this.BeginNewLine();
+            this.IncrementStatementDepth();
+            this.WriteCreateType(type, options, isconstraint);
+            
+            if(!isconstraint)
+                this.WriteSourceTable(owner, name, string.Empty);
+
+            if (checknotexists)
+                this.EndCheckExists(type, owner, name);
+        }
+
+        
+        /// <summary>
+        /// Starts a new CREATE ... statement
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="options"></param>
+        public virtual void BeginCreate(DBSchemaTypes type, string options)
+        {
+            this.CurrentlyCreating = type;
+            bool constraint = this.IsConstraintType(type);
+            if(!constraint)
+                this.BeginNewLine();
+
+            this.IncrementStatementDepth();
+            WriteCreateType(type, options, constraint);
+            
+        }
+
+        /// <summary>
+        /// Outputs the CREATE XXX part
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="options"></param>
+        protected virtual void WriteCreateType(DBSchemaTypes type, string options, bool isconstraint)
+        {
+            string nativetype;
             switch (type)
             {
                 case DBSchemaTypes.Table:
-                    this.WriteRaw("TABLE ");
+                    nativetype = "TABLE";
                     break;
                 case DBSchemaTypes.View:
-                    this.WriteRaw("VIEW ");
+                    nativetype = "VIEW";
                     break;
                 case DBSchemaTypes.StoredProcedure:
-                    this.WriteRaw("PROCEDURE ");
+                    nativetype = "PROCEDURE";
                     break;
                 case DBSchemaTypes.Function:
-                    this.WriteRaw("FUNCTION ");
+                    nativetype = "FUNCTION";
                     break;
                 case DBSchemaTypes.Index:
-                    this.WriteRaw("INDEX ");
+                    nativetype = "INDEX";
+                    break;
+                case DBSchemaTypes.ForeignKey:
+                    nativetype = "FOREIGN KEY";
+                    break;
+                case DBSchemaTypes.PrimaryKey:
+                    nativetype = "PRIMARY KEY";
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("type");
+                    throw new ArgumentOutOfRangeException(type.ToString(),String.Format(Errors.CannotBuildCreateType,type.ToString()));
             }
+
+            WriteCreateType(nativetype, options, isconstraint);
+            this.WriteSpace();
         }
 
-        protected virtual void EndCreate(DBSchemaTypes type)
+        protected virtual void WriteCreateType(string nativeType, string options, bool isconstraint)
         {
+            if (!isconstraint)
+                this.WriteRaw("CREATE ");
+
+            if (string.IsNullOrEmpty(options) == false)
+            {
+                if (options.EndsWith(" ") == false)
+                    options = options + " ";
+
+                this.WriteRaw(options);
+            }
+
+            this.WriteRaw(nativeType);
+        }
+
+        public virtual void EndCreate(DBSchemaTypes type, bool checknotexists)
+        {
+            bool constraint = this.IsConstraintType(type);
+            //if (!constraint && type != DBSchemaTypes.StoredProcedure)
+            //{
+            //    if (this.StatementDepth > 1)
+            //        this.EndSubStatement();
+            //    else
+            //        this.WriteStatementTerminator();
+            //}
+            this.DecrementStatementDepth();
+
+            this.CurrentlyCreating = DBSchemaTypes.None;
+        }
+
+        protected virtual bool IsConstraintType(DBSchemaTypes type)
+        {
+            return (type == DBSchemaTypes.ForeignKey) || (type == DBSchemaTypes.PrimaryKey);
         }
 
         #endregion
 
+        #region public virtual void BeginTableConstraints() + EndTableConstraints()
+
+        /// <summary>
+        /// Begins the list of CreateTable constraints (e.g. Foreign Keys).
+        /// </summary>
+        public virtual void BeginTableConstraints()
+        {
+            //We must have columns on the table, so we append a comma and start the constraints.
+            this.AppendReferenceSeparator();
+            //this.BeginNewLine();
+            //this.IncrementStatementDepth();
+        }
+
+        /// <summary>
+        /// Ends the list of CreateTable constraints (e.g Foreign Keys).
+        /// </summary>
+        public virtual void EndTableConstraints()
+        {
+            //this.DecrementStatementDepth();
+        }
+
+        #endregion 
+
+        //
+        // foreign key on update, on delete and references statements.
+        // 
+
+        #region public virtual void BeginForeignKeyUpdateActions()
+
+        /// <summary>
+        /// Begins the list of update actions
+        /// </summary>
+        public virtual void BeginForeignKeyUpdateActions()
+        {
+
+        }
+
+        #endregion
+
+        #region public void WriteDeleteAction(DBFKAction perform)
+
+        /// <summary>
+        /// Writes the ON DELETE action
+        /// </summary>
+        /// <param name="perform"></param>
+        public void WriteDeleteAction(DBFKAction perform)
+        {
+            this.WriteForeignKeyAction("DELETE", perform);
+        }
+
+        #endregion
+
+        #region public void WriteUpdateAction(DBFKAction perform)
+
+        /// <summary>
+        /// Writes the ON UPDATE action
+        /// </summary>
+        /// <param name="perform"></param>
+        public void WriteUpdateAction(DBFKAction perform)
+        {
+            this.WriteForeignKeyAction("UPDATE", perform);
+        }
+
+        #endregion
+
+        #region protected virtual void WriteForeignKeyAction(string actionOn, DBFKAction perform)
+
+        /// <summary>
+        /// Outputs the ON [action] [perform] for a foreign key
+        /// </summary>
+        /// <param name="actionOn"></param>
+        /// <param name="perform"></param>
+        protected virtual void WriteForeignKeyAction(string actionOn, DBFKAction perform)
+        {
+            switch (perform)
+            {
+                case DBFKAction.Cascade:
+                    this.WriteRaw(" ON ");
+                    this.WriteRaw(actionOn);
+                    this.WriteRaw(" CASCADE");
+
+                    break;
+                case DBFKAction.NoAction:
+                    this.WriteRaw(" ON ");
+                    this.WriteRaw(actionOn);
+                    this.WriteRaw(" NO ACTION");
+
+                    break;
+                case DBFKAction.Undefined:
+                default:
+                    break;
+            }
+        }
+        #endregion
+
+        #region public void EndForeignKeyUpdateActions()
+
+        /// <summary>
+        /// Ends the list of foreign key update actions
+        /// </summary>
+        public virtual void EndForeignKeyUpdateActions()
+        {
+
+        }
+
+        #endregion
+
+        #region public void BeginReferences(string owner, string name)
+
+        /// <summary>
+        /// Begins a REFERENCES ... section
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="p_2"></param>
+        public void BeginReferences(string owner, string name)
+        {
+            this.WriteRaw(" REFERENCES ");
+            this.WriteSourceTable(owner, name, string.Empty);
+        }
+
+        #endregion
+
+        #region public void EndReferences(string owner, string name)
+
+        /// <summary>
+        /// Ends the REFERENCES ... section
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        public void EndReferences(string owner, string name)
+        {
+
+        }
+
+        #endregion
+
+        //
+        // check exists
+        //
+
+        #region public virtual void BeginCheckExists(DBSchemaTypes type, string owner, string name) + EndCheckExists()
+
+
+        /// <summary>
+        /// Starts the IF EXISTS ... block - usually called from the BeginDrop method
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        public virtual void BeginCheckExists(DBSchemaTypes type, string owner, string name)
+        {
+            this.WriteRaw("IF");
+            this.WriteRaw(" EXISTS");
+
+            this.IncrementStatementDepth();
+            BuildInfoSchemaLookup(type, owner, name);
+
+        }
+
+        /// <summary>
+        /// Ends the IF EXISTS ... block usually called from the BeginDrop method.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        public virtual void EndCheckExists(DBSchemaTypes type, string owner, string name)
+        {
+            this.DecrementStatementDepth();
+        }
+
+        #endregion
+
+        #region public virtual void BeginCheckNotExists(DBSchemaTypes type, string owner, string name) + EndCheckNotExisits()
+
+        /// <summary>
+        /// Starts the IF NOT EXISTS block  - usually called by the create statement
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        public virtual void BeginCheckNotExists(DBSchemaTypes type, string owner, string name)
+        {
+            this.WriteRaw("IF NOT");
+            this.WriteRaw(" EXISTS");
+            this.IncrementStatementDepth();
+            BuildInfoSchemaLookup(type, owner, name);
+        }
+
+        /// <summary>
+        /// Ends the IF NOT EXISTS block
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        public virtual void EndCheckNotExists(DBSchemaTypes type, string owner, string name)
+        {
+            this.DecrementStatementDepth();
+        }
+
+        #endregion
+
+        #region  private void BuildInfoSchemaLookup(DBSchemaTypes type, string owner, string name)
+
+        /// <summary>
+        /// Builds the lookup for the INFORMATION_SCHEMA.XXX view to check for existance of particular entries.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        /// <remarks>Called by the BeginCheckExists and BeginCheckNotExists. The SchemaInformation is loaded from the 
+        /// database properties and the lookups are references to the columns in the view for the schema</remarks>
+        private void BuildInfoSchemaLookup(DBSchemaTypes type, string owner, string name)
+        {
+
+            DBSchemaInformation info = this.DatabaseProperties.SchemaInformation;
+            DBSchemaInfoLookup lookup = info.GetListLookup(type);
+
+            //Generate a sub select statement to look at the INFORMATION_SCHEMA to check it exists
+            DBSelectQuery sel = DBQuery.SelectAll().From(info.SchemaName, lookup.TableName)
+                                                   .WhereFieldEquals(lookup.LookupNameColumn, DBConst.String(name));
+            if (!string.IsNullOrEmpty(owner))
+                sel = sel.AndWhere(lookup.LookupSchemaColumn, Compare.Equals, DBConst.String(owner));
+
+            //Add this statement to self
+            sel.BuildStatement(this);
+        }
+
+        #endregion
+
+        //
+        // script
+        //
+
+        #region public virtual void Begin/End DeclareStatement(DBParam param)
+
+        public virtual void BeginDeclareStatement(DBParam param)
+        {
+            this.WriteRaw("DECLARE ");
+            this.WriteParameter(param, false);
+            this.ParameterExclusions.Add(param.Name);
+        }
+
+        
+
+        public virtual void EndDeclareStatement()
+        {
+            if (this.StatementDepth < 1)
+                this.WriteRaw(";");
+            this.BeginNewLine();
+        }
+
+        #endregion
+
+        #region public virtual void BeginProcedureParameters() + EndProcedureParameters()
+
+        private bool _isDeclaringParameters = false;
+
+        /// <summary>
+        /// Returns true if we a currently registering parameters
+        /// </summary>
+        protected bool IsDeclaringParameters
+        {
+            get { return _isDeclaringParameters; }
+            set { _isDeclaringParameters = value; }
+        }
+
+        /// <summary>
+        /// Starts the list of parameters for a stored procedure
+        /// </summary>
+        public virtual void BeginProcedureParameters()
+        {
+            this.IsDeclaringParameters = true;
+            this.BeginBlock(true);
+        }
+
+        /// <summary>
+        /// Ends the list of parameters for a stored procedure
+        /// </summary>
+        public virtual void EndProcedureParameters()
+        {
+            this.EndBlock(true);
+            this.IsDeclaringParameters = false;
+        }
+
+        #endregion
+
+        public virtual void WriteParameter(DBParam param, bool includeDirection)
+        {
+            bool writeType = true;
+            this.WriteParameter(param, writeType, includeDirection);
+        }
+
+        public virtual void WriteParameter(DBParam param, bool writetype, bool includeDirection)
+        {
+            if (!param.HasName)
+                param.Name = this.GetUniqueParameterName();
+
+            this.WriteNativeParameterReference(param.Name);
+
+            if (writetype)
+            {
+                this.WriteRaw(" ");
+                string options;
+                string type = this.GetNativeTypeForDbType(param.DbType, param.Size, param.Precision, DBColumnFlags.Nullable, out options);
+
+                this.WriteRaw(type);
+                if (!string.IsNullOrEmpty(options))
+                {
+                    this.WriteRaw(options);
+                    if (!options.EndsWith(" "))
+                        this.WriteRaw(" ");
+                }
+            }
+
+            if (includeDirection && param.Direction != ParameterDirection.Input)
+            {
+                switch (param.Direction)
+                {
+                    case ParameterDirection.InputOutput:
+                    case ParameterDirection.Output:
+                        this.WriteRaw("OUTPUT ");
+                        break;
+                    case ParameterDirection.ReturnValue:
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+        }
+
+        #region public virtual void Begin/End SetStatement()
+
+        public virtual void BeginSetStatement()
+        {
+            this.BeginNewLine();
+
+            this.WriteRaw("SET ");
+        }
+
+        public virtual void EndSetStatement()
+        {
+            if (this.StatementDepth < 1)
+                this.WriteRaw(";");
+            this.BeginNewLine();
+        }
+
+        #endregion
+
+        #region public virtual void Begin/End Returns Statement
+
+        public virtual void BeginReturnsStatement()
+        {
+            this.BeginNewLine();
+
+            this.WriteRaw("RETURN ");
+        }
+
+        public virtual void EndReturnsStatement()
+        {
+            if (this.StatementDepth < 1)
+                this.WriteRaw(";");
+            this.BeginNewLine();
+        }
+
+        #endregion
 
         //
         // parameter addition, conversion and naming
         //
+
+        #region Stop/Resume/Should Register(ing) Paramters
+
+        private int _monitoringParams = 0;
+
+        /// <summary>
+        /// Stops automatically registering the parameter references when they are registered
+        /// </summary>
+        public virtual void StopRegisteringParameters()
+        {
+            _monitoringParams = _monitoringParams - 1;
+        }
+
+        /// <summary>
+        /// Resumes the atomatic adding of parameter references to this builders collection when they are registered.
+        /// </summary>
+        public virtual void ResumeRegisteringParameters()
+        {
+            _monitoringParams = _monitoringParams + 1;
+        }
+
+        /// <summary>
+        /// Checks the monitoring flag to see if the parameters should register themseleves with the builder.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual bool ShouldRegisterParameters()
+        {
+            return _monitoringParams >= 0;
+        }
+
+        #endregion
 
         #region public virtual string RegisterParameter(IDBValueSource source)
 
@@ -1080,34 +1840,39 @@ namespace Perceiveit.Data.Query
         /// <returns>The distinct name of the parameter</returns>
         public virtual string RegisterParameter(IDBValueSource source)
         {
+            
             bool declared = true;
             string paramName = source.Name;
 
             if (string.IsNullOrEmpty(paramName))
             {
-                paramName = this.GetUniqueParameterName(ParameterNamePrefix);
+                paramName = this.GetUniqueParameterName();
                 declared = false;
             }
             else if (this.Parameters.Contains(paramName))
             {
-                return paramName;
-                //if (this.DatabaseProperties.ParameterLayout == DBParameterLayout.Named)
-                //    //already registered
-                //    return paramName;
-                //else
-                //    paramName = this.GetUniqueParameterName(ParameterNamePrefix);
+                if (this.DatabaseProperties.ParameterLayout == DBParameterLayout.Named)
+                    //already registered
+                    return paramName;
+                else
+                {
+                    paramName = this.GetUniqueParameterName();
+                }
             }
             else
                 declared = true;
 
-            StatementParameter sp = new StatementParameter();
-            sp.ParameterName = paramName;
-            sp.ValueSource = source;
-            sp.ParameterIndex = this.Parameters.Count;
-            if (!declared)
-                sp.ValueSource.Name = paramName;
+            if (this.ShouldRegisterParameters())
+            {
+                StatementParameter sp = new StatementParameter();
+                sp.ParameterName = paramName;
+                sp.ValueSource = source;
+                sp.ParameterIndex = this.Parameters.Count;
+                if (!declared)
+                    sp.ValueSource.Name = paramName;
 
-            this.Parameters.Add(sp);
+                this.Parameters.Add(sp);
+            }
 
             return paramName;
         }
@@ -1121,19 +1886,30 @@ namespace Perceiveit.Data.Query
         /// </summary>
         /// <param name="paramname">The coded parameter name</param>
         /// <exception cref="ArgumentNullException" >Thown if the paramname value is null or empty</exception>
-        public virtual void WriteParameterReference(string paramname)
+        public virtual void WriteNativeParameterReference(string paramname)
         {
             if (string.IsNullOrEmpty(paramname))
                 throw new ArgumentNullException("Cannot append a null or empty parameter reference - implementors: Use the GetUniqueID to support unnamed parameters");
+            
+            string native = this.GetNativeParameterName(paramname, true);
+            if (this.IsDeclaringParameters)
+            {
+                if (!this.ParameterExclusions.Contains(native))
+                    this.ParameterExclusions.Add(native);
+            }
 
-            this.Writer.Write(this.GetNativeParameterName(paramname));
+            this.Writer.Write(native);
         }
 
         #endregion
 
-        #region public virtual string GetUniqueParameterName(string prefix)
+        #region public virtual string GetUniqueParameterName()
 
-        public virtual string GetUniqueParameterName(string prefix)
+        /// <summary>
+        /// Returns a new unique name of a parameter.
+        /// </summary>
+        /// <returns></returns>
+        public virtual string GetUniqueParameterName()
         {
             string name = "_param" + this.GetNextID();
             return name;
@@ -1152,15 +1928,15 @@ namespace Perceiveit.Data.Query
 
         }
 
-        internal void PopulateParameter(DbParameter p, StatementParameter sparam)
+        public virtual void PopulateParameter(DbParameter p, StatementParameter sparam)
         {
             string name = sparam.ParameterName;
             //if (string.IsNullOrEmpty(name))
             //    p.SourceColumn = this.GetUniqueParameterName(DBParam.ParameterNamePrefix);
             //else
             //    p.SourceColumn = name;
-
-            p.ParameterName = this.GetNativeParameterName(name);
+            bool inline = false;
+            p.ParameterName = this.GetNativeParameterName(name, inline);
 
             object value = sparam.ValueSource.Value;
             if (value is DBConst)
@@ -1215,9 +1991,17 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public virtual string GetNativeParameterName(string paramName)
+        #region public virtual string GetNativeParameterName(string paramName, bool forstatement)
 
-        public virtual string GetNativeParameterName(string paramName)
+        /// <summary>
+        /// Returns a native name of a paramerter including any required prefix e.g @ or :
+        /// If the name will be part of the SQL statement then forstatement will be true.
+        /// </summary>
+        /// <param name="paramName">The name stem</param>
+        /// <param name="forstatement">True if this is inline as part of the statement, 
+        /// otherwise false for a parameter that will be added as one of the command parameters collection.</param>
+        /// <returns></returns>
+        public virtual string GetNativeParameterName(string paramName, bool forstatement)
         {
             return string.Format(this.DatabaseProperties.ParameterFormat, paramName);
         }
@@ -1227,6 +2011,18 @@ namespace Perceiveit.Data.Query
         //
         // write methods
         //
+
+        #region public virtual void WriteSpace()
+
+        /// <summary>
+        /// Writes a blank space
+        /// </summary>
+        public virtual void WriteSpace()
+        {
+            this.WriteRaw(" ");
+        }
+
+        #endregion
 
         #region public virtual void WriteTop(double value, double offset, TopType topType)
 
@@ -1579,33 +2375,15 @@ namespace Perceiveit.Data.Query
         /// <param name="schemaOwner"></param>
         /// <param name="sourceTable"></param>
         /// <param name="alias"></param>
-        public virtual void WriteSourceTable(string schemaOwner, string sourceTable, string alias)
+        public void WriteSourceTable(string schemaOwner, string sourceTable, string alias)
         {
-
-            if (string.IsNullOrEmpty(sourceTable))
-                throw new ArgumentNullException("sourceTable", Errors.NoTableNameSpecifiedForATable);
-
-            if (string.IsNullOrEmpty(schemaOwner) == false)
-            {
-                this.BeginIdentifier();
-                this.WriteRaw(schemaOwner);
-                this.EndIdentifier();
-                this.AppendIdSeparator();
-            }
-
-            this.BeginIdentifier();
-            this.WriteRaw(sourceTable);
-            this.EndIdentifier();
-
-            if (string.IsNullOrEmpty(alias) == false)
-            {
-                WriteAlias(alias);
-            }
+            this.WriteSourceTable(string.Empty, schemaOwner, sourceTable, alias);
         }
 
         #endregion
 
-        #region public virtual void WriteSourceTable(string schemaOwner, string sourceTable, string alias)
+
+        #region public virtual void WriteSourceTable(string schemaOwner, string sourceTable, bool temporary, string alias)
 
         /// <summary>
         /// Appends the owner (optional) and table (required) to the statement and sets the alias name (optional).
@@ -1648,7 +2426,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public virtual void WriteSourceTable(string schemaOwner, string sourceTable)
+        #region public virtual void WriteSource(string schemaOwner, string sourceTable)
 
         /// <summary>
         /// Appends the catalog (optional),  owner (optional) and source (required) to the statement.
@@ -1679,9 +2457,12 @@ namespace Perceiveit.Data.Query
                 this.AppendIdSeparator();
             }
 
-            this.BeginIdentifier();
-            this.WriteRaw(source);
-            this.EndIdentifier();
+            if (string.IsNullOrEmpty(source) == false)
+            {
+                this.BeginIdentifier();
+                this.WriteRaw(source);
+                this.EndIdentifier();
+            }
 
         }
 
@@ -1700,6 +2481,80 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public virtual void WriteSubQueryAlias(string alias)
+
+        /// <summary>
+        /// Writes the alias name of a sub query
+        /// </summary>
+        /// <param name="alias"></param>
+        public virtual void WriteSubQueryAlias(string alias)
+        {
+            this.WriteAlias(alias);
+        }
+
+        #endregion
+
+        #region public virtual void WriteDataType(DbType type, int length, int accuracy)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="length"></param>
+        /// <param name="accuracy"></param>
+        /// <param name="flags"></param>
+        public virtual void WriteColumnDataType(DbType type, int length, int accuracy, DBColumnFlags flags)
+        {
+            string opts;
+            string sqltype = GetNativeTypeForDbType(type, length, accuracy, flags, out opts);
+            this.WriteRaw(sqltype);
+            if (!string.IsNullOrEmpty(opts))
+                this.WriteRaw(opts);
+        }
+
+        #endregion
+
+        #region public virtual void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
+
+        /// <summary>
+        /// Writes the flags associated with a colums data type and identity
+        /// </summary>
+        /// <param name="flags"></param>
+        /// <param name="defaultValue"></param>
+        public virtual void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
+        {
+            if ((flags & DBColumnFlags.PrimaryKey) > 0)
+                this.WriteRaw(" PRIMARY KEY");
+            
+            if ((flags & DBColumnFlags.Nullable) > 0)
+                this.WriteRaw(" NULL");
+            else
+                this.WriteRaw(" NOT NULL");
+
+            if ((flags & DBColumnFlags.AutoAssign) > 0)
+                this.WriteRaw(" IDENTITY");
+
+            if ((flags & DBColumnFlags.HasDefault) > 0)
+            {
+                this.WriteRaw(" DEFAULT ");
+                defaultValue.BuildStatement(this);
+            }
+        }
+
+        #endregion
+
+ 
+        public virtual void WriteSequenceOption(DBSequenceBuilderOption option)
+        {
+            throw new NotSupportedException(Errors.SequenceCreationIsNotSupportedOnThisEngine);
+        }
+
+        public virtual void WriteSequenceOption(DBSequenceBuilderOption option, int value)
+        {
+            throw new NotSupportedException(Errors.SequenceCreationIsNotSupportedOnThisEngine);
+        }
+
+       
 
         //
         // dispose and finalize
@@ -1751,6 +2606,8 @@ namespace Perceiveit.Data.Query
         // Generate CREATE XXX Statements
         //
 
+        #region public virtual void GenerateCreateXXXScript - Not Supported
+
         public virtual void GenerateCreateTableScript(Perceiveit.Data.Schema.DBSchemaTable schemaTable)
         {
             throw new NotSupportedException("CREATE TABLE");
@@ -1776,6 +2633,7 @@ namespace Perceiveit.Data.Query
             throw new NotSupportedException("CREATE INDEX");
         }
 
+        #endregion
 
         //
         // GenerateDropXXX methods
@@ -1795,7 +2653,7 @@ namespace Perceiveit.Data.Query
                 throw new ArgumentOutOfRangeException("itemRef.Type");
 
 
-            this.BeginDrop(itemRef.Type);
+            this.BeginDropStatement(itemRef.Type);
 
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
@@ -1816,7 +2674,7 @@ namespace Perceiveit.Data.Query
 
             this.WriteRaw(itemRef.Name);
             this.EndIdentifier();
-            this.EndDrop(itemRef.Type);
+            this.EndDrop(itemRef.Type, false);
         }
 
         #endregion
@@ -1839,7 +2697,7 @@ namespace Perceiveit.Data.Query
             if (itemRef.Container == null || string.IsNullOrEmpty(itemRef.Container.Name) || itemRef.Container.Type != DBSchemaTypes.Table)
                 throw new ArgumentNullException("itemRef.Container", Errors.ContainerNotSetOnIndexReference);
 
-            this.BeginDrop(DBSchemaTypes.Index);
+            this.BeginDropStatement(DBSchemaTypes.Index);
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
             {
@@ -1882,6 +2740,7 @@ namespace Perceiveit.Data.Query
 
             this.WriteRaw(itemRef.Name);
             this.EndIdentifier();
+            this.EndDrop(DBSchemaTypes.Index, false);
         }
 
 
@@ -1901,7 +2760,7 @@ namespace Perceiveit.Data.Query
                 throw new ArgumentOutOfRangeException("itemRef.Type");
 
 
-            this.BeginDrop(itemRef.Type);
+            this.BeginDropStatement(itemRef.Type);
 
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
@@ -1922,7 +2781,7 @@ namespace Perceiveit.Data.Query
 
             this.WriteRaw(itemRef.Name);
             this.EndIdentifier();
-            this.EndDrop(itemRef.Type);
+            this.EndDrop(itemRef.Type, false);
         }
 
         #endregion
@@ -1941,7 +2800,7 @@ namespace Perceiveit.Data.Query
                 throw new ArgumentOutOfRangeException("itemRef.Type");
 
 
-            this.BeginDrop(itemRef.Type);
+            this.BeginDropStatement(itemRef.Type);
 
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
@@ -1962,7 +2821,7 @@ namespace Perceiveit.Data.Query
 
             this.WriteRaw(itemRef.Name);
             this.EndIdentifier();
-            this.EndDrop(itemRef.Type);
+            this.EndDrop(itemRef.Type, false);
         }
 
         #endregion
@@ -1981,7 +2840,7 @@ namespace Perceiveit.Data.Query
                 throw new ArgumentOutOfRangeException("itemRef.Type");
 
 
-            this.BeginDrop(itemRef.Type);
+            this.BeginDropStatement(itemRef.Type);
 
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
@@ -2002,7 +2861,7 @@ namespace Perceiveit.Data.Query
 
             this.WriteRaw(itemRef.Name);
             this.EndIdentifier();
-            this.EndDrop(itemRef.Type);
+            this.EndDrop(itemRef.Type, false);
         }
 
         #endregion
@@ -2117,7 +2976,7 @@ namespace Perceiveit.Data.Query
 
         #region protected virtual string GetNativeTypeForDbType(System.Data.DbType dbType, int setSize, out string options)
 
-        protected virtual string GetNativeTypeForDbType(System.Data.DbType dbType, int setSize, out string options)
+        protected virtual string GetNativeTypeForDbType(System.Data.DbType dbType, int setSize, int accuracy, DBColumnFlags flags, out string options)
         {
             string type;
             options = string.Empty;
@@ -2137,12 +2996,14 @@ namespace Perceiveit.Data.Query
 
                 case System.Data.DbType.String:
                 case System.Data.DbType.AnsiString:
+                    options = "";
                     if (setSize < 0)
                         setSize = 255;
                     if (setSize < 256)
                     {
                         type = "VARCHAR";
                         options = "(" + setSize.ToString() + ")";
+                        
                     }
                     else if (setSize < 65536)
                         type = "TEXT";
@@ -2150,6 +3011,7 @@ namespace Perceiveit.Data.Query
                         type = "MEDIUMTEXT";
                     else
                         type = "LONGTEXT";
+
                     break;
 
 
@@ -2264,74 +3126,39 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public virtual void Begin/End DeclareStatement(DBParam param)
+        #region public virtual void GenerateCheckExists(DBSchemaTypes types, string owner, string name)
 
-        public virtual void BeginDeclareStatement(DBParam param)
+        /// <summary>
+        /// Creates a check exists statement for a specific type with owner.name and the lookups for the table
+        /// </summary>
+        /// <param name="types"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        /// <param name="info"></param>
+        /// <param name="lookups"></param>
+        public virtual void GenerateCheckExists(DBSchemaTypes types, string owner, string name)
         {
-            this.BeginNewLine();
-
-            this.WriteRaw("DECLARE ");
-            if (!param.HasName)
-                param.Name = this.GetUniqueParameterName(this.ParameterNamePrefix);
-
-            this.WriteParameterReference(param.Name);
-            this.WriteRaw(" ");
-            string options;
-            string type = this.GetNativeTypeForDbType(param.DbType, param.Size, out options);
-
-            this.WriteRaw(type);
-            if (!string.IsNullOrEmpty(options))
-            {
-                this.WriteRaw(options);
-                if (!options.EndsWith(" "))
-                    this.WriteRaw(" ");
-            }
+            DBSchemaInformation info = this.DatabaseProperties.SchemaInformation;
+            DBSchemaInfoLookup lookups = info.GetListLookup(types);
+            if (null == lookups)
+                throw new ArgumentNullException("type", String.Format(Errors.DatabaseEngineDoesntSupportType, types));
             
-        }
+            DBSelectQuery sel = DBQuery.Select(DBConst.Int32(1))
+                                  .From(info.SchemaName, lookups.TableName);
+            if (!string.IsNullOrEmpty(owner))
+                sel = sel.WhereField(lookups.LookupSchemaColumn, Compare.Like, DBConst.String(owner))
+                         .AndWhere(lookups.LookupNameColumn, Compare.Like, DBConst.String(name));
+            else
+                sel = sel.WhereField(lookups.LookupNameColumn, Compare.Like, DBConst.String(name));
+            if (null != lookups.Restrictions)
+                sel = sel.And(lookups.Restrictions);
 
-        public virtual void EndDeclareStatement()
-        {
-            if (this.StatementDepth < 1)
-                this.WriteRaw(";");
-            this.BeginNewLine();
-        }
+            sel.IsInnerQuery = true;
+            sel.BuildStatement(this);
 
-        #endregion
-
-        #region public virtual void Begin/End SetStatement()
-
-        public virtual void BeginSetStatement()
-        {
-            this.BeginNewLine();
-
-            this.WriteRaw("SET ");
-        }
-
-        public virtual void EndSetStatement()
-        {
-            if (this.StatementDepth < 1)
-                this.WriteRaw(";");
-            this.BeginNewLine();
         }
 
         #endregion
 
-        #region public virtual void Begin/End Returns Statement
-
-        public virtual void BeginReturnsStatement()
-        {
-            this.BeginNewLine();
-
-            this.WriteRaw("RETURN ");
-        }
-
-        public virtual void EndReturnsStatement()
-        {
-            if (this.StatementDepth < 1)
-                this.WriteRaw(";");
-            this.BeginNewLine();
-        }
-
-        #endregion
     }
 }

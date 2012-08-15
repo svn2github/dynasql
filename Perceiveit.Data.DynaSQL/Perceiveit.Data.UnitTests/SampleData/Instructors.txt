@@ -1,0 +1,12 @@
+﻿Course, Instructor, Fake
+CPPG, John Smith, False
+CPNN, John Smith, False
+CPNN, Beverly Knight, False
+ENGM, Peter Jones, False
+ENGE, Peter Jones, False
+ENGF, Peter Jones, False
+MSPH, Sarah Falls, False
+MSJO, Sarah Falls, False
+MSPS, Alex Mc'allen, False
+NONE, John Smith, True, This should fail as the course does not exist
+MSPS, Nobody Here, True, And this should not get inserted and no corresponding person

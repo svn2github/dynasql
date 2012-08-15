@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -177,7 +177,7 @@ namespace Perceiveit.Data.SqLite
             DataColumn MaxCharacterLengthColumn = GetColumn(dtColumns, "CHARACTER_MAXIMUM_LENGTH", false);
             DataColumn AutoNumberColumn = GetColumn(dtColumns, "AUTOINCREMENT", false);
             DataColumn PrimaryKeyColumn = GetColumn(dtColumns, "PRIMARY_KEY", false);
-
+            DataColumn CharacterSetColumn = GetColumn(dtColumns, "CHARACTER_SET_NAME", false);
             foreach (DataRow row in dtColumns.Rows)
             {
                 DBSchemaTableColumn col = new DBSchemaTableColumn();
@@ -185,7 +185,8 @@ namespace Perceiveit.Data.SqLite
                 col.OrdinalPosition = GetColumnIntValue(row, OrdinalPositionColumn);
                 col.DefaultValue = GetColumnStringValue(row, DefaultValueColumn);
                 col.Nullable = GetColumnBoolValue(row, IsNullableColumn);
-                col.DbType = GetDbTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
+                col.NativeType = GetColumnStringValue(row, DataTypeColumn);
+                col.DbType = GetDbTypeForNativeType(col.NativeType, GetColumnStringValue(row, CharacterSetColumn));
                 col.Type = GetSystemTypeForNativeType(GetColumnStringValue(row, DataTypeColumn));
                 col.Size = GetColumnIntValue(row, MaxCharacterLengthColumn);
                 col.AutoAssign = GetColumnBoolValue(row, AutoNumberColumn);

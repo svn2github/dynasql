@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -48,8 +48,8 @@ namespace Perceiveit.Data.Schema
         [xs.XmlIgnore()]
         public bool HasDefault
         {
-            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.HasDefault); }
-            set { this.SetColumnFlag(DBSchemaColumnFlags.HasDefault, value); }
+            get { return this.IsColumnFlagSet(DBColumnFlags.HasDefault); }
+            set { this.SetColumnFlag(DBColumnFlags.HasDefault, value); }
         }
 
         #endregion
@@ -81,8 +81,8 @@ namespace Perceiveit.Data.Schema
         [xs.XmlIgnore()]
         public bool AutoAssign
         {
-            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.AutoAssign); }
-            set { this.SetColumnFlag(DBSchemaColumnFlags.AutoAssign,value); }
+            get { return this.IsColumnFlagSet(DBColumnFlags.AutoAssign); }
+            set { this.SetColumnFlag(DBColumnFlags.AutoAssign,value); }
         }
 
 
@@ -97,8 +97,8 @@ namespace Perceiveit.Data.Schema
         [xs.XmlIgnore()]
         public bool PrimaryKey
         {
-            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.PrimaryKey); }
-            set { this.SetColumnFlag(DBSchemaColumnFlags.PrimaryKey, value); }
+            get { return this.IsColumnFlagSet(DBColumnFlags.PrimaryKey); }
+            set { this.SetColumnFlag(DBColumnFlags.PrimaryKey, value); }
         }
 
         #endregion

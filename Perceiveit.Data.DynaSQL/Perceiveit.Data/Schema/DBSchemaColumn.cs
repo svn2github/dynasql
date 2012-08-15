@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -38,9 +38,10 @@ namespace Perceiveit.Data.Schema
         private bool _assignedDbType = false;
         private bool _assignedRuntimeType = false;
         private int _size = -1;
+        private int _precision = -1;
         private int _ordinal = -1;
 
-        private DBSchemaColumnFlags _flags;
+        private DBColumnFlags _flags;
 
         #endregion
 
@@ -55,7 +56,7 @@ namespace Perceiveit.Data.Schema
         /// </summary>
         [XmlAttribute("flags")]
         [System.ComponentModel.Browsable(false)]
-        public DBSchemaColumnFlags ColumnFlags
+        public DBColumnFlags ColumnFlags
         {
             get { return _flags; }
             set { _flags = value; }
@@ -126,6 +127,15 @@ namespace Perceiveit.Data.Schema
 
         #endregion
 
+        #region public string NativeType { get; set; }
+
+        /// <summary>
+        /// Gets or sets the native (db engine) type for the column
+        /// </summary>
+        public string NativeType { get; set; }
+
+        #endregion
+
         #region public int Size { get; set; }
 
         /// <summary>
@@ -141,6 +151,19 @@ namespace Perceiveit.Data.Schema
 
         #endregion
 
+        #region public int Precision {get;set;}
+
+        /// <summary>
+        /// Gets or sets the precision of the columns data type
+        /// </summary>
+        public int Precision
+        {
+            get { return _precision; }
+            set { _precision = value; }
+        }
+
+        #endregion
+
         #region public bool ReadOnly { get; set; }
 
         /// <summary>
@@ -150,8 +173,8 @@ namespace Perceiveit.Data.Schema
         [XmlIgnore()]
         public bool ReadOnly 
         {
-            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.ReadOnly); }
-            set { this.SetColumnFlag(DBSchemaColumnFlags.ReadOnly, value); }
+            get { return this.IsColumnFlagSet(DBColumnFlags.ReadOnly); }
+            set { this.SetColumnFlag(DBColumnFlags.ReadOnly, value); }
         }
 
         #endregion
@@ -165,8 +188,8 @@ namespace Perceiveit.Data.Schema
         [XmlIgnore()]
         public bool Nullable 
         {
-            get { return this.IsColumnFlagSet(DBSchemaColumnFlags.Nullable); }
-            set { this.SetColumnFlag(DBSchemaColumnFlags.Nullable, value); }
+            get { return this.IsColumnFlagSet(DBColumnFlags.Nullable); }
+            set { this.SetColumnFlag(DBColumnFlags.Nullable, value); }
         }
 
         #endregion
@@ -255,7 +278,7 @@ namespace Perceiveit.Data.Schema
         /// </summary>
         /// <param name="flag"></param>
         /// <returns></returns>
-        protected bool IsColumnFlagSet(DBSchemaColumnFlags flag)
+        protected bool IsColumnFlagSet(DBColumnFlags flag)
         {
             return (this._flags & flag) > 0;
         }
@@ -268,7 +291,7 @@ namespace Perceiveit.Data.Schema
         /// </summary>
         /// <param name="flag"></param>
         /// <param name="value"></param>
-        protected void SetColumnFlag(DBSchemaColumnFlags flag, bool value)
+        protected void SetColumnFlag(DBColumnFlags flag, bool value)
         {
             if (value)
                 SetColumnFlag(flag);
@@ -283,7 +306,7 @@ namespace Perceiveit.Data.Schema
         /// Sets this columns flag
         /// </summary>
         /// <param name="flag"></param>
-        protected void SetColumnFlag(DBSchemaColumnFlags flag)
+        protected void SetColumnFlag(DBColumnFlags flag)
         {
             _flags = _flags | flag;
         }
@@ -295,7 +318,7 @@ namespace Perceiveit.Data.Schema
         /// Clears the specified flag
         /// </summary>
         /// <param name="flag"></param>
-        protected void ClearColumnFlag(DBSchemaColumnFlags flag)
+        protected void ClearColumnFlag(DBColumnFlags flag)
         {
             _flags = _flags & ~flag;
         }

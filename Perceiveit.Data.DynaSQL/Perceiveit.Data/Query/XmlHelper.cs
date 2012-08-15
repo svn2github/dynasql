@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -406,6 +406,57 @@ namespace Perceiveit.Data.Query
         public const string Returns = "return";
         public const string Set = "set";
         public const string Multiple = "multi";
+        public const string CheckExists = "exist";
+        public const string TableName = "table-name";
+        public const string TableOwner = "table-owner";
+        public const string Temp = "temp";
+        public const string Unique = "unique";
+        public const string IndexOptions = "idx-options";
+
+        public const string ColumnDefinition = "column-defn";
+        public const string OtherType = "other";
+        public const string Length = "length";
+        public const string Precision = "precision";
+        public const string ColumnFlags = "col-flags";
+        public const string Default = "default";
+
+        public const string CreateIndex = "create-index";
+        public const string DropIndex = "drop-index";
+        public const string IndexColumns = "columns";
+
+        public const string CreateView = "create-view";
+        public const string DropView = "drop-view";
+
+        public const string CreateSproc = "create-sproc";
+        public const string DropSproc = "drop-sproc";
+        public const string SprocScript = "sproc-script";
+        public const string SprocParams = "sproc-params";
+
+        public const string CreateTable = "create-table";
+        public const string DropTable = "drop-table";
+        public const string ColumnList = "columns";
+        public const string ConstraintList = "constraints";
+
+        public const string PrimaryKey = "primary-key";
+
+        public const string ForeignKey = "foreign-key";
+        public const string UpdateAction = "on-update";
+        public const string DeleteAction = "on-delete";
+        public const string ReferenceOwner = "refer-owner";
+        public const string ReferenceTable = "refer-table";
+        public const string ReferenceColumns = "reference-columns";
+
+        public const string CreateSequence = "create-sequence";
+        public const string DropSequence = "drop-sequence";
+        public const string SequenceMin = "min";
+        public const string SequenceMax = "max";
+        public const string SequenceStart = "start";
+        public const string SequenceIncrement = "inc-by";
+        public const string SequenceNoCache = "no-cache";
+        public const string SequenceCache = "cache";
+        public const string SequenceCycling = "cycling";
+        public const string SequenceOrdering = "ordering";
 
     }
+
 }

@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -329,17 +329,60 @@ namespace Perceiveit.Data
             //check to see if we have already retrieved the properties
             //this is not thread safe, but the impact is multiple calls to the database rather than blocking 
             //a number of threads - so considered appropriate
-
-            if (_knownProps.TryGetValue(forDatabase.ProviderName + "|" + forDatabase.ConnectionString, out properties) == false)
+            string key = forDatabase.ProviderName + "|" + forDatabase.ConnectionString;
+            if (_knownProps.TryGetValue(key, out properties) == false)
             {
                 properties = this.GetPropertiesFromDb(forDatabase);
-                _knownProps[forDatabase.ProviderName + "|" + forDatabase.ConnectionString] = properties;
+                _knownProps[key] = properties;
             }
             
             return properties;
         }
 
         #endregion
+
+
+        protected virtual void FillNotSupported(TypedOperationCollection all)
+        {
+            Array values = Enum.GetValues(typeof(DBSchemaOperation));
+
+            //We don't support databases 
+            DBSchemaTypes type = DBSchemaTypes.Database;
+            foreach (DBSchemaOperation op in values)
+            {
+                all.Add(type, op);
+            }
+
+            //We don't support users
+            type = DBSchemaTypes.User;
+            foreach (DBSchemaOperation op in values)
+            {
+                all.Add(type, op);
+            }
+
+            //we don't support groups or roles
+            type = DBSchemaTypes.Group;
+            foreach (DBSchemaOperation op in values)
+            {
+                all.Add(type, op);
+            }
+
+            //can't create functions
+            type = DBSchemaTypes.Function;
+            foreach (DBSchemaOperation op in values)
+            {
+                if(op != DBSchemaOperation.Exec)
+                    all.Add(type, op);
+            }
+
+            //can't create sprocs
+            type = DBSchemaTypes.StoredProcedure;
+            foreach (DBSchemaOperation op in values)
+            {
+                if(op != DBSchemaOperation.Exec)
+                    all.Add(type, op);
+            }
+        }
 
         //
         // support methods

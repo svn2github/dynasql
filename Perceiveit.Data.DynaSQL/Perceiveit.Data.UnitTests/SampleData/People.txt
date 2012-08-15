@@ -1,0 +1,7 @@
+﻿First, Last, HireDate, Enrollment
+John, Smith, 2010-06-01, 2010-07-01
+Peter, Jones, 2007-04-17, 2007-04-17
+Sarah, Falls, 2009-12-01, NULL
+Alex, Mc'allen, 2005-11-02,2005-11-02
+Beverly, Knight, 2006-12-02, 2006-12-01
+John, Knight, NULL, NULL

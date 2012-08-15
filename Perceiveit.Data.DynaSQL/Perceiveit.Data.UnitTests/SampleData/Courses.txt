@@ -1,0 +1,10 @@
+﻿ID, Title, Credits, Department, Description
+CPPG, Computer Programming, 1.0, IT, A starter programming course covering the basics
+CPL2, Advanced Programming, 2.0, IT, Advanced programing including patterns and frameworks
+CPNN, Neural Networks, 2.0, IT, Neural network programming - must have completed CPPG and CPL2 to start this one
+ENGM, Mechanical engineering basics, 1.0, Engineering, Basic mechanical engineering course
+ENGE, Electrical engineering 101, 1.0, Engineering, Basic Electrical engineering course
+ENGF, Fluid Dynamics, 2.0, Engineering, Anaylsis of fluid behaviour in pressured systems
+MSPH, Photgraphy, 1.0, Media Studies, Fundamentals of photography
+MSJO, Journalism, 1.0, Media Studies, Fundamentals of journalism
+MSPS, Media Psychology, 2.0, Media Studies, The psycology and moralality of the media - how it influences us.

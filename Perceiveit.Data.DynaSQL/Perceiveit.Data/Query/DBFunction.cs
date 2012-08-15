@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -214,8 +214,80 @@ namespace Perceiveit.Data.Query
             return func;
         }
 
+
+        /// <summary>
+        /// Creates a new LastID function for the specified sequence
+        /// to be executed on the database server 
+        /// </summary>
+        /// <param name="sequence"></param>
+        /// <returns></returns>
+        /// <remarks>Some database implementations require the use of a sequence name to return the
+        /// last id for (Oracle)</remarks>
+        public static DBFunction LastID(string sequence)
+        {
+            DBSequenceFunctionRef func = new DBSequenceFunctionRef();
+            func.Owner = string.Empty;
+            func.SequenceName = sequence;
+            func.KnownFunction = Data.Function.LastID;
+            return func;
+        }
+
         #endregion
 
+        #region public static DBFunction NextID(string sequence)
+
+        /// <summary>
+        /// Creates a new NextID (NextValue) function for the specified sequence
+        /// </summary>
+        /// <param name="sequence"></param>
+        /// <returns></returns>
+        public static DBFunction NextID(string sequence)
+        {
+            DBSequenceFunctionRef func = new DBSequenceFunctionRef();
+            func.Owner = string.Empty;
+            func.SequenceName = sequence;
+            func.KnownFunction = Data.Function.NextID;
+            return func;
+        }
+
+        /// <summary>
+        /// Creates a new NextID (NextValue) function for the specified owner.sequence
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="sequence"></param>
+        /// <returns></returns>
+        public static DBFunction NextID(string owner, string sequence)
+        {
+            DBSequenceFunctionRef func = new DBSequenceFunctionRef();
+            func.Owner = owner;
+            func.SequenceName = sequence;
+            func.KnownFunction = Data.Function.NextID;
+            return func;
+        }
+
+        #endregion
+
+        #region public static DBFunction Concat(DBClause clause1, DBClause clause2) + 2 overloads
+
+        public static DBFunction Concat(DBClause clause1, DBClause clause2)
+        {
+            DBFunction func = Function(Data.Function.Concatenate, clause1, clause2);
+            return func;
+        }
+
+        public static DBFunction Concat(DBClause clause1, DBClause clause2, DBClause clause3)
+        {
+            DBFunction func = Function(Data.Function.Concatenate, clause1, clause2, clause3);
+            return func;
+        }
+
+        public static DBFunction Concat(params DBClause[] clauses)
+        {
+            DBFunction func = Function(Data.Function.Concatenate, clauses);
+            return func;
+        }
+
+        #endregion
 
         #region  public static DBFunction Function(Function func, params DBClause[] parameters) + 3 overloads
 
@@ -333,7 +405,15 @@ namespace Perceiveit.Data.Query
 
             if (this.HasParameters)
             {
-                this.Parameters.BuildStatement(builder);
+                int index = 0;
+                foreach (DBClause p in this.Parameters)
+                {
+                    builder.BeginFunctionParameter(index);
+                    p.BuildStatement(builder);
+                    builder.EndFunctionParameter(index);
+                    index++;
+                }
+                
             }
             builder.EndFunctionParameterList();
 
@@ -425,5 +505,59 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+    }
+
+
+    internal class DBSequenceFunctionRef : DBFunctionRef
+    {
+        
+        #region internal string SequenceName { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the sequence this query should create
+        /// </summary>
+        internal string SequenceName { get; set; }
+
+        #endregion
+
+        #region internal string Owner { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the sequence owner
+        /// </summary>
+        internal string Owner { get; set; }
+
+        #endregion
+
+        public DBSequenceFunctionRef() : base()
+        {
+        }
+
+        public override bool BuildStatement(DBStatementBuilder builder)
+        {
+            if (string.IsNullOrEmpty(this.Owner) == false)
+            {
+                builder.BeginIdentifier();
+                builder.WriteRaw(this.Owner);
+                builder.EndIdentifier();
+                builder.AppendIdSeparator();
+            }
+            builder.BeginIdentifier();
+            builder.WriteRaw(this.SequenceName);
+            builder.EndIdentifier();
+            builder.AppendIdSeparator();
+            builder.BeginFunction(this.KnownFunction, string.Empty);
+
+            builder.BeginFunctionParameterList();
+            if (this.HasParameters)
+            {
+                this.Parameters.BuildStatement(builder);
+            }
+            builder.EndFunctionParameterList();
+
+            builder.EndFunction(this.KnownFunction, string.Empty);
+
+            return true;
+        }
     }
 }

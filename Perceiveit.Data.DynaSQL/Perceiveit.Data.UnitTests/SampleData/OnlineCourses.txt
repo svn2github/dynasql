@@ -1,0 +1,3 @@
+﻿Id, Url
+MSPH, http://myuniversity.com/courses/photography
+MSJO, http://myuniversity.com/courses/journalism

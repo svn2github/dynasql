@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -165,6 +165,39 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of OR'd clauses e.g WHERE (A=1) OR (A=2) OR (A=3) OR....
+        /// </summary>
+        /// <param name="any"></param>
+        /// <returns></returns>
+        public DBUpdateQuery WhereAny(params DBComparison[] any)
+        {
+            DBComparison joined = DBComparison.Any(any);
+            return this.Where(joined);
+        }
+
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of AND'd clauses e.g WHERE (A=1) AND (B=2) AND (C=3) AND...
+        /// </summary>
+        /// <param name="all"></param>
+        /// <returns></returns>
+        public DBUpdateQuery WhereAll(params DBComparison[] all)
+        {
+            DBComparison joined = DBComparison.All(all);
+            return this.Where(joined);
+        }
+
+        /// <summary>
+        /// Appends a WHERE comparison for a collection of AND NOT'd clause WHERE (NOT (A=1)) AND (NOT (A=3)) AND (NOT ...
+        /// </summary>
+        /// <param name="none"></param>
+        /// <returns></returns>
+        public DBUpdateQuery WhereNone(params DBComparison[] none)
+        {
+            DBComparison joined = DBComparison.None(none);
+            return this.Where(joined);
+        }
+
         #region public DBUpdateQuery WhereFieldEquals(string field, DBClause value) + 1 overload
 
         public DBUpdateQuery WhereFieldEquals(string field, DBClause value)
@@ -176,6 +209,7 @@ namespace Perceiveit.Data.Query
         {
             return WhereField(fieldTable, fieldName, Compare.Equals, value);
         }
+
 
         #endregion
 
@@ -303,6 +337,8 @@ namespace Perceiveit.Data.Query
                 this._where.BuildStatement(builder);
                 builder.EndWhereStatement();
             }
+
+            builder.EndUpdateStatement();
             return true;
         }
 

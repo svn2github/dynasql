@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
  *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -338,7 +338,17 @@ namespace Perceiveit.Data
         /// <summary>
         /// Checks the first argument and returns it unless it's null - returns the second. 
         /// </summary>
-        IsNull = 2
+        IsNull = 2,
+
+        /// <summary>
+        /// Gets the auto numbered  next vaue in the sequence
+        /// </summary>
+        NextID = 3,
+
+        /// <summary>
+        /// A string concatenation function
+        /// </summary>
+        Concatenate = 4
     }
 
     /// <summary>
@@ -367,6 +377,9 @@ namespace Perceiveit.Data
     [Flags()]
     public enum DBSchemaTypes
     {
+        //Not creating anything
+        None = 0,
+
         /// <summary>
         /// A database table
         /// </summary>
@@ -400,7 +413,69 @@ namespace Perceiveit.Data
         /// <summary>
         /// An indexed link between 2 tables
         /// </summary>
-        ForeignKey = 64
+        ForeignKey = 64,
+
+        /// <summary>
+        /// A primary key on a single table
+        /// </summary>
+        PrimaryKey = 128,
+
+        /// <summary>
+        /// A complete database
+        /// </summary>
+        Database = 256,
+
+        /// <summary>
+        /// A database user
+        /// </summary>
+        User = 512,
+
+        /// <summary>
+        /// A databage group or role
+        /// </summary>
+        Group = 1024,
+
+        /// <summary>
+        /// A sequence of numbers
+        /// </summary>
+        Sequence = 2048
+
+
+    }
+
+    /// <summary>
+    /// A list of possible operations that can be performed on a schema item
+    /// </summary>
+    public enum DBSchemaOperation
+    {
+        CheckExists,
+        CheckNotExists,
+        /// <summary>
+        /// e.g create index ... ON table... checks that ON is supported
+        /// </summary>
+        CreateOn,
+        Create,
+        Drop,
+        Select,
+        Insert,
+        Update,
+        Delete,
+        Exec,
+        Grant,
+        Deny
+    }
+
+    /// <summary>
+    /// Gets the create options for some schema items
+    /// </summary>
+    [Flags()]
+    public enum CreateOptions
+    {
+        None = 0,
+        Unique = 1,
+        Temporary = 2,
+        Clustered = 4,
+        NonClustered = 8
     }
 
     /// <summary>
@@ -455,7 +530,12 @@ namespace Perceiveit.Data
         ForeignKeys,
 
         /// <summary>
-        /// All the indexes in the connected engine (restricted to atabase and table)
+        /// All columns associated with the foreign key (restricted to database, table and foreign key)
+        /// </summary>
+        ForeignKeyColumns,
+
+        /// <summary>
+        /// All the indexes in the connected engine (restricted to database and table)
         /// </summary>
         Indexes,
 
@@ -494,7 +574,7 @@ namespace Perceiveit.Data
     /// A set of flags to describe the definition of a DBSchemaColumn.
     /// </summary>
     [Flags()]
-    public enum DBSchemaColumnFlags
+    public enum DBColumnFlags
     {
         /// <summary>
         /// If set, this column cannot be written to
@@ -528,4 +608,65 @@ namespace Perceiveit.Data
     }
 
 
+    /// <summary>
+    /// The state of a database construct - whether it exists or not (or unknown)
+    /// </summary>
+    public enum DBExistState
+    {
+        Unknown,
+        Exists,
+        NotExists
+    }
+
+    /// <summary>
+    /// The actions that can be performed on referenced rows forced by a Foreign Key
+    /// </summary>
+    public enum DBFKAction
+    {
+        Undefined,
+        Cascade,
+        NoAction
+    }
+
+
+    /// <summary>
+    /// THe available options for ordering of sequence values
+    /// </summary>
+    public enum DBSequenceOrdering
+    {
+        None,
+        Ordered,
+        NotOrdered
+    }
+
+    /// <summary>
+    /// Available options for the cycling of sequence values
+    /// </summary>
+    public enum DBSequenceCycling
+    {
+        None,
+        Cycle,
+        NoCycle
+    }
+
+
+    public enum DBSequenceBuilderOption
+    {
+        Minimum,
+
+        Maximim,
+
+        StartValue,
+
+        Cycling,
+        NoCycling,
+
+        Ordered,
+        NotOrdered,
+
+        Increment,
+
+        Cache,
+        NoCaching
+    }
 }

@@ -1,0 +1,14 @@
+﻿This files details the know unsupported operations of the Dynasql library.
+This list is not exhaustive, but it is being monitored and kept as up to data as possible.
+
+1. OleDb (Access) - creation and use of stored procedures.
+			Workaround: none
+
+2. MySql - If Not Exists on views. This is not supported on MySql. 
+			Workaround: Use the Schema provider to check for a view.
+
+3. SQLite - Creation and use of Stored Prodcedures.
+			Workaround: none
+
+4. MySql - Functions as Default values on columns.
+			Workaround: Timestamps columns can be used once in a table

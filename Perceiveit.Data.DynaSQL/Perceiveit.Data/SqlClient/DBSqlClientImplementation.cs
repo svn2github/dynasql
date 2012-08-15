@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -54,27 +54,42 @@ namespace Perceiveit.Data.SqlClient
             if (string.IsNullOrEmpty(dbname))
                 dbname = builder.DataSource;
 
-            props = (DBDatabaseProperties)forDatabase.ExecuteRead(statement, delegate(System.Data.Common.DbDataReader reader)
-            {
 
+            TypedOperationCollection unsupported = new TypedOperationCollection();
+            this.FillNotSupported(unsupported);
+
+            DBSchemaInformation info = DBSchemaInformation.CreateDefault();
+            
+            TopType[] tops = new TopType[] {TopType.Count, TopType.Percent, TopType.Range };
+            bool caseSensitive = false;
+            string level = "?";
+            string edition = "?";
+            Version version = new Version(1,0);
+
+            forDatabase.ExecuteRead(statement, reader =>
+            {
                 if (reader.Read())
                 {
-                    return new DBDatabaseProperties(dbname, "SQL Server",
-                            reader["edition"].ToString(),
-                            reader["level"].ToString(),
-                            "@{0}",
-                            new Version(reader["version"].ToString()),
-                            SupportedSchemaOptions.All,
-                            false,
-                            DBParameterLayout.Named,
-                            SUPPORTED_TYPES, new TopType[] { TopType.Count, TopType.Percent });
-                }
-                else
-                {
-                    return DBDatabaseProperties.Unknown;
-
+                    
+                    level = reader["level"].ToString();
+                    edition = reader["edition"].ToString();
+                    version = new Version(reader["version"].ToString());
                 }
             });
+
+            props = new DBDatabaseProperties(dbname, "SQL Server",
+                            level,
+                            edition,
+                            "@{0}",
+                            version,
+                            SupportedSchemaOptions.All,
+                            caseSensitive,
+                            DBParameterLayout.Named,
+                            SUPPORTED_TYPES, tops,
+                            info,
+                            unsupported);
+            props.TemporaryTableConstruct = "";
+            props.TemporaryTablePrefix = "#";
             return props;
 
         }

@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -136,7 +136,7 @@ namespace Perceiveit.Data.Query
                 case(XmlHelper.Parameter):
                     //parameter is a special case.
                     //we add them to akeyed colection if they are not already registered
-                    //then at the ed we set the values at the end
+                    //then at the end we set the values at the end
                     string name = reader.GetAttribute(XmlHelper.Name);
                     DBParam aparam;
                     if (context.Parameters.TryGetParameter(name, out aparam))
@@ -176,8 +176,65 @@ namespace Perceiveit.Data.Query
                 case(XmlHelper.InnerSelect):
                     c = DBSubQuery.SubSelect();
                     break;
+
                 case(XmlHelper.Multiple):
                     c = DBMultiComparisonRef.Many();
+                    break;
+
+                case(XmlHelper.CreateSproc):
+                    c = DBCreateProcedureQuery.CreateProcedure();
+                    break;
+
+                case(XmlHelper.Declare):
+                    c = DBDeclaration.Declare();
+                    break;
+
+                case(XmlHelper.CreateTable):
+                    c = DBCreateTableQuery.Table();
+                    break;
+
+                case(XmlHelper.ColumnDefinition):
+                    c = DBColumn.Column();
+                    break;
+
+                case(XmlHelper.PrimaryKey):
+                    c = DBPrimaryKey.PrimaryKey();
+                    break;
+
+                case(XmlHelper.ForeignKey):
+                    c = DBForeignKey.ForeignKey();
+                    break;
+
+                case(XmlHelper.CreateIndex):
+                    c = DBCreateIndexQuery.Index();
+                    break;
+
+                case(XmlHelper.CreateView):
+                    c = DBCreateViewQuery.CreateView();
+                    break;
+
+                case(XmlHelper.CreateSequence):
+                    c = DBCreateSequenceQuery.Sequence();
+                    break;
+
+                case(XmlHelper.DropTable):
+                    c = DBDropTableQuery.DropTable();
+                    break;
+
+                case(XmlHelper.DropIndex):
+                    c = DBDropIndexQuery.DropIndex();
+                    break;
+
+                case(XmlHelper.DropView):
+                    c = DBDropViewQuery.DropView();
+                    break;
+
+                case(XmlHelper.DropSproc):
+                    c = DBDropProcedureQuery.DropProcedure();
+                    break;
+
+                case(XmlHelper.DropSequence):
+                    c = DBDropSequenceQuery.DropSequence();
                     break;
                 default:
                     throw XmlHelper.CreateException(Errors.CantDeserializeXML, reader, null, element);

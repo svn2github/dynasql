@@ -2,16 +2,16 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
+ *  You should have received a copy of the GNU Lesser General Public License
  *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Data;
 using Perceiveit.Data.Schema;
 using Perceiveit.Data.Query;
 
@@ -29,9 +30,13 @@ namespace Perceiveit.Data.MySqlClient
     /// </summary>
     public class DBMySqlStatementBuilder : DBStatementBuilder
     {
+
+        
         #region staticvars
 
         public static string StdMySqlBlockDelimiter = "$$";
+        public static string DefaultTableEngine = "InnoDB";
+        
 
         #endregion
 
@@ -41,9 +46,18 @@ namespace Perceiveit.Data.MySqlClient
         private string _mysqldelim;
         private int _limits = -1;
         private int _offset = -1;
-        
+        private string _engine = DefaultTableEngine;
+
         #endregion
 
+        #region public virtual string TableEngine {get;}
+        
+        public virtual string TableEngine
+        {
+            get { return _engine; }
+        }
+
+        #endregion
 
         #region protected virtual string ProcedureDelimiter {get;set;}
 
@@ -55,6 +69,9 @@ namespace Perceiveit.Data.MySqlClient
 
         #endregion
 
+        //
+        // ctor
+        //
 
 
         #region .ctor(database, properties, writer, ownswriter)
@@ -69,6 +86,26 @@ namespace Perceiveit.Data.MySqlClient
         #endregion
 
 
+        //
+        // overridden methods
+        //
+
+        public override void WriteStatementTerminator()
+        {
+            base.WriteStatementTerminator();
+        }
+
+        protected override string GetNativeTypeForDbType(DbType dbType, int setSize, int accuracy, DBColumnFlags flags, out string options)
+        {
+            string value = base.GetNativeTypeForDbType(dbType, setSize, accuracy, flags, out options);
+            if (dbType == DbType.String || dbType == DbType.StringFixedLength)
+            {
+                if (null == options)
+                    options = "";
+                options += " character set UTF8";
+            }
+            return value;
+        }
 
         public override void WriteTop(double count, double offset, TopType topType)
         {
@@ -113,33 +150,66 @@ namespace Perceiveit.Data.MySqlClient
         {
             if (function == Function.LastID)
                 this.WriteRaw("LAST_INSERT_ID");
+            else if (function == Function.GetDate)
+                this.WriteRaw("NOW");
             else
                 base.BeginFunction(function, name);
         }
         
 
-        public override void WriteParameterReference(string paramname)
+        public override void WriteNativeParameterReference(string paramname)
         {
             if (this._buildingsproc)
                 this.WriteRaw(paramname);
             else
-                base.WriteParameterReference(paramname);
+                base.WriteNativeParameterReference(paramname);
         }
 
+        private int _laststatementdepth;
+
+        /// <summary>
+        /// 
+        /// </summary>
         public override void BeginScript()
         {
-            //this.Writer.Write("BEGIN");
-            this.IncrementStatementBlock();
-            //this.BeginNewLine();
+            
+
+            //If we are creating a stored procedure then we want to 
+            //change the statement depth to zero so we are in a full statement as the start of the procedure only
+            if (this.CurrentlyCreating == DBSchemaTypes.StoredProcedure && _laststatementdepth == 0)
+            {
+                this.Writer.Write("BEGIN");
+                this.BeginNewLine();
+                this._laststatementdepth = this.StatementDepth;
+                this.StatementDepth = 0;
+            }
+            else
+            {
+                this.IncrementStatementBlock();
+                this.BeginNewLine();
+            }
         }
 
         public override void EndScript()
         {
-            this.DecrementStatementBlock();
-            //this.BeginNewLine();
-            //this.Writer.WriteLine("END");
+            if (this.CurrentlyCreating == DBSchemaTypes.StoredProcedure && this.StatementDepth == 0)
+            {
+                this.StatementDepth = _laststatementdepth;
+                _laststatementdepth = 0;
+                this.BeginNewLine();
+                this.Writer.WriteLine("END");
+            }
+            else
+            {
+                this.BeginNewLine();
+                this.DecrementStatementBlock();
+            }
         }
 
+
+        /// <summary>
+        /// MySQL execute is a CALL(....) statement
+        /// </summary>
         public override void BeginExecuteStatement()
         {
             if (!this.DatabaseProperties.CheckSupports(DBSchemaTypes.StoredProcedure))
@@ -158,6 +228,217 @@ namespace Perceiveit.Data.MySqlClient
             this.Writer.Write(")");
         }
 
+        /// <summary>
+        /// We don't declare variables, but SET them
+        /// </summary>
+        /// <param name="param"></param>
+        public override void BeginDeclareStatement(DBParam param)
+        {
+            this.ParameterExclusions.Add(param.Name);
+            this.WriteRaw("SET ");
+            bool writeType = false;
+            bool writeDirection = false;
+            this.WriteParameter(param, writeType, writeDirection);
+
+            string value = GetDefaultValueForType(param.DbType);
+            this.WriteOperator(Operator.Equals);
+            this.WriteSpace();
+            this.WriteRaw(value);
+
+            
+        }
+
+        
+
+        protected virtual string GetDefaultValueForType(DbType type)
+        {
+            string value;
+            switch (type)
+            {
+                case DbType.AnsiString:
+                case DbType.AnsiStringFixedLength:
+                case DbType.String:
+                case DbType.StringFixedLength:
+                    value = "\"\"";
+                    break;
+                case DbType.Boolean:
+                    value = "FALSE";
+                    break;
+                case DbType.Currency:
+                case DbType.Decimal:
+                case DbType.Double:
+                case DbType.Single:
+                    value = "0.0";
+                    break;
+                case DbType.Byte:
+                case DbType.SByte:
+                case DbType.Int16:
+                case DbType.Int32:
+                case DbType.Int64:
+                case DbType.UInt16:
+                case DbType.UInt32:
+                case DbType.UInt64:
+                case DbType.VarNumeric:
+                    value = "0";
+                    break;
+                case DbType.Binary:
+                case DbType.Date:
+                case DbType.DateTime:
+                case DbType.DateTime2:
+                case DbType.Time:
+                case DbType.DateTimeOffset:
+                case DbType.Object:
+                case DbType.Guid:
+                case DbType.Xml:
+                default:
+                    value = "NULL";
+                    break;
+            }
+
+            return value;
+        }
+
+
+        public override void EndDeclareStatement()
+        {
+            this.WriteRaw(";");
+            this.BeginNewLine();
+            //base.EndDeclareStatement();
+        }
+
+        //Drop overrides for the supported syntax - DROP .... IF EXISTS
+        //Rather than the default IF EXISTS (SELECT FROM INFO SCHEMA)
+
+        public override void BeginDropStatement(DBSchemaTypes type, string owner, string name, bool checkExists)
+        {
+            if (checkExists)
+            {
+                if (type == DBSchemaTypes.Index)
+                    throw new ArgumentOutOfRangeException("checkExists", string.Format(Errors.DBDoesntSupportIfExistsForThisType, "MySQL", type));
+            }
+            this.BeginDropStatement(type);
+            
+            if (checkExists)
+                this.WriteCheckExists(type, owner, name);
+
+            this.WriteSourceTable(owner, name, string.Empty);
+        }
+
+        private void WriteCheckExists(DBSchemaTypes type, string owner, string name)
+        {
+            this.WriteRaw(" IF EXISTS ");
+        }
+
+        public override void BeginCheckExists(DBSchemaTypes type, string owner, string name)
+        {
+            if (type == DBSchemaTypes.Index)
+                throw new ArgumentOutOfRangeException("checkExists", string.Format(Errors.DBDoesntSupportIfExistsForThisType, "MySQL", type));
+        }
+
+        public override void EndCheckExists(DBSchemaTypes type, string owner, string name)
+        {
+            
+        }
+
+
+        public override string GetNativeParameterName(string paramName, bool forStatement)
+        {
+            if (this.CurrentlyCreating == DBSchemaTypes.StoredProcedure)
+                return paramName;
+
+            else if (this.ParameterExclusions.Contains(paramName))
+            {
+                return "@" + paramName;
+            }
+            else
+                return base.GetNativeParameterName(paramName, forStatement);
+        }
+
+        public override void BeginCreate(DBSchemaTypes type, string owner, string name, string options, bool checknotexists)
+        {
+            if (checknotexists)
+            {
+                if (type == DBSchemaTypes.Index || type == DBSchemaTypes.View)
+                    throw new ArgumentOutOfRangeException("checknotexisits",string.Format(Errors.DBDoesntSupportIfExistsForThisType, "MySQL", type));
+
+            }
+
+            bool isconstraint = IsConstraintType(type);
+
+            if (isconstraint)
+            {
+                if (!string.IsNullOrEmpty(name))
+                {
+                    this.WriteRaw("CONSTRAINT ");
+                    this.BeginIdentifier();
+                    this.WriteRaw(name);
+                    this.EndIdentifier();
+                    this.WriteRaw(" ");
+                }
+            }
+            
+            this.BeginCreate(type, options);
+
+            if (checknotexists)
+                this.WriteCheckNotExists(type, owner, name);
+
+            if(!this.IsConstraintType(type))
+                this.WriteSourceTable(owner, name, string.Empty); 
+            
+        }
+
+        public override void EndCreate(DBSchemaTypes type, bool checknotexists)
+        {
+            //We write the 
+            if (type == DBSchemaTypes.Table)
+                this.WriteRaw(" ENGINE = " + this.TableEngine);
+
+            this.DecrementStatementDepth();
+
+            //if (type == DBSchemaTypes.StoredProcedure)
+            //{
+            //    this.WriteRaw(this.ProcedureDelimiter);
+            //}
+            
+        }
+
+        public override void BeginEntityDefinition()
+        {
+            if (this.CurrentlyCreating != DBSchemaTypes.StoredProcedure)
+                base.BeginEntityDefinition();
+            else
+            {
+                //We don't want the AS keyword for StoredProcedures
+            }
+        }
+
+        public override void EndEntityDefinition()
+        {
+            
+        }
+
+        public override string GetCreateOption(CreateOptions option)
+        {
+            if ((option & CreateOptions.Clustered) > 0 || (option & CreateOptions.NonClustered) > 0)
+                throw new ArgumentOutOfRangeException(Errors.CannotUseClusteredOrNonClustered);
+
+            return base.GetCreateOption(option);
+        }
+        private void WriteCheckNotExists(DBSchemaTypes type, string owner, string name)
+        {
+            this.WriteRaw(" IF NOT EXISTS ");
+        }
+
+        public override void BeginCheckNotExists(DBSchemaTypes type, string owner, string name)
+        {
+            if (type == DBSchemaTypes.Index || type == DBSchemaTypes.View)
+                throw new ArgumentOutOfRangeException("checknotexisits", string.Format(Errors.DBDoesntSupportIfExistsForThisType, "MySQL", type));
+        }
+
+        public override void EndCheckNotExists(DBSchemaTypes type, string owner, string name)
+        {
+            
+        }
         //
         // generate CREATE scripts
         //
@@ -254,7 +535,7 @@ namespace Perceiveit.Data.MySqlClient
 
             this.DecrementStatementDepth();
             this.EndBlock();
-            this.EndCreate(DBSchemaTypes.Table);
+            this.EndCreate(DBSchemaTypes.Table, false);
         }
 
         #endregion
@@ -271,7 +552,7 @@ namespace Perceiveit.Data.MySqlClient
             this.WriteRaw(" ");
 
             string options;
-            string type = this.GetNativeTypeForDbType(tc.DbType, tc.Size, out options);
+            string type = this.GetNativeTypeForDbType(tc.DbType, tc.Size, tc.Precision, tc.ColumnFlags, out options);
             this.WriteRaw(type);
             if (string.IsNullOrEmpty(options) == false)
                 this.WriteRaw(options);
@@ -425,7 +706,7 @@ namespace Perceiveit.Data.MySqlClient
         private void WriteFunctionReturns(System.Data.DbType type, int size)
         {
             string opt;
-            string ntype = GetNativeTypeForDbType(type, size, out opt);
+            string ntype = GetNativeTypeForDbType(type, size, -1, DBColumnFlags.Nullable, out opt);
             this.WriteRaw("RETURNS " + ntype);
             if (string.IsNullOrEmpty(opt) == false)
                 this.WriteRaw(opt);
@@ -502,10 +783,10 @@ namespace Perceiveit.Data.MySqlClient
                                 throw new ArgumentOutOfRangeException("DBSchemaParameter.Direction");
                         }
                     }
-                    this.WriteParameterReference(p.InvariantName);
+                    this.WriteNativeParameterReference(p.InvariantName);
                     this.WriteRaw(" ");
                     string options;
-                    string type = this.GetNativeTypeForDbType(p.DbType, p.ParameterSize, out options);
+                    string type = this.GetNativeTypeForDbType(p.DbType, p.ParameterSize, -1, DBColumnFlags.Nullable, out options);
                     this.WriteRaw(type);
                     if (string.IsNullOrEmpty(options) == false)
                         this.WriteRaw(options);
@@ -520,5 +801,32 @@ namespace Perceiveit.Data.MySqlClient
         }
 
         #endregion
+
+        /// <summary>
+        /// Writes the flags associated with a colums data type and identity
+        /// </summary>
+        /// <param name="flags"></param>
+        /// <param name="defaultValue"></param>
+        public override void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
+        {
+            if ((flags & DBColumnFlags.PrimaryKey) > 0)
+                this.WriteRaw(" PRIMARY KEY");
+
+            if ((flags & DBColumnFlags.Nullable) > 0)
+                this.WriteRaw(" NULL");
+            else
+                this.WriteRaw(" NOT NULL");
+
+            if ((flags & DBColumnFlags.AutoAssign) > 0)
+                this.WriteRaw(" AUTO_INCREMENT");
+
+            if ((flags & DBColumnFlags.HasDefault) > 0)
+            {
+                this.WriteRaw(" DEFAULT ");
+                defaultValue.BuildStatement(this);
+            }
+        }
+
+       
     }
 }

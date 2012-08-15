@@ -2,17 +2,17 @@
  *  This file is part of the DynaSQL library.
  *
 *  DynaSQL is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
+ *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  * 
  *  DynaSQL is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
+ *  GNU Lesser General Public License for more details.
  * 
- *  You should have received a copy of the GNU General Public License
- *  along with Query in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with DynaSQL in the COPYING.txt file.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
 
@@ -268,6 +268,7 @@ namespace Perceiveit.Data.Query
         //
 
         #region public DBExecQuery WithParam(DBParam param)
+
         /// <summary>
         /// Appends a parameter to this EXEC statement
         /// </summary>
@@ -284,7 +285,27 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public DBExecQuery WithParams(params DBParam[] all)
+
+        /// <summary>
+        /// Appends all the parameters to this exec statement
+        /// </summary>
+        /// <param name="all"></param>
+        /// <returns></returns>
+        public DBExecQuery WithParams(params DBParam[] all)
+        {
+            DBExecQuery exec = this;
+            foreach (DBParam p in all)
+            {
+                exec = exec.WithParam(p);
+            }
+            return exec;
+        }
+
+        #endregion
+
         #region public DBExecQuery WithParamValue(object paramValue) + 3 overloads
+
         /// <summary>
         /// Appends a new parameter to this EXEC statement with the specified value. 
         /// WARNING - specifying null or DBNull will make the DbType undiscoverable at runtime, and may cause execution errors
@@ -332,6 +353,13 @@ namespace Perceiveit.Data.Query
         public DBExecQuery WithParamValue(string name, System.Data.DbType type, object value)
         {
             DBParam p = DBParam.ParamWithValue(name, type, value);
+            return this.WithParam(p);
+        }
+
+
+        public DBExecQuery WithParamValue(string name, System.Data.DbType type, int length, object value)
+        {
+            DBParam p = DBParam.ParamWithValue(name, type, length, value);
             return this.WithParam(p);
         }
 

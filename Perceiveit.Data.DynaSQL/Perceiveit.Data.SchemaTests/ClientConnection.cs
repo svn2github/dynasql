@@ -19,7 +19,7 @@ namespace Perceiveit.Data.SchemaTests
 
         public string ProviderName
         {
-            get { return ((DataRowView)this.comboProvider.SelectedItem)[this.comboProvider.DisplayMember].ToString(); }
+            get { return this.comboProvider.Text; }
             set
             {
                 if (string.IsNullOrEmpty(value))
