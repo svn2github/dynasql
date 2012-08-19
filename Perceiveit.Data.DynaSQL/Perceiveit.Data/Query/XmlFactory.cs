@@ -181,6 +181,13 @@ namespace Perceiveit.Data.Query
                     c = DBMultiComparisonRef.Many();
                     break;
 
+                case(XmlHelper.QueryOptionSet):
+                    c = new DBQueryHintOptionSet();
+                    break;
+                case(XmlHelper.QueryOption):
+                    c = DBQueryHintOption.QueryOption();
+                    break;
+
                 case(XmlHelper.CreateSproc):
                     c = DBCreateProcedureQuery.CreateProcedure();
                     break;

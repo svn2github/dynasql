@@ -41,6 +41,7 @@ namespace Perceiveit.Data.Query
         private DBGroupBySet _grpby;
         private DBClause _last;
         private bool _distinct = false;
+        private DBQueryHintOptionSet _options;
 
 
         //
@@ -108,6 +109,22 @@ namespace Perceiveit.Data.Query
         {
             get { return this._grpby; }
             set { this._grpby = value; }
+        }
+
+        #endregion
+
+        #region internal DBQueryHintOptionSet QueryOptions {get;set;}
+
+        /// <summary>
+        /// Gets or sets the Query hints for this select statement
+        /// </summary>
+        internal DBQueryHintOptionSet QueryOptions
+        {
+            get
+            {
+                return _options;
+            }
+            set { _options = value; }
         }
 
         #endregion
@@ -242,6 +259,13 @@ namespace Perceiveit.Data.Query
                 builder.EndOrderStatement();
             }
 
+            if (_options != null)
+            {
+                builder.BeginQueryHints();
+                this._options.BuildStatement(builder);
+                builder.EndQueryHints();
+            }
+
             builder.EndSelectStatement();
 
             return true;
@@ -317,6 +341,10 @@ namespace Perceiveit.Data.Query
                 this.OrderSet.WriteXml(writer, context);
             }
 
+            if (this._options != null)
+                this.QueryOptions.WriteXml(writer, context);
+
+
             return base.WriteInnerElements(writer, context);
         }
 
@@ -386,6 +414,10 @@ namespace Perceiveit.Data.Query
                     this.OrderSet = context.Factory.Read(XmlHelper.Order, reader, context) as DBOrderSet;
                     b = true;
                     break;
+                case(XmlHelper.QueryOptionSet):
+                    this.QueryOptions = context.Factory.Read(XmlHelper.QueryOptionSet, reader, context) as DBQueryHintOptionSet;
+                    b = true;
+                    break;
                 default:
                     b = base.ReadAnInnerElement(reader, context);
                     break;
@@ -440,6 +472,14 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public DBSelectQuery TopRange(int index, int count)
+
+        /// <summary>
+        /// Adds a Range limits to the select query
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
         public DBSelectQuery TopRange(int index, int count)
         {
             DBTop top = DBTop.Range(index, count);
@@ -447,6 +487,8 @@ namespace Perceiveit.Data.Query
 
             return this;
         }
+
+        #endregion
 
         #region public DBSelectQuery Distinct()
         /// <summary>
@@ -1184,6 +1226,171 @@ namespace Perceiveit.Data.Query
         #endregion
 
         //
+        // hints (table and query)
+        //
+
+        #region public DBSelectQuery WithHint(DBTableHint hint) + 1 overload
+
+        /// <summary>
+        /// Adds a specific query hint to the current table in this statement
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithHint(DBTableHint hint)
+        {
+            if (this._last is DBTableSet)
+                (this._last as DBTableSet).WithHint(hint);
+            else if (this._root != null)
+                this._last = this._root.WithHint(hint);
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a specific query hint with options to the current table in this statement
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithHint(DBTableHint hint, params string[] options)
+        {
+            if (this._last is DBTableSet)
+                this._last = (this._last as DBTableSet).WithHint(hint, options);
+            else if (this._root != null)
+                this._last = this._root.WithHint(hint, options);
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+        #endregion
+
+        #region public DBSelectQuery WithHints(params DBTableHint[] hints)
+
+        /// <summary>
+        /// Adds the list of hints to the current table in the query
+        /// </summary>
+        /// <param name="hints"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithHints(params DBTableHint[] hints)
+        {
+            if (this._last is DBTableSet)
+                this._last = (this._last as DBTableSet).WithHints(hints);
+            else if (this._root != null)
+                this._last = this._root.WithHints(hints);
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+        #endregion
+
+        #region public DBSelectQuery ClearTableHints()
+
+        /// <summary>
+        /// Clears any table hints on the current table
+        /// </summary>
+        /// <returns></returns>
+        public DBSelectQuery ClearTableHints()
+        {
+            if (this._last is DBTableSet)
+                this._last = (this._last as DBTableSet).ClearTableHints();
+            else if (this._root != null)
+                this._last = this._root.ClearTableHints();
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+        #endregion
+
+
+        #region public DBSelectQuery WithQueryOption(DBQueryOption option) + 3 overlaods
+
+        /// <summary>
+        /// Adds a query option to this Select Statement
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithQueryOption(DBQueryOption option)
+        {
+            DBQueryHintOption hint = DBQueryHintOption.QueryOption(option);
+            return this.WithQueryOption(hint);
+        }
+
+        /// <summary>
+        /// Adds a query option to this Select Statement with the parameter clause required for the option. 
+        /// </summary>
+        /// <param name="option"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithQueryOption(DBQueryOption option, DBClause param)
+        {
+            DBQueryHintOption hint = DBQueryHintOption.QueryOption(option, param);
+            return this.WithQueryOption(hint);
+
+        }
+
+        /// <summary>
+        /// Adds a query option to this Select Statement and it's associated integer parameter - eg FAST 10
+        /// </summary>
+        /// <param name="option"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithQueryOption(DBQueryOption option, int value)
+        {
+            return WithQueryOption(option, DBConst.Int32(value));
+        }
+
+        /// <summary>
+        /// Adds all the specified options to the Select Query
+        /// </summary>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public DBSelectQuery WithQueryOptions(params DBQueryOption[] options)
+        {
+            if (null != options && options.Length > 0)
+            {
+                DBSelectQuery toreturn = this;
+                foreach (DBQueryOption option in options)
+                {
+                    toreturn = toreturn.WithQueryOption(option);
+                }
+                return toreturn;
+            }
+            else
+                return this;
+        }
+
+        public DBSelectQuery WithQueryOption(DBQueryHintOption hintoption)
+        {
+            if (null == this.QueryOptions)
+                this.QueryOptions = new DBQueryHintOptionSet();
+
+            this.QueryOptions.Add(hintoption);
+            return this;
+        }
+
+        #endregion
+
+        #region ClearQueryOption()
+
+        /// <summary>
+        /// Clears any assigned query options
+        /// </summary>
+        /// <returns></returns>
+        public DBSelectQuery ClearQueryOption()
+        {
+            if (null != this.QueryOptions)
+                this.QueryOptions = null;
+
+            return this;
+        }
+
+        #endregion
+
+
+        //
         // As
         //
 
@@ -1568,7 +1775,7 @@ namespace Perceiveit.Data.Query
         // where
         //
 
-        #region public DBSelectQuery Where(DBReference left, ComparisonOperator compare, DBClause right) + 1 overload
+        #region public DBSelectQuery Where(DBReference left, ComparisonOperator compare, DBClause right) + 10 overload
 
         /// <summary>
         /// Appends the WHERE comparison clause onto the select set
@@ -1839,6 +2046,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public DBSelectQuery AndWhereXXX(params DBComparison[] any)
+
         /// <summary>
         /// Appends to the WHERE with an AND (compare OR compare OR compare)
         /// </summary>
@@ -1872,6 +2081,10 @@ namespace Perceiveit.Data.Query
             return AndWhere(joined);
         }
 
+        #endregion
+
+        #region public DBSelectQuery OrWhereXXX(params DBComparison[] any)
+
         /// <summary>
         /// Appends to the WHERE with an OR (compare OR compare OR compare)
         /// </summary>
@@ -1904,6 +2117,8 @@ namespace Perceiveit.Data.Query
             DBComparison joined = DBComparison.None(none);
             return OrWhere(joined);
         }
+
+        #endregion
 
         #region public DBSelectQuery OrWhere(DBClause left, ComparisonOperator op, DBClause right) + 4 overloads
 

@@ -12,7 +12,6 @@
   
 
   <Perceiveit.Data 
-    xmlns="http://schemas.perceiveit.co.uk/Data/Configuration.xsd"
     wrap-exceptions="false" > <!-- use @wrap-exceptions to stop sensitive information 
                                    from being included in the exception message -->
     
@@ -26,7 +25,6 @@
       <Clear/>
       <Attach name="Console" factory="Perceiveit.Data.Profile.DBConsoleProfilerFactory, Perceiveit.Data" />
       <Attach name="LogFile" factory="Perceiveit.Data.Profile.DBTextFileProfilerFactory, Perceiveit.Data" >
-        <Clear />
         <Set key="file-path" value="C:\Temp\DBLog_[Name]_[Date].log" /><!-- the file-path value is parsed to accept [Name], [Date] and [Connection] options 
                                                                             so text file logs can be separated. 
                                                                             Soon to support max-age and max-size options -->

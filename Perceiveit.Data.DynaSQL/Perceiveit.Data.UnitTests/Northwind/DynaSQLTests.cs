@@ -1188,6 +1188,8 @@ namespace Perceiveit.Data.DynaSql.Tests
             }
         }
 
+
+        
         
 
         [TestMethod]
@@ -1218,6 +1220,8 @@ namespace Perceiveit.Data.DynaSql.Tests
                                             DBComparison.Compare(DBField.Field(Nw.Customers.CompanyName), Compare.Like, DBConst.String("ABC%"))));
 
         }
+
+       
 
 
         [TestMethod]
@@ -1431,6 +1435,40 @@ namespace Perceiveit.Data.DynaSql.Tests
             TestContext.WriteLine("Returned identifier was {0}", value);
             
         }
+
+        [TestMethod()]
+        public void Northwind_21_TableHints()
+        {
+            DBDatabase db = DBDatabase.Create("Northwind", Nw.DbConnection, Nw.DbProvider);
+            AttachProfiler(db);
+
+            DBQuery hinted = DBQuery.Select()
+                                            .Field(Nw.Customers.Table, Nw.Customers.CustomerID)
+                                            .Field("O", Nw.Orders.OrderID)
+                                    .From(Nw.Customers.Table)
+                                                    .WithHints(DBTableHint.NoLock, DBTableHint.NoWait)
+                                                    .WithHint(DBTableHint.Index, "pk_Customers")
+                                            .InnerJoin(Nw.Orders.Table).As("O").WithHint(DBTableHint.ForceSeek)
+                                    .On(Nw.Customers.Table, Nw.Customers.CustomerID, Compare.Equals, "O", Nw.Orders.CustomerID);
+
+            string sql = hinted.ToSQLString(db);
+            TestContext.WriteLine(sql);
+
+            int count = 0;
+            db.ExecuteRead(hinted, reader =>
+            {
+                while (reader.Read())
+                {
+                    //Just junk to make sure we read
+                    string cid = reader[0].ToString();
+                    string oid = reader[1].ToString();
+                    count++;
+                }
+            });
+
+            TestContext.WriteLine("Loaded {0} customer orders ", count);
+        }
+
 
         [TestMethod]
         public void AnyOldSql()

@@ -255,4 +255,7 @@
   <data name="CannotUseClusteredOrNonClustered" xml:space="preserve">
     <value>The database engine does not support CLUSTERED or NON CLUSTERED indexes</value>
   </data>
+  <data name="NoRootOrLastForHint" xml:space="preserve">
+    <value>No root or last table set to add the hint to</value>
+  </data>
 </root>

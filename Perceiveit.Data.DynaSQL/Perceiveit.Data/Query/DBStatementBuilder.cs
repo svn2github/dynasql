@@ -503,6 +503,159 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region Query Hints
+
+        public virtual void BeginQueryHints()
+        {
+            this.WriteRaw(" OPTIONS (");
+        }
+
+        public virtual void EndQueryHints()
+        {
+            this.WriteRaw(")");
+        }
+
+        public virtual void BeginAQueryHint(DBQueryOption hint)
+        {
+            string s = this.GetQueryHintWord(hint);
+            this.WriteRaw(s);
+        }
+
+        public virtual void EndAQueryHint(DBQueryOption hint)
+        {
+        }
+
+        protected virtual string GetQueryHintWord(DBQueryOption option)
+        {
+            
+            string value;
+            switch (option)
+            {
+                case DBQueryOption.HashGroup:
+                    value = "HASH GROUP";
+                    break;
+                case DBQueryOption.OrderGroup:
+                    value = "ORDER GROUP";
+                    break;
+                case DBQueryOption.ConcatUnion:
+                    value = "CONCAT UNION";
+                    break;
+                case DBQueryOption.HashUnion:
+                    value = "HASH UNION";
+                    break;
+                case DBQueryOption.MergeUnion:
+                    value = "MERGE UNION";
+                    break;
+                case DBQueryOption.LoopJoin:
+                    value = "LOOP JOIN";
+                    break;
+                case DBQueryOption.MergeJoin:
+                    value = "MERGE JOIN";
+                    break;
+                case DBQueryOption.HashJoin:
+                    value = "HASH JOIN";
+                    break;
+                case DBQueryOption.ExpandViews:
+                    value = "EXPAND VIEWS";
+                    break;
+                case DBQueryOption.Fast:
+                    value = "FAST";
+                    break;
+                case DBQueryOption.ForceOrder:
+                    value = "FORCE ORDER";
+                    break;
+                case DBQueryOption.KeepPlan:
+                    value = "KEEP PLAN";
+                    break;
+                case DBQueryOption.KeepFixedPlan:
+                    value = "KEEPFIXED PLAN";
+                    break;
+                case DBQueryOption.MaxDOP:
+                    value = "MAXDOP";
+                    break;
+                case DBQueryOption.MaxRecursion:
+                    value = "MAXRECURSION";
+                    break;
+                case DBQueryOption.OptimizeFor:
+                    value = "OPTIMIZE FOR";
+                    break;
+                case DBQueryOption.OptimiseForUnknown:
+                    value = "OPTIMIZE FOR UNKNOWN";
+                    break;
+                case DBQueryOption.ParametrizationSimple:
+                    value = "PARAMETERIZATION SIMPLE";
+                    break;
+                case DBQueryOption.ParameterizationForced:
+                    value = "PARAMETERIZATION FORCED";
+                    break;
+                case DBQueryOption.Recompile:
+                    value = "RECOMPLIE";
+                    break;
+                case DBQueryOption.RobustPlan:
+                    value = "ROBUST PLAN";
+                    break;
+                case DBQueryOption.UsePlan:
+                    value = "USE PLAN";
+                    break;
+                case DBQueryOption.Raw:
+                default:
+                    value = "";
+                    break;
+            }
+            return value;
+        }
+
+        #endregion
+
+        #region Table Hints
+
+        public virtual void BeginTableHints()
+        {
+            this.WriteRaw(" WITH (");
+        }
+
+        public virtual void EndTableHints()
+        {
+            this.WriteRaw(")");
+        }
+
+        public virtual void BeginTableHint(DBTableHint hint)
+        {
+            string s = this.GetTableHintWord(hint);
+            this.WriteRaw(s);
+        }
+
+        public virtual void EndTableHint(DBTableHint hint)
+        {
+        }
+
+        public virtual void BeginHintParameterList()
+        {
+            this.WriteRaw("(");
+        }
+
+        public virtual void EndHintParameterList()
+        {
+            this.WriteRaw(")");
+        }
+
+        public virtual void WriteHintParameter(int index, string parameter)
+        {
+            if (index > 0)
+                this.WriteRaw(",");
+            this.WriteRaw(parameter);
+        }
+
+        public virtual string GetTableHintWord(DBTableHint hint)
+        {
+            if (hint == DBTableHint.Raw)
+                return "";
+            else
+                return hint.ToString().ToUpper();
+        }
+
+        #endregion
+
         #region public virtual void BeginSubSelect() + EndSubSelect()
 
         public virtual void BeginSubStatement()

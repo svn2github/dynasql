@@ -119,6 +119,41 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public DBTableHintList Hints { get; set; }
+
+        private DBTableHintSet _hints;
+
+        /// <summary>
+        /// Gets the list of hints on this table
+        /// </summary>
+        internal DBTableHintSet Hints
+        {
+            get
+            {
+                if (_hints == null)
+                    _hints = new DBTableHintSet(this);
+
+                return _hints;
+            }
+        }
+
+        #endregion
+
+        #region public bool HasHints
+
+        /// <summary>
+        /// Returns true is this table has hints defined
+        /// </summary>
+        public bool HasHints
+        {
+            get
+            {
+                return this._hints != null;
+            }
+        }
+
+        #endregion
+
         //
         // .ctor(s)
         //
@@ -184,6 +219,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public DBJoin LeftJoin(DBTable tbl, DBClause parent, Compare comp, DBClause child)
+
         /// <summary>
         /// Appends a new LEFT OUTER JOIN between this table and the specified table matching between this tables parentfield and the other tables child field
         /// </summary>
@@ -224,6 +261,9 @@ namespace Perceiveit.Data.Query
             return join;
         }
 
+        #endregion
+
+
         #region public DBJoin Join(DBClause table, JoinType type, DBComparison comp)
 
         /// <summary>
@@ -239,6 +279,68 @@ namespace Perceiveit.Data.Query
             this.Joins.Add(join);
 
             return join;
+        }
+
+        #endregion
+
+        #region WithHint(s) + ClearHints()
+
+
+        /// <summary>
+        /// Appends a Query execution table hint
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <returns></returns>
+        public DBTable WithHint(DBTableHint hint)
+        {
+            this.Hints.WithHint(hint);
+            return this;
+        }
+
+        /// <summary>
+        /// Appends a Query execution table hint and option
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public DBTable WithHint(DBTableHint hint, params string[] options)
+        {
+            this.Hints.WithHint(hint, options);
+            return this;
+        }
+
+        /// <summary>
+        /// Appends a Query execution table hint and option
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <returns></returns>
+        public DBTable WithHint(DBTableHintOption hint)
+        {
+            this.Hints.WithHint(hint);
+            return this;
+        }
+
+        /// <summary>
+        /// Appends all the Query execution table hints
+        /// </summary>
+        /// <param name="hints"></param>
+        /// <returns></returns>
+        public DBTable WithHints(params DBTableHint[] hints)
+        {
+            if (null != hints && hints.Length > 0)
+            {
+                foreach (DBTableHint hint in hints)
+                {
+                    this.WithHint(hint);
+                }
+            }
+            return this;
+        }
+
+        public DBTable ClearTableHints()
+        {
+            this.Hints.Clear();
+            return this;
         }
 
         #endregion
@@ -391,6 +493,10 @@ namespace Perceiveit.Data.Query
             else
                 builder.WriteSourceTable(this.Owner, this.Name, this.Alias);
 
+            if (this.HasHints)
+                this.Hints.BuildStatement(builder);
+            
+
             if (this.HasJoins)
                 this.Joins.BuildStatement(builder);
 
@@ -451,6 +557,12 @@ namespace Perceiveit.Data.Query
                 this.Joins.ReadXml(XmlHelper.JoinList, reader, context);
                 b = true;
             }
+            else if (this.IsElementMatch(XmlHelper.TableHintSet, reader, context))
+            {
+                this.Hints.Clear();
+                this.Hints.ReadXml(reader, context);
+                b = true;
+            }
             else
                 b = base.ReadAnInnerElement(reader, context);
 
@@ -480,6 +592,10 @@ namespace Perceiveit.Data.Query
         
         protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
+            if (this.HasHints)
+            {
+                this.Hints.WriteXml(writer, context);
+            }
             if (this.Joins != null && this.Joins.Count > 0)
             {
                 this.WriteStartElement(XmlHelper.JoinList, writer, context);

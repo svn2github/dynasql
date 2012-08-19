@@ -669,4 +669,56 @@ namespace Perceiveit.Data
         Cache,
         NoCaching
     }
+
+    public enum DBTableHint
+    {
+        NoExpand,
+        NoLock,
+        HoldLock,
+        Index,
+        ForceScan,
+        ForceSeek,
+        NoWait,
+        PageLock,
+        ReadCommitted,
+        ReadCommittedBlock,
+        ReadPast,
+        ReadUncommitted,
+        RepeatableRead,
+        RowLock,
+        Serializable,
+        TabLock,
+        TabLockX,
+        UpdLock,
+        XLock,
+        Raw
+    }
+
+    public enum DBQueryOption
+    {
+        HashGroup,
+        OrderGroup,
+        ConcatUnion,
+        HashUnion,
+        MergeUnion,
+        LoopJoin,
+        MergeJoin,
+        HashJoin,
+        ExpandViews,
+        Fast,
+        ForceOrder,
+        KeepPlan,
+        KeepFixedPlan,
+        MaxDOP,
+        MaxRecursion,
+        OptimizeFor,
+        OptimiseForUnknown,
+        ParametrizationSimple,
+        ParameterizationForced,
+        Recompile,
+        RobustPlan,
+        UsePlan,
+        Raw
+
+    }
 }

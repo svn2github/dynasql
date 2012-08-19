@@ -340,6 +340,15 @@ namespace Perceiveit.Data {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No root or last table set to add the hint to.
+        /// </summary>
+        internal static string NoRootOrLastForHint {
+            get {
+                return ResourceManager.GetString("NoRootOrLastForHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The table or view cannot be identified because the name has not been set..
         /// </summary>
         internal static string NoTableNameSpecifiedForATable {

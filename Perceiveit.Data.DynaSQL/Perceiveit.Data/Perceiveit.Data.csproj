@@ -127,7 +127,12 @@
     <Compile Include="Query\DBDropTableQuery.cs" />
     <Compile Include="Query\DBDropViewQuery.cs" />
     <Compile Include="Query\DBForeignKey.cs" />
+    <Compile Include="Query\DBHintOption.cs" />
     <Compile Include="Query\DBPrimaryKey.cs" />
+    <Compile Include="Query\DBQueryHintOption.cs" />
+    <Compile Include="Query\DBQueryHintOptionSet.cs" />
+    <Compile Include="Query\DBTableHintOption.cs" />
+    <Compile Include="Query\DBTableHintSet.cs" />
     <Compile Include="Query\DBTableIndex.cs" />
     <Compile Include="Query\DBQuery+Create.cs" />
     <Compile Include="Query\DBQuery+Drop.cs" />

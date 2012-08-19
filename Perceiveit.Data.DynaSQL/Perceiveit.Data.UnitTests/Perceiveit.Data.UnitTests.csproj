@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CSVData.cs" />
+    <Compile Include="Northwind\DBDatabaseTests.cs" />
     <Compile Include="Northwind\DynaSQLTests.cs" />
     <Compile Include="XML\DynaSQLXmlReadTests.cs" />
     <Compile Include="XML\DynaSqlXMLTests.cs" />
@@ -88,6 +89,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="MySQL\MySQLAll.orderedtest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Northwind\DBDatabase.orderedtest">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="Oracle\OracleAll.orderedtest">

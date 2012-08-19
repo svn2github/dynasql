@@ -33,11 +33,25 @@ namespace Perceiveit.Data
     //
 
     /// <summary>
+    /// Callback when an exception occurs during the execution of a statement
+    /// </summary>
+    /// <param name="onerror"></param>
+    /// <returns></returns>
+    public delegate void DBOnErrorCallback(DBExceptionEventArgs onerror);
+
+    /// <summary>
     /// one of 3 callback method signatures from the DBDatabase.ExecuteRead(...) methods.
     /// </summary>
     /// <param name="reader">The reader created by the DBDatabase from the statement</param>
     /// <returns>Returns any object the the caller of the ExecuteRead statement requires.</returns>
     public delegate object DBCallback(System.Data.Common.DbDataReader reader);
+
+    /// <summary>
+    /// Call back method that sets a DbDataRecord rather than the DbDataReader
+    /// </summary>
+    /// <param name="record"></param>
+    /// <returns></returns>
+    public delegate object DBRecordCallback(System.Data.IDataRecord record);
 
     /// <summary>
     /// one of 3 callback methods signatures for the DBDatabase.ExecuteRead(...) methods. This signature supports the passing of a context object.
@@ -48,10 +62,24 @@ namespace Perceiveit.Data
     public delegate object DBContextCallback(System.Data.Common.DbDataReader reader, object context);
 
     /// <summary>
+    /// Call back method that sets a DbDataRecord rather than the DbDataReader
+    /// </summary>
+    /// <param name="record"></param>
+    /// <returns></returns>
+    public delegate object DBContextRecordCallback(System.Data.IDataRecord record, object context);
+
+    /// <summary>
     /// One of 3 callback methods for the DBDatabase.ExecuteRead(...) methods. This signature does not return a value so no value is required to be returned
     /// </summary>
     /// <param name="reader">The reader created by the DBDatabase from the statement passed to ExecuteRead(..</param>
     public delegate void DBEmptyCallback(System.Data.Common.DbDataReader reader);
+
+    /// <summary>
+    /// Call back method that sets a DbDataRecord rather than the DbDataReader with no return value
+    /// </summary>
+    /// <param name="record"></param>
+    /// <returns></returns>
+    public delegate void DBEmptyRecordCallback(System.Data.IDataRecord record);
 
 
     #region public delegate void DBExceptionHandler(object sender, DBExceptionEventArgs args); + public class DBExceptionEventArgs : EventArgs

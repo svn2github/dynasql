@@ -308,6 +308,21 @@ namespace Perceiveit.Data.DynaSql.Tests
             this.OutputAndValidate(db, drop, " Drop Sequence TwoInAMillion");
         }
 
+        [TestMethod()]
+        public void Test_19_TableHints()
+        {
+            DBQuery hinted = DBQuery.SelectAll()
+                                    .From("dbo", "Categories").WithHint(DBTableHint.NoLock).WithHint(DBTableHint.Index, "pk_Categories")
+                                    .InnerJoin("dbo", "Customers").WithHint(DBTableHint.ReadUncommitted)
+                                            .On("Categories", "category_id", Compare.Equals, "Customers", "category_id")
+                                    .WhereIn(DBField.Field("Categroies", "category_id"), DBConst.Int32(1), DBConst.Int32(2), DBConst.Int32(3))
+                                    .WithQueryOption(DBQueryOption.Fast, 10).WithQueryOption(DBQueryOption.HashJoin);
+
+            this.OutputAndValidate(hinted, " Hinted joined select query");
+        }
+
+        
+
 
         //
         // support methods

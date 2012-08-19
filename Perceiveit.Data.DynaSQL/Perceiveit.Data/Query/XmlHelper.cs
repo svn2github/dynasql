@@ -457,6 +457,15 @@ namespace Perceiveit.Data.Query
         public const string SequenceCycling = "cycling";
         public const string SequenceOrdering = "ordering";
 
+        public const string TableHintSet = "with-hints";
+        public const string HintOption = "option";
+
+        public const string TableHint = "table-hint";
+        public const string HintParameter = "hint-param";
+
+        public const string QueryOptionSet = "with-options";
+        public const string QueryOption = "query-option";
+        
     }
 
 }

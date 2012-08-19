@@ -282,6 +282,93 @@ namespace Perceiveit.Data.Query
         #endregion
 
         //
+        // hints
+        //
+
+        #region public DBTableSet WithHint(DBTableHint hint) + 2 overload
+
+        /// <summary>
+        /// Adds a specific query hint to the current table in this statement
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <returns></returns>
+        public DBTableSet WithHint(DBTableHintOption hint)
+        {
+            if (this.Last is DBTable)
+                (this.Last as DBTable).WithHint(hint);
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+
+        /// <summary>
+        /// Adds a specific query hint to the current table in this statement
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <returns></returns>
+        public DBTableSet WithHint(DBTableHint hint)
+        {
+            if (this.Last is DBTable)
+                (this.Last as DBTable).WithHint(hint);
+           else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a specific query hint with options to the current table in this statement
+        /// </summary>
+        /// <param name="hint"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public DBTableSet WithHint(DBTableHint hint, params string[] options)
+        {
+            if (this.Last is DBTable)
+                this.Last = (this.Last as DBTable).WithHint(hint, options);
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+        #endregion
+
+        #region public DBTableSet WithHints(params DBTableHint[] hints)
+
+        /// <summary>
+        /// Adds the list of hints to the current table in the query
+        /// </summary>
+        /// <param name="hints"></param>
+        /// <returns></returns>
+        public DBTableSet WithHints(params DBTableHint[] hints)
+        {
+            if (this.Last is DBTable)
+                this.Last = (this.Last as DBTable).WithHints(hints);
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+        #endregion
+
+        #region public DBTableSet ClearTableHints()
+
+        /// <summary>
+        /// Clears any table hints on the current table
+        /// </summary>
+        /// <returns></returns>
+        public DBTableSet ClearTableHints()
+        {
+            if (this.Last is DBTable)
+                this.Last = (this.Last as DBTable).ClearTableHints();
+            else
+                throw new InvalidOperationException(Errors.NoRootOrLastForHint);
+            return this;
+        }
+
+        #endregion
+
+
+        //
         // Interface Implementations
         //
 

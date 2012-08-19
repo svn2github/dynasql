@@ -66,12 +66,15 @@ namespace Perceiveit.Data
         #endregion
 
         //
-        // instance vars
+        // events
         //
-
 
         #region public event DBExceptionHandler HandleException
 
+        /// <summary>
+        /// Raised when there is an error during the execution of a command 
+        /// (and the exception is not handled by any provided method by the caller)
+        /// </summary>
         public event DBExceptionHandler HandleException;
 
         protected virtual void OnHandleException(DBExceptionEventArgs args)
@@ -80,6 +83,10 @@ namespace Perceiveit.Data
                 this.HandleException(this, args);
         }
         #endregion
+
+        //
+        // instance variables
+        //
 
         #region ivars
 
@@ -246,6 +253,78 @@ namespace Perceiveit.Data
         // Execute read methods
         //
 
+        #region public object[] ExecuteReadEach(string sqltext, DBRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="sqltext">The SQL statement to execute</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The array of objects returned from each of your DBRecordCallback delegate method invocations</returns>
+        public object[] ExecuteReadEach(string sqltext, DBRecordCallback populator)
+        {
+            return ExecuteReadEach(sqltext, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="sqltext">The SQL statement to execute</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The array of objects returned from each of your DBRecordCallback delegate method invocations</returns>
+        public object[] ExecuteReadEach(string sqltext, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(sqltext, delegate(DbDataReader reader)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                    all.Add(populator(reader));
+                return all.ToArray();
+
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(string sqltext, DBRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord for the FIRST result from the command
+        /// </summary>
+        /// <param name="sqltext">The SQL statement to execute</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object returned from your DBRecordCallback delegate method</returns>
+        public object ExecuteReadOne(string sqltext, DBRecordCallback populator)
+        {
+            return ExecuteReadOne(sqltext, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord for the FIRST result from the command
+        /// </summary>
+        /// <param name="sqltext">The SQL statement to execute</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBRecordCallback delegate method</returns>
+        public object ExecuteReadOne(string sqltext, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(sqltext, delegate(DbDataReader reader)
+            {
+                if (reader.Read())
+                    return populator(reader);
+                else
+                    return null;
+            }, onerror);
+        }
+
+        #endregion
+
         #region public object ExecuteRead(string sqltext, DBCallback callback)
 
         /// <summary>
@@ -257,6 +336,19 @@ namespace Perceiveit.Data
         /// <returns>The object returned from your DBCallback delegate method</returns>
         public object ExecuteRead(string sqltext, DBCallback callback)
         {
+            return ExecuteRead(sqltext, callback, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="sqltext">The SQL statement to execute</param>
+        /// <param name="callback">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteRead(string sqltext, DBCallback callback, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(sqltext))
                 throw new ArgumentNullException("sqltext");
 
@@ -267,10 +359,88 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(sqltext))
             {
-                returns = this.ExecuteRead(cmd, callback);
+                returns = this.ExecuteRead(cmd, callback, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+
+        #region public object[] ExecuteReadEach(string text, CommandType type, DBRecordCallback populator)
+        
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReacord FOR EACH result from the command
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The array of objects returned from your DBRecordCallback method</returns>
+        public object[] ExecuteReadEach(string text, CommandType type, DBRecordCallback populator)
+        {
+            return ExecuteReadEach(text, type, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReacord FOR EACH result from the command
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The array of objects returned from your DBRecordCallback method</returns>
+        public object[] ExecuteReadEach(string text, CommandType type, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(text, type, delegate(DbDataReader reader)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                    all.Add(populator(reader));
+
+                return all.ToArray();
+
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(string text, CommandType type, DBRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReacord for the FIRST result from the command
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object returned from your DBRecordCallback method</returns>
+        public object ExecuteReadOne(string text, CommandType type, DBRecordCallback populator)
+        {
+            return ExecuteReadOne(text, type, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReacord for the FIRST result from the command
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBRecordCallback method</returns>
+        public object ExecuteReadOne(string text, CommandType type, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(text, type, delegate(DbDataReader reader)
+            {
+                if (reader.Read())
+                    return populator(reader);
+                else
+                    return null;
+            }, onerror);
         }
 
         #endregion
@@ -287,6 +457,20 @@ namespace Perceiveit.Data
         /// <returns>The object returned from your DBCallback method</returns>
         public object ExecuteRead(string text, CommandType type, DBCallback callback)
         {
+            return ExecuteRead(text, type, callback, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="callback">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        public object ExecuteRead(string text, CommandType type, DBCallback callback, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
             if (null == callback)
@@ -296,10 +480,82 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(text, type))
             {
-                returns = this.DoExecuteRead(cmd, callback);
+                returns = this.DoExecuteRead(cmd, callback, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+
+        #region public object[] ExecuteReadEach(DBQuery query, DBRecordCallback populator)
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns and array of EACH object</param>
+        /// <returns>The object array returned from each call to your DBRecordCallback delegate method</returns>
+        public object[] ExecuteReadEach(DBQuery query, DBRecordCallback populator)
+        {
+            return this.ExecuteReadEach(query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns and array of EACH object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object array returned from each call to your DBRecordCallback delegate method</returns>
+        public object[] ExecuteReadEach(DBQuery query, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(query, delegate(DbDataReader reader)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                    all.Add(populator(reader));
+                return all.ToArray();
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(DBQuery query, DBRecordCallback populator)
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord for the FIRST result from the command
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteReadOne(DBQuery query, DBRecordCallback populator)
+        {
+            return ExecuteReadOne(query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord for the FIRST result from the command
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteReadOne(DBQuery query, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(query, delegate(DbDataReader reader)
+            {
+                if (reader.Read())
+                    return populator(reader);
+                else
+                    return null;
+            }, onerror);
         }
 
         #endregion
@@ -315,6 +571,19 @@ namespace Perceiveit.Data
         /// <returns>The object returned from your DBCallback delegate method</returns>
         public object ExecuteRead(DBQuery query, DBCallback populator)
         {
+            return ExecuteRead(query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteRead(DBQuery query, DBCallback populator, DBOnErrorCallback onerror)
+        {
             if (null == query)
                 throw new ArgumentNullException("query");
             if (null == populator)
@@ -324,7 +593,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(query))
             {
-                returns = this.DoExecuteRead(cmd, populator);
+                returns = this.DoExecuteRead(cmd, populator, onerror);
             }
 
             return returns;
@@ -332,7 +601,86 @@ namespace Perceiveit.Data
 
         #endregion
 
+
+
+        #region public object[] ExecuteReadEach(DbTransaction transaction, DBQuery query, DBRecordCallback populator)
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object array of results returned from your DBRecordCallback delegate method</returns>
+        public object[] ExecuteReadEach(DbTransaction transaction, DBQuery query, DBRecordCallback populator)
+        {
+            return ExecuteReadEach(transaction, query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object array of results returned from your DBRecordCallback delegate method</returns>
+        public object[] ExecuteReadEach(DbTransaction transaction, DBQuery query, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(transaction, query, delegate(DbDataReader reader)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                    all.Add(populator(reader));
+                return all.ToArray();
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(DbTransaction transaction, DBQuery query, DBRecordCallback populator)
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord of the FIRST result from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteReadOne(DbTransaction transaction, DBQuery query, DBRecordCallback populator)
+        {
+            return ExecuteReadOne(transaction, query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord of the FIRST result from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteReadOne(DbTransaction transaction, DBQuery query, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(transaction, query, delegate(DbDataReader reader)
+            {
+                if (reader.Read())
+                    return populator(reader);
+                else
+                    return null;
+
+            }, onerror);
+
+        }
+
+        #endregion
+
         #region public object ExecuteRead(DbTransaction transaction, DBQuery query, DBCallback populator)
+
         /// <summary>
         /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
         /// and invokes the callback method with the DbDataReader from the command
@@ -342,6 +690,20 @@ namespace Perceiveit.Data
         /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
         /// <returns>The object returned from your DBCallback delegate method</returns>
         public object ExecuteRead(DbTransaction transaction, DBQuery query, DBCallback populator)
+        {
+            return ExecuteRead(transaction, query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteRead(DbTransaction transaction, DBQuery query, DBCallback populator, DBOnErrorCallback onerror)
         {
             if (null == transaction)
                 throw new ArgumentNullException("transaction");
@@ -357,10 +719,86 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(transaction, query))
             {
-                returns = this.DoExecuteRead(cmd, populator);
+                returns = this.DoExecuteRead(cmd, populator, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+
+        #region public object[] ExecuteReadEach(DbCommand cmd, DBRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object arrary returned from each of your DBCallback delegate method calls</returns>
+        public object[] ExecuteReadEach(DbCommand cmd, DBRecordCallback populator)
+        {
+            return ExecuteReadEach(cmd, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the IDataRecord FOR EACH result from the command
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object arrary returned from each of your DBCallback delegate method calls</returns>
+        public object[] ExecuteReadEach(DbCommand cmd, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(cmd, delegate(DbDataReader reader)
+            {
+                List<object> all = new List<object>();
+
+                while (reader.Read())
+                {
+                    all.Add(populator(reader));
+                }
+                return all.ToArray();
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(DbCommand cmd, DBRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the IDataRecord for the FIRST result from the command
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteReadOne(DbCommand cmd, DBRecordCallback populator)
+        {
+            return ExecuteReadOne(cmd, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the IDataRecord for the FIRST result from the command
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="callback">A delegate method that accepts the IDataRecord as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteReadOne(DbCommand cmd, DBRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(cmd, delegate(DbDataReader reader)
+            {
+                if (reader.Read())
+                    return populator(reader);
+                else
+                    return null;
+
+            }, onerror);
         }
 
         #endregion
@@ -376,6 +814,19 @@ namespace Perceiveit.Data
         /// <returns>The object returned from your DBCallback delegate method</returns>
         public object ExecuteRead(DbCommand cmd, DBCallback callback)
         {
+            return this.ExecuteRead(cmd, callback, null);
+        }
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="callback">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback delegate method</returns>
+        public object ExecuteRead(DbCommand cmd, DBCallback callback, DBOnErrorCallback onerror)
+        {
             if (cmd == null)
                 throw new ArgumentNullException("cmd");
 
@@ -385,9 +836,7 @@ namespace Perceiveit.Data
             if (callback == null)
                 throw new ArgumentNullException("callback");
 
-
-
-            object returns = DoExecuteRead(cmd, callback);
+            object returns = DoExecuteRead(cmd, callback, onerror);
 
             return returns;
         }
@@ -396,7 +845,9 @@ namespace Perceiveit.Data
 
         #endregion
 
+
         #region protected virtual object DoExecuteRead(DbCommand cmd, DBCallback callback)
+
 
         /// <summary>
         /// Virtual (overridable) execute read method accepting a DBCallback. All ExecuteRead methods that 
@@ -407,7 +858,7 @@ namespace Perceiveit.Data
         /// <returns>Any object returned from the DBCallback will by returned from this method (can be null)</returns>
         /// <remarks>If the commands' connection is closed it will be opened. Any reader will be disposed, and profiling will be undertaken if started.<br/>
         /// It is assumed all parameters are not null, and is up to the calling methods to check this beforehand.</remarks>
-        protected virtual object DoExecuteRead(DbCommand cmd, DBCallback callback)
+        protected virtual object DoExecuteRead(DbCommand cmd, DBCallback callback, DBOnErrorCallback onerror)
         {
             object returns = null;
             DbDataReader reader = null;
@@ -432,7 +883,7 @@ namespace Perceiveit.Data
             catch (Exception ex)
             {
                 ReThrowAction action;
-                this.HandleExecutionError(ref ex, out action);
+                this.HandleExecutionError(onerror, ref ex, out action);
 
                 if (action == ReThrowAction.Original)
                     throw;
@@ -463,8 +914,101 @@ namespace Perceiveit.Data
 
         // read with context callback
 
+        #region public object[] ExecuteReadEach(string text, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReader for the FIRST result from the command and the context provided in the 
+        /// call to this method
+        /// </summary>
+        /// <param name="text">The SQL text to execute</param>
+        /// <param name="context">Any context to be passed to the callback method</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord for the FIRST result and the context object as parameters and returns an object</param>
+        /// <returns>The collected object array returned from your DBContextReceodCallback delegate method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(string text, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadEach(text, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReader FOR EACH result from the command and the context provided in the 
+        /// call to this method
+        /// </summary>
+        /// <param name="text">The SQL text to execute</param>
+        /// <param name="context">Any context to be passed to the callback method</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord FOR EACH result and the context object as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The collected object array returned from your DBContextRecordCallback delegate method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(string text, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+
+            return (object[])ExecuteRead(text, context, delegate(DbDataReader reader, object innercontext)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                {
+                    all.Add(populator(reader, innercontext));
+                }
+
+                return all.ToArray();
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(string text, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReader for the FIRST result from the command and the context provided in the 
+        /// call to this method
+        /// </summary>
+        /// <param name="text">The SQL text to execute</param>
+        /// <param name="context">Any context to be passed to the callback method</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord for the FIRST result and the context object as parameters and returns an object</param>
+        /// <returns>The object returned from your DBContextCallback delegate method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(string text, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadOne(text, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataReader for the FIRST result from the command and the context provided in the 
+        /// call to this method
+        /// </summary>
+        /// <param name="text">The SQL text to execute</param>
+        /// <param name="context">Any context to be passed to the callback method</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord for the FIRST result and the context object as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback delegate method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(string text, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+
+            return ExecuteRead(text, context, delegate(DbDataReader reader, object innercontext)
+            {
+                if (reader.Read())
+                {
+                    return populator(reader, innercontext);
+                }
+                else
+                    return null;
+            }, onerror);
+        }
+
+        #endregion
+
         #region public object ExecuteRead(string text, object context, DBContextCallback populator)
-        
+
         /// <summary>
         /// Executes the specified SQL text as a command against the this DBDatabase connection, 
         /// and invokes the callback method with the DbDataReader from the command and the context provided in the 
@@ -478,6 +1022,23 @@ namespace Perceiveit.Data
         /// but also any argument passed to this method as the context parameter</remarks>
         public object ExecuteRead(string text, object context, DBContextCallback populator)
         {
+            return ExecuteRead(text, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command and the context provided in the 
+        /// call to this method
+        /// </summary>
+        /// <param name="text">The SQL text to execute</param>
+        /// <param name="context">Any context to be passed to the callback method</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader and the context object as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback delegate method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteRead(string text, object context, DBContextCallback populator, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
 
@@ -488,10 +1049,102 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(text))
             {
-                returns = this.DoExecuteContextRead(cmd, context, populator);
+                returns = this.DoExecuteContextRead(cmd, context, populator, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+
+        #region public object[] ExecuteReadEach(string text, CommandType type, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord FOR EACH result and the object context as parameters and returns an object</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(string text, CommandType type, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadEach(text, type, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord FOR EACH result and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(string text, CommandType type, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[]) ExecuteRead(text, type, context, delegate(DbDataReader reader, object innercontext)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                    all.Add(populator(reader, innercontext));
+                return all.ToArray();
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(string text, CommandType type, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord from the FIRST result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord for the FIRST result and the object context as parameters and returns an object</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(string text, CommandType type, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadOne(text, type, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord from the FIRST result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord for the FIRST result and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(string text, CommandType type, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return this.ExecuteRead(text, type, context, delegate(DbDataReader reader, object innercontext)
+            {
+                if (reader.Read())
+                    return populator(reader, context);
+                else
+                    return null;
+            }, onerror);
         }
 
         #endregion
@@ -512,6 +1165,24 @@ namespace Perceiveit.Data
         /// but also any argument passed to this method as the context parameter</remarks>
         public object ExecuteRead(string text, CommandType type, object context, DBContextCallback populator)
         {
+            return ExecuteRead(text, type, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteRead(string text, CommandType type, object context, DBContextCallback populator, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
 
@@ -522,10 +1193,107 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(text, type))
             {
-                returns = this.DoExecuteContextRead(cmd, context, populator);
+                returns = this.DoExecuteContextRead(cmd, context, populator, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+
+        #region public object[] ExecuteReadEach(DbTransaction transaction, DBQuery query, object context, DBContextRecordCallback populator) + 1 overload
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase transaction, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord FOR EACH record and the object context as parameters and returns an object</param>
+        /// <returns>The object array returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(DbTransaction transaction, DBQuery query, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadEach(transaction, query, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase transaction, 
+        /// and invokes the callback method with the IDataRecord FOR EACH result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord FOR EACH result and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(DbTransaction transaction, DBQuery query, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(transaction, query, context, delegate(DbDataReader reader, object innercontext)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                {
+                    all.Add(populator(reader, innercontext));
+                }
+                return all.ToArray();
+
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(DbTransaction transaction, DBQuery query, object context, DBContextRecordCallback populator) + 1 overload
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase transaction, 
+        /// and invokes the callback method with the IDataRecord from the FIRST result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord of the FIRST record and the object context as parameters and returns an object</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(DbTransaction transaction, DBQuery query, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadOne(transaction, query, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase transaction, 
+        /// and invokes the callback method with the IDataRecord from the FIRST result of the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord of the FIRST record and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(DbTransaction transaction, DBQuery query, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(transaction, query, context, delegate(DbDataReader reader, object innercontext)
+            {
+                if (reader.Read())
+                {
+                    return populator(reader, innercontext);
+                }
+                else
+                    return null;
+            }, onerror);
         }
 
         #endregion
@@ -546,6 +1314,23 @@ namespace Perceiveit.Data
         /// but also any argument passed to this method as the context parameter</remarks>
         public object ExecuteRead(DbTransaction transaction, DBQuery query, object context, DBContextCallback populator)
         {
+            return ExecuteRead(transaction, query, context, populator, null);
+        }
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBContextCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteRead(DbTransaction transaction, DBQuery query, object context, DBContextCallback populator, DBOnErrorCallback onerror)
+        {
             object returns;
 
             if (null == transaction)
@@ -562,10 +1347,104 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(transaction, query))
             {
-                returns = this.DoExecuteContextRead(cmd, context, populator);
+                returns = this.DoExecuteContextRead(cmd, context, populator, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+
+        #region public object[] ExecuteReadEach(DBQuery query, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(DBQuery query, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadEach(query, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method ONCE with the IDataRecord from the FIRST command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The array of objects returned from your DBCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(DBQuery query, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[])ExecuteRead(query, context, delegate(DbDataReader reader, object innercontext)
+            {
+                List<object> all = new List<object>();
+                while (reader.Read())
+                {
+                    all.Add(populator(reader, innercontext));
+                }
+                return all.ToArray();
+
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(DBQuery query, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method ONCE with the IDataRecord from the FIRST command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(DBQuery query, object context, DBContextRecordCallback populator)
+        {
+            return ExecuteReadOne(query, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method ONCE with the IDataRecord from the FIRST command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(DBQuery query, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return ExecuteRead(query, context, delegate(DbDataReader reader, object innercontext)
+            {
+                if (reader.Read())
+                {
+                    return populator(reader, innercontext);
+                }
+                else
+                    return null;
+
+            }, onerror);
         }
 
         #endregion
@@ -585,6 +1464,23 @@ namespace Perceiveit.Data
         /// but also any argument passed to this method as the context parameter</remarks>
         public object ExecuteRead(DBQuery query, object context, DBContextCallback populator)
         {
+            return ExecuteRead(query, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="query">The DBQuery to generate the SQL command</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader and the object context as parameters and returns an object</param>
+        /// <param name="onerror">If an error is raised during the execution of the query the onerror method will be invoked</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteRead(DBQuery query, object context, DBContextCallback populator, DBOnErrorCallback onerror)
+        {
             object returns;
 
             if (null == query)
@@ -595,10 +1491,101 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(query))
             {
-                returns = this.DoExecuteContextRead(cmd, context, populator);
+                returns = this.DoExecuteContextRead(cmd, context, populator, onerror);
             }
 
             return returns;
+        }
+
+        #endregion
+
+
+        #region public object[] ExecuteReadEach(DbCommand cmd, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <returns>An array of all the objects returned from your DBCallback method</returns>
+        /// <remarks>The DBContextRecordCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(DbCommand cmd, object context, DBContextRecordCallback populator)
+        {
+            return this.ExecuteReadEach(cmd, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <param name="onerror">A delegate method that is called when there is an error executing the statement</param>
+        /// <returns>An array of all the objects returned from your DBCallback method</returns>
+        /// <remarks>The DBContextRecordCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object[] ExecuteReadEach(DbCommand cmd, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return (object[]) this.ExecuteRead(cmd, context, delegate(DbDataReader reader, object innercontext)
+            {
+                List<object> all = new List<object>();
+
+                while (reader.Read())
+                {
+                    all.Add(populator(reader, context));
+                }
+                return all.ToArray();
+                
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public object ExecuteReadOne(DbCommand cmd, object context, DBContextRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextRecordCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(DbCommand cmd, object context, DBContextRecordCallback populator)
+        {
+            return this.ExecuteReadOne(cmd, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord and the object context as parameters and returns an object</param>
+        /// <param name="onerror">A delegate method that is called when there is an error executing the statement</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextRecordCallback has a method signature that not only accepts a IDataRecord, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteReadOne(DbCommand cmd, object context, DBContextRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            return this.ExecuteRead(cmd, context, delegate(DbDataReader reader, object innercontext)
+            {
+                if (reader.Read())
+                    return populator(reader, context);
+                else
+                    return null;
+            }, onerror);
         }
 
         #endregion
@@ -618,6 +1605,23 @@ namespace Perceiveit.Data
         /// but also any argument passed to this method as the context parameter</remarks>
         public object ExecuteRead(DbCommand cmd, object context, DBContextCallback populator)
         {
+            return this.ExecuteRead(cmd, context, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified DBQuery as a command against this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command and the context provided in the
+        /// call to this method
+        /// </summary>
+        /// <param name="context">An object to be passed to the callback method</param>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader and the object context as parameters and returns an object</param>
+        /// <param name="onerror">A delegate method that is called when there is an error executing the statement</param>
+        /// <returns>The object returned from your DBCallback method</returns>
+        /// <remarks>The DBContextCallback has a method signature that not only accepts a DBDataReader, 
+        /// but also any argument passed to this method as the context parameter</remarks>
+        public object ExecuteRead(DbCommand cmd, object context, DBContextCallback populator, DBOnErrorCallback onerror)
+        {
             if (cmd == null)
                 throw new ArgumentNullException("cmd");
 
@@ -627,7 +1631,7 @@ namespace Perceiveit.Data
             if (populator == null)
                 throw new ArgumentNullException("populator");
 
-            object returns = DoExecuteContextRead(cmd, context, populator);
+            object returns = DoExecuteContextRead(cmd, context, populator, onerror);
 
             return returns;
         }
@@ -648,7 +1652,7 @@ namespace Perceiveit.Data
         /// <returns>Any object retruned from the DBContaxtCallback will by retruned from this method (can be null)</returns>
         /// <remarks>If the commands' connection is closed it will be opened. Any reader will be disposed, and profiling will be undertaken if started.
         /// It is assumed all parameters are not null, and is up to the calling methods to check this beforehand.</remarks>
-        protected virtual object DoExecuteContextRead(DbCommand cmd, object context, DBContextCallback populator)
+        protected virtual object DoExecuteContextRead(DbCommand cmd, object context, DBContextCallback populator, DBOnErrorCallback onerror)
         {
             object returns = null;
             DbDataReader reader = null;
@@ -672,7 +1676,7 @@ namespace Perceiveit.Data
             catch (Exception ex)
             {
                 ReThrowAction action;
-                this.HandleExecutionError(ref ex, out action);
+                this.HandleExecutionError(onerror, ref ex, out action);
 
                 if (action == ReThrowAction.Original)
                     throw;
@@ -699,7 +1703,63 @@ namespace Perceiveit.Data
 
         #endregion
 
-        // no return value
+        // ExecuteRead() no return value
+
+        #region public void ExecuteReadEach(string text, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command
+        /// </summary>
+        /// <param name="text">The SQL statement to execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(string text, DBEmptyRecordCallback populator)
+        {
+            ExecuteReadEach(text, CommandType.Text, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command
+        /// </summary>
+        /// <param name="text">The SQL statement to execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(string text, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            ExecuteReadEach(text, CommandType.Text, populator, onerror);
+        }
+
+        #endregion
+
+        #region public void ExecuteReadOne(string text, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command
+        /// </summary>
+        /// <param name="text">The SQL statement to execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(string text, DBEmptyRecordCallback populator)
+        {
+            ExecuteReadOne(text, CommandType.Text, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command
+        /// </summary>
+        /// <param name="text">The SQL statement to execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(string text, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            ExecuteReadOne(text, CommandType.Text, populator, onerror);
+        }
+
+        #endregion
 
         #region public void ExecuteRead(string text, DBEmptyCallback populator)
 
@@ -712,7 +1772,93 @@ namespace Perceiveit.Data
         /// <remarks>The DBEmptyCallback does not require a return value</remarks>
         public void ExecuteRead(string text, DBEmptyCallback populator)
         {
-            ExecuteRead(text, CommandType.Text, populator);
+            ExecuteRead(text, CommandType.Text, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="text">The SQL statement to execute</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteRead(string text, DBEmptyCallback populator, DBOnErrorCallback onerror)
+        {
+            ExecuteRead(text, CommandType.Text, populator, onerror);
+        }
+
+        #endregion
+
+
+
+        #region public void ExecuteReadEach(string text, CommandType type, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command.
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(string text, CommandType type, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadEach(text, type, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command.
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <param name="onerror">A delegate method that is called if there is an error executing the statement</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(string text, CommandType type, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(text, type, reader =>
+            {
+                while (reader.Read())
+                    populator(reader);
+            },
+            onerror);
+        }
+
+        #endregion
+
+        #region public void ExecuteReadOne(string text, CommandType type, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command.
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(string text, CommandType type, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadOne(text, type, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command.
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <param name="onerror">A delegate method that is called if there is an error executing the statement</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(string text, CommandType type, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(text, type, reader =>
+            {
+                if (reader.Read())
+                    populator(reader);
+            }, 
+            onerror);
         }
 
         #endregion
@@ -729,6 +1875,20 @@ namespace Perceiveit.Data
         /// <remarks>The DBEmptyCallback does not require a return value</remarks>
         public void ExecuteRead(string text, CommandType type, DBEmptyCallback populator)
         {
+            this.ExecuteRead(text, type, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified SQL text as a command (of the specified CommandType) against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command.
+        /// </summary>
+        /// <param name="text">The SQL Statement to execute</param>
+        /// <param name="type">The type of command the SQL Statement corresponds to</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter and returns an object</param>
+        /// <param name="onerror">A delegate method that is called if there is an error executing the statement</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteRead(string text, CommandType type, DBEmptyCallback populator, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
             if (null == populator)
@@ -736,8 +1896,78 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(text, type))
             {
-                this.DoExecuteEmptyRead(cmd, populator);
+                this.DoExecuteEmptyRead(cmd, populator, onerror);
             }
+        }
+
+        #endregion
+
+
+
+        #region public void ExecuteReadEach(DbTransaction transaction, DBQuery query, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord FOR EACH from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyRecordCallback does not require a return value</remarks>
+        public void ExecuteReadEach(DbTransaction transaction, DBQuery query, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadEach(transaction, query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord FOR EACH record from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyRecordCallback does not require a return value</remarks>
+        public void ExecuteReadEach(DbTransaction transaction, DBQuery query, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(transaction, query, reader =>
+            {
+                while (reader.Read())
+                    populator(reader);
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public void ExecuteReadOne(DbTransaction transaction, DBQuery query, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord ONCE from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyRecordCallback does not require a return value</remarks>
+        public void ExecuteReadOne(DbTransaction transaction, DBQuery query, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadOne(transaction, query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the IDataRecord ONCE with the first record from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyRecordCallback does not require a return value</remarks>
+        public void ExecuteReadOne(DbTransaction transaction, DBQuery query, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(transaction, query, reader =>
+            {
+                if (reader.Read())
+                    populator(reader);
+            }, onerror);
         }
 
         #endregion
@@ -754,6 +1984,19 @@ namespace Perceiveit.Data
         /// <remarks>The DBEmptyCallback does not require a return value</remarks>
         public void ExecuteRead(DbTransaction transaction, DBQuery query, DBEmptyCallback populator)
         {
+            this.ExecuteRead(transaction, query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase using the provided transaction, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="transaction">A currently open and active transaction</param>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteRead(DbTransaction transaction, DBQuery query, DBEmptyCallback populator, DBOnErrorCallback onerror)
+        {
             if (null == transaction)
                 throw new ArgumentNullException("transaction");
             if (null == populator)
@@ -761,8 +2004,78 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(transaction, query))
             {
-                this.DoExecuteEmptyRead(cmd, populator);
+                this.DoExecuteEmptyRead(cmd, populator, onerror);
             }
+        }
+
+        #endregion
+
+
+
+        #region public void ExecuteReadEach(DBQuery query, DBEmptyCallback populator) + 1 overload
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord that will be called FOR EACH with the first item from the query
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter.</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(DBQuery query, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadEach(query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord that will be called FOR EACH with the first item from the query
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter.</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(DBQuery query, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(query, reader =>
+            {
+                while (reader.Read())
+                {
+                    populator(reader);
+                }
+
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public void ExecuteReadOne(DBQuery query, DBEmptyRecordCallback populator) + 1 overload
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord that will be called ONCE with the first item from the query
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter.</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(DBQuery query, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadOne(query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the IDataRecord that will be called ONCE with the first item from the query
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter.</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(DBQuery query, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(query, reader =>
+            {
+                if (reader.Read())
+                    populator(reader);
+
+            }, onerror);
         }
 
         #endregion
@@ -778,6 +2091,18 @@ namespace Perceiveit.Data
         /// <remarks>The DBEmptyCallback does not require a return value</remarks>
         public void ExecuteRead(DBQuery query, DBEmptyCallback populator)
         {
+            this.ExecuteRead(query, populator, null);
+        }
+
+        /// <summary>
+        /// Generates the DBQuery as a command to execute against the this DBDatabase connection, 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="query">The DBQuery to build the SQL statement from and execute</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter.</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteRead(DBQuery query, DBEmptyCallback populator, DBOnErrorCallback onerror)
+        {
             if (null == query)
                 throw new ArgumentNullException("query");
             if (null == populator)
@@ -785,8 +2110,80 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(query))
             {
-                this.DoExecuteEmptyRead(cmd, populator);
+                this.DoExecuteEmptyRead(cmd, populator, onerror);
             }
+        }
+
+        #endregion
+
+
+
+        #region public void ExecuteReadEach(DbCommand cmd, DBEmptyRecordCallback populator)
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the IDataRecord from the command FOR EACH read entry
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(DbCommand cmd, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadEach(cmd, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the IDataRecord from the command FOR EACH read entry
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <param name="onerror">A delegate that will be called if there is an error executing the command</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadEach(DbCommand cmd, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(cmd, reader =>
+            {
+                while (reader.Read())
+                {
+                    populator(reader);
+                }
+
+            }, onerror);
+        }
+
+        #endregion
+
+        #region public void ExecuteReadOne(DbCommand cmd, DBEmptyCallback populator) + 1 overload
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method ONCE with the IDataRecord from the command for the first read entry
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(DbCommand cmd, DBEmptyRecordCallback populator)
+        {
+            this.ExecuteReadOne(cmd, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method ONCE with the IDataRecord from the command for the first read entry
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the IDataRecord as a parameter</param>
+        /// <param name="onerror">A delegate that will be called if there is an error executing the command</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteReadOne(DbCommand cmd, DBEmptyRecordCallback populator, DBOnErrorCallback onerror)
+        {
+            this.ExecuteRead(cmd, reader =>
+            {
+                if (reader.Read())
+                    populator(reader);
+
+            }, onerror);
         }
 
         #endregion
@@ -802,6 +2199,18 @@ namespace Perceiveit.Data
         /// <remarks>The DBEmptyCallback does not require a return value</remarks>
         public void ExecuteRead(DbCommand cmd, DBEmptyCallback populator)
         {
+            ExecuteRead(cmd, populator, null);
+        }
+
+        /// <summary>
+        /// Executes the specified Command against it's connection (opening as required), 
+        /// and invokes the callback method with the DbDataReader from the command
+        /// </summary>
+        /// <param name="cmd">The initialiazed DbCommand with a non null DbConnection (if the connection is not open it will be opened and closed within the method)</param>
+        /// <param name="populator">A delegate method that accepts the DbDataReader as a parameter</param>
+        /// <remarks>The DBEmptyCallback does not require a return value</remarks>
+        public void ExecuteRead(DbCommand cmd, DBEmptyCallback populator, DBOnErrorCallback onerror)
+        {
             if (null == cmd)
                 throw new ArgumentNullException("cmd");
             if (null == cmd.Connection)
@@ -809,7 +2218,7 @@ namespace Perceiveit.Data
             if (null == populator)
                 throw new ArgumentNullException("populator");
 
-            DoExecuteEmptyRead(cmd, populator);
+            DoExecuteEmptyRead(cmd, populator, onerror);
         }
 
         
@@ -827,7 +2236,7 @@ namespace Perceiveit.Data
         /// <param name="populator">The delegate method to perform the actual reading</param>
         /// <remarks>If the commands' connection is closed it will be opened. Any reader will be disposed, and profiling will be undertaken if started.<br/>
         /// It is assumed all parameters are not null, and is up to the calling methods to check this beforehand.</remarks>
-        protected virtual void DoExecuteEmptyRead(DbCommand cmd, DBEmptyCallback populator)
+        protected virtual void DoExecuteEmptyRead(DbCommand cmd, DBEmptyCallback populator, DBOnErrorCallback onerror)
         {
             DbDataReader reader = null;
             bool opened = false;
@@ -852,7 +2261,7 @@ namespace Perceiveit.Data
             catch (Exception ex)
             {
                 ReThrowAction action;
-                this.HandleExecutionError(ref ex, out action);
+                this.HandleExecutionError(onerror, ref ex, out action);
 
                 if (action == ReThrowAction.Original)
                     throw;
@@ -897,6 +2306,17 @@ namespace Perceiveit.Data
         /// <returns>The resultant object from the database query</returns>
         public object ExecuteScalar(DBQuery query)
         {
+            return ExecuteScalar(query, null);
+        }
+
+        /// <summary>
+        /// Generates a SQL Command from the DBQuery and execute this against this instances database, 
+        /// returning the scalar result
+        /// </summary>
+        /// <param name="query">The DBQuery to execute</param>
+        /// <returns>The resultant object from the database query</returns>
+        public object ExecuteScalar(DBQuery query, DBOnErrorCallback onerror)
+        {
             if (null == query)
                 throw new ArgumentNullException("query");
 
@@ -904,7 +2324,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(query))
             {
-                returns = this.DoExecuteScalar(cmd);
+                returns = this.DoExecuteScalar(cmd, onerror);
             }
 
             return returns;
@@ -923,6 +2343,18 @@ namespace Perceiveit.Data
         /// <returns>The resultant object from the database query</returns>
         public object ExecuteScalar(DbConnection connection, DBQuery query)
         {
+            return ExecuteScalar(connection, query, null);
+        }
+
+        /// <summary>
+        /// Generates a SQL Command from the DBQuery and executes this against the specifed connection, 
+        /// returning the scalar result
+        /// </summary>
+        /// <param name="query">The DBQuery to execute</param>
+        /// <param name="connection">The database connection to use</param>
+        /// <returns>The resultant object from the database query</returns>
+        public object ExecuteScalar(DbConnection connection, DBQuery query, DBOnErrorCallback onerror)
+        {
             if (null == connection)
                 throw new ArgumentNullException("connection");
             if (null == query)
@@ -932,7 +2364,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(connection, query))
             {
-                returns = this.DoExecuteScalar(cmd);
+                returns = this.DoExecuteScalar(cmd, onerror);
             }
 
             return returns;
@@ -940,7 +2372,7 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public object ExecuteScalar(DbTransaction transaction, DBQuery query)
+        #region public object ExecuteScalar(DbTransaction transaction, DBQuery query) + 1 overload
 
         /// <summary>
         /// Generates a SQL Command from the DBQuery and execute this with the specified transaction, 
@@ -950,6 +2382,18 @@ namespace Perceiveit.Data
         /// <param name="transaction">The valid and active transaction to execute under</param>
         /// <returns>The resultant object from the database query</returns>
         public object ExecuteScalar(DbTransaction transaction, DBQuery query)
+        {
+            return ExecuteScalar(transaction, query, null);
+        }
+
+        /// <summary>
+        /// Generates a SQL Command from the DBQuery and execute this with the specified transaction, 
+        /// returning the scalar result.
+        /// </summary>
+        /// <param name="query">The DBQuery to execute</param>
+        /// <param name="transaction">The valid and active transaction to execute under</param>
+        /// <returns>The resultant object from the database query</returns>
+        public object ExecuteScalar(DbTransaction transaction, DBQuery query, DBOnErrorCallback onerror)
         {
             if (null == transaction)
                 throw new ArgumentNullException("transaction");
@@ -962,7 +2406,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(transaction, query))
             {
-                returns = this.DoExecuteScalar(cmd);
+                returns = this.DoExecuteScalar(cmd, onerror);
             }
 
             return returns;
@@ -970,7 +2414,7 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public object ExecuteScalar(string text)
+        #region public object ExecuteScalar(string text) + 1 overload
 
         /// <summary>
         /// Executes a SQL string against this instances database, 
@@ -980,12 +2424,23 @@ namespace Perceiveit.Data
         /// <returns>The resultant object from the database execution</returns>
         public object ExecuteScalar(string text)
         {
-            return this.ExecuteScalar(text, CommandType.Text);
+            return ExecuteScalar(text, null);
+        }
+
+        /// <summary>
+        /// Executes a SQL string against this instances database, 
+        /// returning the scalar result
+        /// </summary>
+        /// <param name="text">The SQL string to execute</param>
+        /// <returns>The resultant object from the database execution</returns>
+        public object ExecuteScalar(string text, DBOnErrorCallback onerror)
+        {
+            return this.ExecuteScalar(text, CommandType.Text, onerror);
         }
 
         #endregion
 
-        #region public object ExecuteScalar(string text, CommandType type)
+        #region public object ExecuteScalar(string text, CommandType type) + 1 overload
 
         /// <summary>
         /// Executes a SQL string (of the specified type) against this instances database, 
@@ -996,6 +2451,18 @@ namespace Perceiveit.Data
         /// <returns>The resultant object from the database execution</returns>
         public object ExecuteScalar(string text, CommandType type)
         {
+            return this.ExecuteScalar(text, type, null);
+        }
+
+        /// <summary>
+        /// Executes a SQL string (of the specified type) against this instances database, 
+        /// returning the scalar result
+        /// </summary>
+        /// <param name="text">The SQL string to execute</param>
+        /// <param name="type">The type of command hte sql text represents</param>
+        /// <returns>The resultant object from the database execution</returns>
+        public object ExecuteScalar(string text, CommandType type, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
 
@@ -1003,7 +2470,7 @@ namespace Perceiveit.Data
             
             using (DbCommand cmd = this.CreateCommand(text, type))
             {
-                result = this.DoExecuteScalar(cmd);
+                result = this.DoExecuteScalar(cmd, onerror);
             }
 
             return result;
@@ -1011,7 +2478,7 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public object ExecuteScalar(DbCommand cmd)
+        #region public object ExecuteScalar(DbCommand cmd) + 1 overload
 
         /// <summary>
         /// Executes the DBCommand (which must include the correct connection) returning the scalar result
@@ -1020,27 +2487,37 @@ namespace Perceiveit.Data
         /// <returns>The resultant object from the database execution</returns>
         public object ExecuteScalar(DbCommand cmd)
         {
+            return this.ExecuteScalar(cmd, null);
+        }
+
+        /// <summary>
+        /// Executes the DBCommand (which must include the correct connection) returning the scalar result
+        /// </summary>
+        /// <param name="cmd">The SQL command to execute</param>
+        /// <returns>The resultant object from the database execution</returns>
+        public object ExecuteScalar(DbCommand cmd, DBOnErrorCallback onerror)
+        {
             if (null == cmd)
                 throw new ArgumentNullException("cmd");
 
             if (null == cmd.Connection)
                 throw new ArgumentNullException("cmd.Connection");
 
-            object result = DoExecuteScalar(cmd);
+            object result = DoExecuteScalar(cmd, onerror);
 
             return result;
         }
 
         #endregion
 
-        #region protected virtual object DoExecuteScalar(DbCommand cmd)
+        #region protected virtual object DoExecuteScalar(DbCommand cmd, DBOnErrorCallback onerror)
 
         /// <summary>
         ///  Virtual (overridable) execute read method accepting a command. All ExecuteScalar methods ultimately call this method
         /// </summary>
         /// <param name="cmd">The command to execute</param>
         /// <returns>The result of the ExecuteScalar method</returns>
-        protected virtual object DoExecuteScalar(DbCommand cmd)
+        protected virtual object DoExecuteScalar(DbCommand cmd, DBOnErrorCallback onerror)
         {
             object result = null;
             bool opened = false;
@@ -1062,7 +2539,7 @@ namespace Perceiveit.Data
             catch (Exception ex)
             {
                 ReThrowAction action;
-                this.HandleExecutionError(ref ex, out action);
+                this.HandleExecutionError(onerror, ref ex, out action);
 
                 if (action == ReThrowAction.Original)
                     throw;
@@ -1100,6 +2577,18 @@ namespace Perceiveit.Data
         /// <returns>The resultant integer from the database query</returns>
         public int ExecuteNonQuery(DBQuery query)
         {
+            return ExecuteNonQuery(query, null);
+        }
+
+        /// <summary>
+        /// Generates a SQL Command from the DBQuery and executes this against this instances database, 
+        /// returning the integer result
+        /// </summary>
+        /// <param name="query">The DBQuery to execute</param>
+        /// <param name="onerror">Callback for error handling</param>
+        /// <returns>The resultant integer from the database query</returns>
+        public int ExecuteNonQuery(DBQuery query, DBOnErrorCallback onerror)
+        {
             if (null == query)
                 throw new ArgumentNullException("query");
 
@@ -1107,7 +2596,7 @@ namespace Perceiveit.Data
             
             using (DbCommand cmd = this.CreateCommand(query))
             {
-                returns = this.DoExecuteNonQuery(cmd);
+                returns = this.DoExecuteNonQuery(cmd, onerror);
             }
 
             return returns;
@@ -1116,7 +2605,8 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public int ExecuteNonQuery(DbConnection connection, DBQuery query)
+        #region public int ExecuteNonQuery(DbConnection connection, DBQuery query) + 1 overload
+       
         /// <summary>
         /// Generates a SQL Command from the DBQuery and executes this against the specifed connection, 
         /// returning the integer result
@@ -1125,6 +2615,18 @@ namespace Perceiveit.Data
         /// <param name="connection">The database connection to use</param>
         /// <returns>The resultant integer from the database query</returns>
         public int ExecuteNonQuery(DbConnection connection, DBQuery query)
+        {
+            return this.ExecuteNonQuery(connection, query, null);
+        }
+        
+        /// <summary>
+        /// Generates a SQL Command from the DBQuery and executes this against the specifed connection, 
+        /// returning the integer result
+        /// </summary>
+        /// <param name="query">The DBQuery to execute</param>
+        /// <param name="connection">The database connection to use</param>
+        /// <returns>The resultant integer from the database query</returns>
+        public int ExecuteNonQuery(DbConnection connection, DBQuery query, DBOnErrorCallback onerror)
         {
             if (null == connection)
                 throw new ArgumentNullException("connection");
@@ -1135,7 +2637,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(connection, query))
             {
-                returns = this.DoExecuteNonQuery(cmd);
+                returns = this.DoExecuteNonQuery(cmd, onerror);
             }
 
             return returns;
@@ -1143,7 +2645,7 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public int ExecuteNonQuery(DbTransaction transaction, DBQuery query)
+        #region public int ExecuteNonQuery(DbTransaction transaction, DBQuery query) + 1 overload
 
         /// <summary>
         /// Generates a SQL Command from the DBQuery and execute this with the specified transaction, 
@@ -1153,6 +2655,18 @@ namespace Perceiveit.Data
         /// <param name="transaction">The valid and active transaction to execute under</param>
         /// <returns>The resultant integer from the database query</returns>
         public int ExecuteNonQuery(DbTransaction transaction, DBQuery query)
+        {
+            return this.ExecuteNonQuery(transaction, query, null);
+        }
+        
+        /// <summary>
+        /// Generates a SQL Command from the DBQuery and execute this with the specified transaction, 
+        /// returning the integer result.
+        /// </summary>
+        /// <param name="query">The DBQuery to execute</param>
+        /// <param name="transaction">The valid and active transaction to execute under</param>
+        /// <returns>The resultant integer from the database query</returns>
+        public int ExecuteNonQuery(DbTransaction transaction, DBQuery query, DBOnErrorCallback onerror)
         {
             if (null == transaction)
                 throw new ArgumentNullException("transaction");
@@ -1165,7 +2679,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(transaction, query))
             {
-                returns = this.DoExecuteNonQuery(cmd);
+                returns = this.DoExecuteNonQuery(cmd, onerror);
             }
 
             return returns;
@@ -1173,7 +2687,7 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public int ExecuteNonQuery(string text)
+        #region public int ExecuteNonQuery(string text) + 1 overload
 
         /// <summary>
         /// Executes a SQL string against this instances database, 
@@ -1186,19 +2700,26 @@ namespace Perceiveit.Data
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
 
-            int result;
+            return ExecuteNonQuery(text, CommandType.Text);
+        }
 
-            using (DbCommand cmd = this.CreateCommand(text))
-            {
-                result = this.DoExecuteNonQuery(cmd);
-            }
+        /// <summary>
+        /// Executes a SQL string against this instances database, 
+        /// returning the integer result
+        /// </summary>
+        /// <param name="text">The SQL string to execute</param>
+        /// <returns>The resultant integer from the database execution</returns>
+        public int ExecuteNonQuery(string text, DBOnErrorCallback onerror)
+        {
+            if (string.IsNullOrEmpty(text))
+                throw new ArgumentNullException("text");
 
-            return result;
+            return ExecuteNonQuery(text, CommandType.Text, onerror);
         }
 
         #endregion
 
-        #region public int ExecuteNonQuery(string text, CommandType type)
+        #region public int ExecuteNonQuery(string text, CommandType type) + 1 overload
 
         /// <summary>
         /// Executes a SQL string (of the specified type) against this instances database, 
@@ -1209,6 +2730,18 @@ namespace Perceiveit.Data
         /// <returns>The resultant integer from the database execution</returns>
         public int ExecuteNonQuery(string text, CommandType type)
         {
+            return ExecuteNonQuery(text, type, null);
+        }
+
+        /// <summary>
+        /// Executes a SQL string (of the specified type) against this instances database, 
+        /// returning the integer result
+        /// </summary>
+        /// <param name="text">The SQL string to execute</param>
+        /// <param name="type">The type of command the sql text represents</param>
+        /// <returns>The resultant integer from the database execution</returns>
+        public int ExecuteNonQuery(string text, CommandType type, DBOnErrorCallback onerror)
+        {
             if (string.IsNullOrEmpty(text))
                 throw new ArgumentNullException("text");
             
@@ -1216,7 +2749,7 @@ namespace Perceiveit.Data
 
             using (DbCommand cmd = this.CreateCommand(text, type))
             {
-                result = this.DoExecuteNonQuery(cmd);
+                result = this.DoExecuteNonQuery(cmd, onerror);
             }
 
             return result;
@@ -1224,7 +2757,7 @@ namespace Perceiveit.Data
 
         #endregion
 
-        #region public int ExecuteNonQuery(DbCommand cmd)
+        #region public int ExecuteNonQuery(DbCommand cmd) + 1 overload
 
         /// <summary>
         /// Executes the DBCommand (which must include the correct connection) returning the integer result
@@ -1233,18 +2766,28 @@ namespace Perceiveit.Data
         /// <returns>The resultant integer from the database execution</returns>
         public int ExecuteNonQuery(DbCommand cmd)
         {
+            return ExecuteNonQuery(cmd, null);
+        }
+        
+        /// <summary>
+        /// Executes the DBCommand (which must include the correct connection) returning the integer result
+        /// </summary>
+        /// <param name="cmd">The SQL command to execute</param>
+        /// <param name="onerror">An error callback for any exceptions raised</param>
+        /// <returns>The resultant integer from the database execution</returns>
+        public int ExecuteNonQuery(DbCommand cmd, DBOnErrorCallback onerror)
+        {
             if (null == cmd)
                 throw new ArgumentNullException("cmd");
             if (null == cmd.Connection)
                 throw new ArgumentNullException("cmd.Connection");
 
-            int result = DoExecuteNonQuery(cmd);
+            int result = DoExecuteNonQuery(cmd, onerror);
 
             return result;
         }
 
         #endregion
-
 
         #region protected virtual int DoExecuteNonQuery(DbCommand cmd)
 
@@ -1253,7 +2796,7 @@ namespace Perceiveit.Data
         /// </summary>
         /// <param name="cmd">The command to execute</param>
         /// <returns>The result of the DbCommand.ExecuteNonQuery method</returns>
-        protected virtual int DoExecuteNonQuery(DbCommand cmd)
+        protected virtual int DoExecuteNonQuery(DbCommand cmd, DBOnErrorCallback onerror)
         {
             int result = 0;
             bool opened = false;
@@ -1275,7 +2818,7 @@ namespace Perceiveit.Data
             catch (Exception ex)
             {
                 ReThrowAction action;
-                this.HandleExecutionError(ref ex, out action);
+                this.HandleExecutionError(onerror, ref ex, out action);
 
                 if (action == ReThrowAction.Original)
                     throw;
@@ -1964,22 +3507,31 @@ namespace Perceiveit.Data
         // support methods
         //
 
+       
+
         #region protected virtual void HandleExecutionError(Exception ex)
 
         /// <summary>
         /// Method called if there was an error generated dring the execution of a database command.
         /// </summary>
         /// <param name="ex">The exception that occurred</param>
+        /// <param name="onerror">Any error handler</param>
+        /// <param name="rethrow">Set to the action to undertake</param>
         /// <remarks>The default behaviour for this instance is to rethrow the exception.
         /// However if the compilation constant 'WRAP_EXCEPTIONS' is defined then all errors that occur 
         /// during execution will be wrapped in a generic exception message.<br/>
         /// Inheritors can also override this method to provide their own error handling</remarks>
-        protected virtual void HandleExecutionError(ref Exception ex, out ReThrowAction rethrow)
+        protected virtual void HandleExecutionError(DBOnErrorCallback onerror, ref Exception ex, out ReThrowAction rethrow)
         {
             DBConfigurationSection section = Configuration.DBConfigurationSection.GetSection();
-
+            
             DBExceptionEventArgs args = new DBExceptionEventArgs(ex);
-            this.OnHandleException(args);
+            if (onerror != null)
+                onerror(args);
+
+            //if the onerror callaback has not handled it then check the HandleException event
+            if (!args.Handled)
+                this.OnHandleException(args);
 
             if (args.Handled)
             {
