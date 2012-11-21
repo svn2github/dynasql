@@ -204,11 +204,15 @@ namespace Perceiveit.Data.Query
 
         #region protected virtual string DateFormatString {get;}
 
+        /// <summary>
+        /// Gets the format string to convert dates to string representations.
+        /// Inheritors can overwrite this to return their own formatting
+        /// </summary>
         protected virtual string DateFormatString
         {
             get
             {
-                return "yyyy-MM-dd hh:mm:ss";
+                return "yyyy-MM-dd HH:mm:ss";
             }
         }
 

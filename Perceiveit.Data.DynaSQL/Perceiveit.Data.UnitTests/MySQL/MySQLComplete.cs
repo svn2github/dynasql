@@ -1006,7 +1006,22 @@ namespace Perceiveit.Data.UnitTests.MySQL
                 }
             });
             TestContext.WriteLine("Total number of courses in the '{0}' department is '{1}'", deptname.Value, count);
-                
+
+
+            DBQuery selectall = DBQuery.Select().Field("CategoryName")
+                                        .From("Categories")
+                                        .OrderBy("CateogryName");
+            List<string> categories = new List<string>();
+
+            db.ExecuteReadEach(selectall, reader =>
+            {
+                categories.Add(reader.GetString(0));
+            },
+            onerror =>
+            {
+
+            });
+
         }
 
         #endregion
