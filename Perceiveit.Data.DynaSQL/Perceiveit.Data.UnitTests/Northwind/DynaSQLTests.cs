@@ -1433,6 +1433,12 @@ namespace Perceiveit.Data.DynaSql.Tests
             TestContext.WriteLine(script.ToSQLString(db));
             object value = db.ExecuteScalar(script);
             TestContext.WriteLine("Returned identifier was {0}", value);
+
+            DBSelectQuery sel = DBQuery.SelectFields("one", "two", "three")
+                                       .From("OtherTable");
+
+            DBQuery ins = DBQuery.InsertInto("MyTable").Fields("one", "two", "three")
+                                 .Select(sel);
             
         }
 
