@@ -165,6 +165,11 @@ namespace Perceiveit.Data.Query
 
     internal class DBValueGroupRef : DBValueGroup
     {
+
+#if SILVERLIGHT
+        // no statement building
+#else
+
         //
         // SQL Statement builder
         //
@@ -180,6 +185,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // XML Serializer

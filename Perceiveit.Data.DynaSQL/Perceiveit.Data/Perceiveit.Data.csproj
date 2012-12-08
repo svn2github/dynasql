@@ -131,6 +131,7 @@
     <Compile Include="Query\DBPrimaryKey.cs" />
     <Compile Include="Query\DBQueryHintOption.cs" />
     <Compile Include="Query\DBQueryHintOptionSet.cs" />
+    <Compile Include="Query\DBStatementBuilder.cs" />
     <Compile Include="Query\DBTableHintOption.cs" />
     <Compile Include="Query\DBTableHintSet.cs" />
     <Compile Include="Query\DBTableIndex.cs" />
@@ -219,7 +220,6 @@
     <Compile Include="Query\DBClauseList.cs" />
     <Compile Include="Query\DBField.cs" />
     <Compile Include="Query\Internal\DBSelectSet.cs" />
-    <Compile Include="Query\DBStatementBuilder.cs" />
     <Compile Include="SqlClient\DBSqlClientStatementBuilder.cs" />
     <Compile Include="Errors.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -1,0 +1,306 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{161D1EAA-A6F3-41EF-8D6A-DB548BA825B4}</ProjectGuid>
+    <ProjectTypeGuids>{A1591282-1198-4647-A2B1-27E5FF5F6F3B};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Perceiveit.Data</RootNamespace>
+    <AssemblyName>Perceiveit.Data.Silverlight</AssemblyName>
+    <TargetFrameworkIdentifier>Silverlight</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
+    <SilverlightApplication>false</SilverlightApplication>
+    <ValidateXaml>true</ValidateXaml>
+    <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <!-- This property group is only here to support building this project using the 
+       MSBuild 3.5 toolset. In order to work correctly with this older toolset, it needs 
+       to set the TargetFrameworkVersion to v3.5 -->
+  <PropertyGroup Condition="'$(MSBuildToolsVersion)' == '3.5'">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>Bin\Release</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System.Windows" />
+    <Reference Include="system" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Windows.Browser" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\Perceiveit.Data\DBHelper.cs">
+      <Link>DBHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Errors.Designer.cs">
+      <Link>Errors.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBAggregate.cs">
+      <Link>Query\DBAggregate.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBAssign.cs">
+      <Link>Query\DBAssign.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBBooleanOp.cs">
+      <Link>Query\DBBooleanOp.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCalc.cs">
+      <Link>Query\DBCalc.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCalculableClause.cs">
+      <Link>Query\DBCalculableClause.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBClause.cs">
+      <Link>Query\DBClause.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBClauseList.cs">
+      <Link>Query\DBClauseList.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBColumn.cs">
+      <Link>Query\DBColumn.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBComparison.cs">
+      <Link>Query\DBComparison.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBConst.cs">
+      <Link>Query\DBConst.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBConstraint.cs">
+      <Link>Query\DBConstraint.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCreateIndexQuery.cs">
+      <Link>Query\DBCreateIndexQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCreateProcedureQuery.cs">
+      <Link>Query\DBCreateProcedureQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCreateQuery.cs">
+      <Link>Query\DBCreateQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCreateSequenceQuery.cs">
+      <Link>Query\DBCreateSequenceQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCreateTableQuery.cs">
+      <Link>Query\DBCreateTableQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBCreateViewQuery.cs">
+      <Link>Query\DBCreateViewQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDeclaration.cs">
+      <Link>Query\DBDeclaration.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDeleteQuery.cs">
+      <Link>Query\DBDeleteQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDropIndexQuery.cs">
+      <Link>Query\DBDropIndexQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDropProcedureQuery.cs">
+      <Link>Query\DBDropProcedureQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDropQuery.cs">
+      <Link>Query\DBDropQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDropSequenceQuery.cs">
+      <Link>Query\DBDropSequenceQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDropTableQuery.cs">
+      <Link>Query\DBDropTableQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBDropViewQuery.cs">
+      <Link>Query\DBDropViewQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBExecQuery.cs">
+      <Link>Query\DBExecQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBField.cs">
+      <Link>Query\DBField.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBForeignKey.cs">
+      <Link>Query\DBForeignKey.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBFunction.cs">
+      <Link>Query\DBFunction.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBHintOption.cs">
+      <Link>Query\DBHintOption.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBInsertQuery.cs">
+      <Link>Query\DBInsertQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBJoin.cs">
+      <Link>Query\DBJoin.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBOrder.cs">
+      <Link>Query\DBOrder.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBParam.cs">
+      <Link>Query\DBParam.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBPrimaryKey.cs">
+      <Link>Query\DBPrimaryKey.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBQuery+Create.cs">
+      <Link>Query\DBQuery+Create.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBQuery+Drop.cs">
+      <Link>Query\DBQuery+Drop.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBQuery.cs">
+      <Link>Query\DBQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBQueryHintOption.cs">
+      <Link>Query\DBQueryHintOption.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBQueryHintOptionSet.cs">
+      <Link>Query\DBQueryHintOptionSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBReturn.cs">
+      <Link>Query\DBReturn.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBScript.cs">
+      <Link>Query\DBScript.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBSelectQuery.cs">
+      <Link>Query\DBSelectQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBSet.cs">
+      <Link>Query\DBSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBStatement.cs">
+      <Link>Query\DBStatement.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBSubQuery.cs">
+      <Link>Query\DBSubQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBTable.cs">
+      <Link>Query\DBTable.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBTableHintOption.cs">
+      <Link>Query\DBTableHintOption.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBTableHintSet.cs">
+      <Link>Query\DBTableHintSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBTableIndex.cs">
+      <Link>Query\DBTableIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBToken.cs">
+      <Link>Query\DBToken.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBTokenList.cs">
+      <Link>Query\DBTokenList.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBTop.cs">
+      <Link>Query\DBTop.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBUpdateQuery.cs">
+      <Link>Query\DBUpdateQuery.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\DBValueGroup.cs">
+      <Link>Query\DBValueGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBAssignSet.cs">
+      <Link>Query\Internal\DBAssignSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBCalculableExpressionSet.cs">
+      <Link>Query\Internal\DBCalculableExpressionSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBExpressionSet.cs">
+      <Link>Query\Internal\DBExpressionSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBFilterSet.cs">
+      <Link>Query\Internal\DBFilterSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBGroupBySet.cs">
+      <Link>Query\Internal\DBGroupBySet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBOrderSet.cs">
+      <Link>Query\Internal\DBOrderSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBSelectSet.cs">
+      <Link>Query\Internal\DBSelectSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBTableSet.cs">
+      <Link>Query\Internal\DBTableSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\Internal\DBValueSet.cs">
+      <Link>Query\Internal\DBValueSet.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\XmlFactory.cs">
+      <Link>Query\XmlFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\XmlHelper.cs">
+      <Link>Query\XmlHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\XmlReaderContext.cs">
+      <Link>Query\XmlReaderContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\XmlWriterContext.cs">
+      <Link>Query\XmlWriterContext.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\Query\_Interfaces.cs">
+      <Link>Query\_Interfaces.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\_Delegates.cs">
+      <Link>_Delegates.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\_Documentation.cs">
+      <Link>_Documentation.cs</Link>
+    </Compile>
+    <Compile Include="..\Perceiveit.Data\_Enumerations.cs">
+      <Link>_Enumerations.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Perceiveit.Data\Errors.resx">
+      <Link>Errors.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Silverlight\$(SilverlightVersion)\Microsoft.Silverlight.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{A1591282-1198-4647-A2B1-27E5FF5F6F3B}">
+        <SilverlightProjectProperties />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -363,6 +363,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region protected DBClause ReadNextInnerClause(string endElement, System.Xml.XmlReader reader, XmlReaderContext context)
+        
         /// <summary>
         /// Reads the next element from the XMLReader and constructs then a new clause based upon this XML data
         /// </summary>
@@ -388,6 +390,8 @@ namespace Perceiveit.Data.Query
 
             return clause;
         }
+
+        #endregion
 
     }
 

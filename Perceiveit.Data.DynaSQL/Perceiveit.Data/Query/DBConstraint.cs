@@ -36,6 +36,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
 
         #region protected virtual void BuildColumnListStatement(DBStatementBuilder builder, DBColumnList tooutput)
 
@@ -57,6 +60,51 @@ namespace Perceiveit.Data.Query
                 builder.WriteSourceField(string.Empty, string.Empty, col.Name, string.Empty);
             }
             builder.EndBlock();
+        }
+
+        #endregion
+
+#endif
+
+        //
+        // xml serialization
+        //
+
+        #region protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
+        
+        /// <summary>
+        /// Reads a single attribute
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
+        {
+            if (IsAttributeMatch(XmlHelper.Name, reader, context))
+            {
+                this.Name = reader.Value;
+                return true;
+            }
+            else
+                return base.ReadAnAttribute(reader, context);
+        }
+
+        #endregion
+
+        #region protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
+
+        /// <summary>
+        /// writes all the attributes
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
+        {
+            if (!string.IsNullOrEmpty(this.Name))
+                this.WriteAttribute(writer, XmlHelper.Name, this.Name, context);
+
+            return base.WriteAllAttributes(writer, context);
         }
 
         #endregion
@@ -123,24 +171,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
-        {
-            if (IsAttributeMatch(XmlHelper.Name, reader, context))
-            {
-                this.Name = reader.Value;
-                return true;
-            }
-            else
-                return base.ReadAnAttribute(reader, context);
-        }
 
-        protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
-        {
-            if (!string.IsNullOrEmpty(this.Name))
-                this.WriteAttribute(writer, XmlHelper.Name, this.Name, context);
-
-            return base.WriteAllAttributes(writer, context);
-        }
     }
 
 

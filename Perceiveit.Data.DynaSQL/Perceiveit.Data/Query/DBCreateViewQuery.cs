@@ -135,6 +135,10 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.CreateView; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             bool check = (this.CheckExists == DBExistState.NotExists);
@@ -146,6 +150,8 @@ namespace Perceiveit.Data.Query
             builder.EndCreate(DBSchemaTypes.View, check);
             return true;
         }
+
+#endif
 
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {

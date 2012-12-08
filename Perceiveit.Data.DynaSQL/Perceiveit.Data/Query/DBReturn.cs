@@ -67,6 +67,10 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.Returns; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginReturnsStatement();
@@ -75,6 +79,8 @@ namespace Perceiveit.Data.Query
             builder.EndReturnsStatement();
             return true;
         }
+
+#endif
 
         protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
         {

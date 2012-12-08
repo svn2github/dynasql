@@ -1283,8 +1283,8 @@ namespace Perceiveit.Data.UnitTests.Oracle
                 DBQuery.Drop.View(Schools.Schema,OnlyOnSiteCoursesView), //.IfExists(),
                 DBQuery.Drop.View(Schools.Schema,OnlyOnlineCoursesView), //.IfExists(),
 
-                DBQuery.Drop.Index(Schools.Schema,"idx_DeptName"), //.IfExists(),     //uses the INFORMATION_SCHEMA.INDEXES view
-                DBQuery.Drop.Index(Schools.Schema,"idx_CourseTitle"), //.IfExists(),  //if your version supports then execute the drop.
+                DBQuery.Drop.Index(Schools.Schema,DeptNameIndex), //.IfExists(),     //uses the INFORMATION_SCHEMA.INDEXES view
+                DBQuery.Drop.Index(Schools.Schema,CourseTitleIndex), //.IfExists(),  //if your version supports then execute the drop.
                                                                                     //Should be dropped with the tables anyway
 
                 DBQuery.Drop.Table(Schools.Schema,Schools.Instructor.Table), //.IfExists(),

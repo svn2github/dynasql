@@ -28,6 +28,9 @@ namespace Perceiveit.Data.Query
     public abstract class DBStatement : DBClause
     {
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL String methods
         //
@@ -45,5 +48,7 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+#endif
+
     }
 }

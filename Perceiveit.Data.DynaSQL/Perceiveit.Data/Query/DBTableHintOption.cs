@@ -48,6 +48,9 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.TableHint; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginTableHint(this.Option);
@@ -64,6 +67,8 @@ namespace Perceiveit.Data.Query
             builder.EndTableHint(this.Option);
             return true;
         }
+
+#endif
 
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
@@ -89,7 +94,7 @@ namespace Perceiveit.Data.Query
         {
             if (IsAttributeMatch(XmlHelper.HintOption, reader, context))
             {
-                object val = Enum.Parse(typeof(DBTableHint), reader.Value);
+                object val = XmlHelper.ParseEnum<DBTableHint>(reader.Value);
                 this.Option = (DBTableHint)val;
                 return true;
             }

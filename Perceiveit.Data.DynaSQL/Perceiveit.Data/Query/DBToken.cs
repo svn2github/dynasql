@@ -28,6 +28,11 @@ namespace Perceiveit.Data.Query
     /// </summary>
     public abstract class DBToken
     {
+
+        
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // abstract BuildStatement method
         //
@@ -38,6 +43,8 @@ namespace Perceiveit.Data.Query
         /// <param name="builder"></param>
         /// <returns></returns>
         public abstract bool BuildStatement(DBStatementBuilder builder);
+
+#endif
 
     }
 }

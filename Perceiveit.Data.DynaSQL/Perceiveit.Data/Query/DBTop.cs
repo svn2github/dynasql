@@ -178,6 +178,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder methods
         //
@@ -197,6 +201,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
+
         //
         // XML Serialization
         //
@@ -209,7 +215,7 @@ namespace Perceiveit.Data.Query
             if (this.IsAttributeMatch(XmlHelper.TopValue, reader, context))
                 this.TopValue = int.Parse(reader.Value);
             else if (this.IsAttributeMatch(XmlHelper.TopType, reader, context))
-                this.Type = (TopType)Enum.Parse(typeof(TopType), reader.Value);
+                this.Type = XmlHelper.ParseEnum<TopType>(reader.Value);
             else
                 b = base.ReadAnAttribute(reader, context);
 

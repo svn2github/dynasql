@@ -305,6 +305,9 @@ namespace Perceiveit.Data.Query
     internal class DBSubQueryRef : DBSubQuery
     {
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement
         //
@@ -328,7 +331,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-
+#endif
         //
         // XML Serialization
         //

@@ -41,7 +41,7 @@ namespace Perceiveit.Data.Query
         {
             if (this.IsAttributeMatch(XmlHelper.CheckExists, reader, context))
             {
-                this.CheckExists = (DBExistState)Enum.Parse(typeof(DBExistState), reader.Value);
+                this.CheckExists = XmlHelper.ParseEnum<DBExistState>(reader.Value);
                 return true;
             }
             else

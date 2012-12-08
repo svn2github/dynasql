@@ -244,7 +244,7 @@ namespace Perceiveit.Data.Query
                     c = DBDropSequenceQuery.DropSequence();
                     break;
                 default:
-                    throw XmlHelper.CreateException(Errors.CantDeserializeXML, reader, null, element);
+                    throw XmlHelper.CreateException("The XML data could not be deserialized because the element {1} was not recognised. {0}" , reader, null, element);
 
             }
 

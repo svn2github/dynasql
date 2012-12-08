@@ -29,6 +29,8 @@ namespace Perceiveit.Data.Query
     public abstract partial class DBQuery : DBStatement, System.Xml.Serialization.IXmlSerializable
     {
 
+        public const string XMLSCHEMA = "http://schemas.perceiveit.co.uk/Query";
+
         #region internal bool IsInnerQuery {get;set;}
 
         private bool _innerq = false;
@@ -534,6 +536,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #if SILVERLIGHT
+        // no statement building
+#else
         //
         // Build statement methods
         //
@@ -551,6 +556,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
 
         //
         // writeXml methods
@@ -720,7 +726,7 @@ namespace Perceiveit.Data.Query
 
         void System.Xml.Serialization.IXmlSerializable.ReadXml(System.Xml.XmlReader reader)
         {
-             XmlReaderContext context = new XmlReaderContext("http://schemas.perceiveit.co.uk/Query", string.Empty);
+             XmlReaderContext context = new XmlReaderContext(XMLSCHEMA, string.Empty);
              this.ReadXml(reader, context);
         }
 

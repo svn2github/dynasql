@@ -348,7 +348,7 @@ namespace Perceiveit.Data.Query
             bool b = true;
             if (this.IsAttributeMatch(XmlHelper.ParameterDirection, reader, context) && !string.IsNullOrEmpty(reader.Value))
             {
-                this.Direction = (System.Data.ParameterDirection)Enum.Parse(typeof(System.Data.ParameterDirection), reader.Value, true);
+                this.Direction = XmlHelper.ParseEnum<System.Data.ParameterDirection>(reader.Value);
             }
             else if (this.IsAttributeMatch(XmlHelper.ParameterSize, reader, context) && !string.IsNullOrEmpty(reader.Value))
             {
@@ -360,7 +360,7 @@ namespace Perceiveit.Data.Query
             }
             else if (this.IsAttributeMatch(XmlHelper.DbType, reader, context) && !string.IsNullOrEmpty(reader.Value))
             {
-                this.DbType = (System.Data.DbType)Enum.Parse(typeof(System.Data.DbType), reader.Value);
+                this.DbType = XmlHelper.ParseEnum<System.Data.DbType>(reader.Value);
             }
             else
                 b = base.ReadAnAttribute(reader, context);
@@ -706,6 +706,11 @@ namespace Perceiveit.Data.Query
     /// </summary>
     internal class DBParamRef : DBParam, IDBValueSource
     {
+
+#if SILVERLIGHT
+        // no statement building
+#else
+
         /// <summary>
         /// Overrides the default behaviour to write the parameter
         /// </summary>
@@ -720,6 +725,8 @@ namespace Perceiveit.Data.Query
             return true;
 
         }
+
+#endif
 
     }
 
@@ -777,6 +784,11 @@ namespace Perceiveit.Data.Query
             this._val = value;
         }
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
+
         /// <summary>
         /// Overrides the default behaviour to register the parameter
         /// </summary>
@@ -792,6 +804,7 @@ namespace Perceiveit.Data.Query
 
         }
         
+#endif
 
 
         #region XMLSerialization Read methods - NOT Supported
@@ -926,6 +939,11 @@ namespace Perceiveit.Data.Query
                 return this.Dictionary.TryGetValue(name, out aparam);
         }
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public bool BuildStatement(DBStatementBuilder builder, bool newline, bool indent)
         {
             bool outputseparator = false;
@@ -949,6 +967,7 @@ namespace Perceiveit.Data.Query
             return count > 0;
         }
 
+#endif
         public bool ReadXml(string endElement, XmlReader reader, XmlReaderContext context)
         {
             bool isEmpty = reader.IsEmptyElement && XmlHelper.IsElementMatch(endElement, reader, context);

@@ -223,7 +223,7 @@ namespace Perceiveit.Data
                     break;
 
                 case System.Data.DbType.Xml:
-                    runtime = typeof(System.Xml.XmlNode);
+                    runtime = typeof(System.Xml.Serialization.IXmlSerializable);
                     break;
 
                 default:
@@ -235,77 +235,6 @@ namespace Perceiveit.Data
 
         #endregion
 
-
-
-
-
-        /* This is not required at the moment */
-        //internal static bool DbTypeHasSystemSize(System.Data.DbType type, out int size)
-        //{
-        //    bool fixedwidth = false;
-        //    size = -1;
-        //    switch (type)
-        //    {
-        //        case System.Data.DbType.AnsiString:
-        //        case System.Data.DbType.AnsiStringFixedLength:
-        //        case System.Data.DbType.String:
-        //        case System.Data.DbType.StringFixedLength:
-        //        case System.Data.DbType.Binary:
-        //            fixedwidth = false;
-        //            break;
-
-        //        case System.Data.DbType.Boolean:
-        //        case System.Data.DbType.Byte:
-        //            fixedwidth = true;
-        //            size = 1;
-        //            break;
-
-        //        case System.Data.DbType.Currency:
-        //            break;
-        //        case System.Data.DbType.Date:
-        //            break;
-        //        case System.Data.DbType.DateTime:
-        //            break;
-        //        case System.Data.DbType.DateTime2:
-        //            break;
-        //        case System.Data.DbType.DateTimeOffset:
-        //            break;
-        //        case System.Data.DbType.Decimal:
-        //            break;
-        //        case System.Data.DbType.Double:
-        //            break;
-        //        case System.Data.DbType.Guid:
-        //            break;
-        //        case System.Data.DbType.Int16:
-        //            break;
-        //        case System.Data.DbType.Int32:
-        //            break;
-        //        case System.Data.DbType.Int64:
-        //            break;
-        //        case System.Data.DbType.Object:
-        //            break;
-        //        case System.Data.DbType.SByte:
-        //            break;
-        //        case System.Data.DbType.Single:
-        //            break;
-        //        case System.Data.DbType.Time:
-        //            break;
-        //        case System.Data.DbType.UInt16:
-        //            break;
-        //        case System.Data.DbType.UInt32:
-        //            break;
-        //        case System.Data.DbType.UInt64:
-        //            break;
-        //        case System.Data.DbType.VarNumeric:
-        //            break;
-        //        case System.Data.DbType.Xml:
-        //            break;
-        //        default:
-        //            throw new ArgumentOutOfRangeException("dbtype");
-        //            break;
-
-        //    }
-        //}
 
     }
 }

@@ -310,6 +310,10 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.CreateTable; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             bool checknotexists = this.CheckExists == DBExistState.NotExists;
@@ -330,6 +334,8 @@ namespace Perceiveit.Data.Query
             builder.EndCreate(DBSchemaTypes.Table, checknotexists);
             return true;
         }
+
+#endif
 
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {

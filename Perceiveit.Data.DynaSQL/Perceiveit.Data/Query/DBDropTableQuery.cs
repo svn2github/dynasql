@@ -113,6 +113,11 @@ namespace Perceiveit.Data.Query
         }
 
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginDropStatement(DBSchemaTypes.Table, this.TableOwner, this.TableName, this.CheckExists == DBExistState.Exists);
@@ -120,6 +125,8 @@ namespace Perceiveit.Data.Query
 
             return true;
         }
+
+#endif
 
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {

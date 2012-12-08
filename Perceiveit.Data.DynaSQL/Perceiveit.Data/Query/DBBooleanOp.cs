@@ -108,6 +108,10 @@ namespace Perceiveit.Data.Query
 
     internal class DBBooleanOpRef : DBBooleanOp
     {
+
+        #if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -125,6 +129,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // XML Serialization
@@ -166,7 +172,7 @@ namespace Perceiveit.Data.Query
             bool b;
             if (this.IsAttributeMatch(XmlHelper.Operator, reader, context))
             {
-                this.Operator = (BooleanOp)Enum.Parse(typeof(BooleanOp), reader.Value, true);
+                this.Operator = XmlHelper.ParseEnum<BooleanOp>(reader.Value);
                 b = true;
             }
             else

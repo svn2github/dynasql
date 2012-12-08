@@ -94,6 +94,49 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public static T ParseEnum<T>(string value) where T: struct
+
+        /// <summary>
+        /// Parses the value to a specific enumeration type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static T ParseEnum<T>(string value) where T: struct
+        {
+#if SILVERLIGHT
+            T result;
+            if (Enum.TryParse<T>(value, true, out result))
+                return result;
+            else
+                throw new XmlException(string.Format(Errors.CannotParseValueToType, value, typeof(T).FullName));
+#else
+
+            return (T)Enum.Parse(typeof(T), value);
+#endif
+        }
+
+        #endregion
+
+        public static bool TryParseEnum<T>(string value, out T result) where T: struct
+        {
+#if SILVERLIGHT
+            return Enum.TryParse<T>(value, out result);
+#else
+            int index = Array.IndexOf<string>(Enum.GetNames(typeof(T)), value);
+            if (index > -1)
+            {
+                result = (T)Enum.Parse(typeof(T), value, true);
+                return true;
+            }
+            else
+            {
+                result = default(T);
+                return false;
+            }
+#endif
+        }
+
         //
         // write methods
         //
@@ -168,15 +211,27 @@ namespace Perceiveit.Data.Query
                         else if (value is Byte[])
                         {
                             isCData = true;
-                            svalue = Convert.ToBase64String((byte[])value, Base64FormattingOptions.InsertLineBreaks);
+                            svalue = Convert.ToBase64String((byte[])value);
                             code = BinaryTypeCode;
                         }
+                        
+                            
+#if SILVERLIGHT
+                        else
+                        {
+                            //only option is to convert to a string
+                            isCData = false;
+                            code = ObjectTypeCode;
+                            svalue = value.ToString();
+                        }
+#else
                         else if (value is System.Xml.XmlNode)
                         {
                             isCData = false;
                             svalue = ((System.Xml.XmlNode)value).OuterXml;
                             code = XmlTypeCode;
                         }
+                        
                         else
                         {
                             isCData = true;
@@ -189,6 +244,7 @@ namespace Perceiveit.Data.Query
                             svalue = Convert.ToBase64String((byte[])value, Base64FormattingOptions.InsertLineBreaks);
                             code = ObjectTypeCode;
                         }
+#endif
                         break;
                     default:
                         isCData = false;
@@ -246,20 +302,28 @@ namespace Perceiveit.Data.Query
                         }
                         else if (code == ObjectTypeCode)
                         {
+#if SILVERLIGHT
+                            throw new NotSupportedException(Errors.CannotDeserializeObjectTypesInSilverlight);
+#else
                             byte[] data = Convert.FromBase64String(svalue);
                             using (System.IO.MemoryStream ms = new System.IO.MemoryStream(data))
                             {
                                 System.Runtime.Serialization.Formatters.Binary.BinaryFormatter bf = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
                                 value = bf.Deserialize(ms);
                             }
+#endif
                         }
                         else if (code == XmlTypeCode)
                         {
+#if SILVERLIGHT
+                            throw new NotSupportedException(Errors.CannotDeserializeObjectTypesInSilverlight);
+#else
                             value = new System.Xml.XmlDocument().ReadNode(reader.ReadSubtree());
+#endif
                         }
                         else
                         {
-                            TypeCode tc = (TypeCode)Enum.Parse(typeof(TypeCode), code, true);
+                            TypeCode tc = XmlHelper.ParseEnum<TypeCode>(code);
                             switch (tc)
                             {
                                 case TypeCode.Boolean:
@@ -419,6 +483,7 @@ namespace Perceiveit.Data.Query
         public const string Precision = "precision";
         public const string ColumnFlags = "col-flags";
         public const string Default = "default";
+        public const string TableIndex = "table-index";
 
         public const string CreateIndex = "create-index";
         public const string DropIndex = "drop-index";

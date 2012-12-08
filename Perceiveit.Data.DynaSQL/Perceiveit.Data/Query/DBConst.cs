@@ -359,6 +359,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder methods
         //
@@ -378,6 +381,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // XML Serialization Methods
@@ -419,7 +424,7 @@ namespace Perceiveit.Data.Query
             bool b = true;
 
             if (this.IsAttributeMatch(XmlHelper.DbType, reader, context))
-                this.Type = (DbType)Enum.Parse(typeof(DbType), reader.Value, true);
+                this.Type = XmlHelper.ParseEnum<DbType>(reader.Value);
             else if (this.IsAttributeMatch(XmlHelper.IsNull, reader, context) && bool.TrueString.Equals(reader.Value))
                 this.Value = DBNull.Value;
             else if (this.IsAttributeMatch(XmlHelper.Alias, reader, context))

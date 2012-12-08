@@ -134,6 +134,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         #region public override bool BuildStatement(DBStatementBuilder builder)
 
         /// <summary>
@@ -157,6 +161,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#endif
         //
         // XML Serialization
         //
@@ -210,7 +216,7 @@ namespace Perceiveit.Data.Query
         {
             if (IsAttributeMatch(XmlHelper.HintOption, reader, context))
             {
-                object parsed = Enum.Parse(typeof(DBQueryOption), reader.Value);
+                object parsed = XmlHelper.ParseEnum<DBQueryOption>(reader.Value);
                 this.Option = (DBQueryOption)parsed;
                 return true;
             }

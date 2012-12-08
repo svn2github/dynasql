@@ -261,6 +261,9 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.ForeignKey; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
 
         public override bool BuildStatement(DBStatementBuilder builder)
         {
@@ -295,6 +298,7 @@ namespace Perceiveit.Data.Query
             return true;
         }
 
+#endif
 
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
@@ -315,12 +319,12 @@ namespace Perceiveit.Data.Query
         {
             if(IsAttributeMatch(XmlHelper.UpdateAction,reader,context))
             {
-                this.OnUpdateAction = (DBFKAction)Enum.Parse(typeof(DBFKAction), reader.Value);
+                this.OnUpdateAction = XmlHelper.ParseEnum<DBFKAction>(reader.Value);
                 return true;
             }
             else if (IsAttributeMatch(XmlHelper.DeleteAction, reader, context))
             {
-                this.OnDeleteAction = (DBFKAction)Enum.Parse(typeof(DBFKAction), reader.Value);
+                this.OnDeleteAction = XmlHelper.ParseEnum<DBFKAction>(reader.Value);
                 return true;
             }
             else if (IsAttributeMatch(XmlHelper.ReferenceOwner, reader, context))

@@ -198,6 +198,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // build statement methods
         //
@@ -273,6 +277,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#endif
+
         #region protected virtual void ValidateStatement()
         /// <summary>
         /// validates the statement as it is - minimum requirements are at least one return column
@@ -284,6 +291,7 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
 
         //
         // xml serialization methods

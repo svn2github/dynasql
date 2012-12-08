@@ -253,6 +253,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement build methods
         //
@@ -276,6 +279,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // Xml serialization
@@ -322,9 +327,10 @@ namespace Perceiveit.Data.Query
             if (IsAttributeMatch(XmlHelper.JoinType, reader, context))
             {
                 string value = reader.Value;
-                if (string.IsNullOrEmpty(value) == false && Array.IndexOf<string>(Enum.GetNames(typeof(JoinType)),value) > -1)
+                JoinType result;
+                if (string.IsNullOrEmpty(value) == false && XmlHelper.TryParseEnum<JoinType>(value, out result))
                 {
-                    this.JoinType = (JoinType)Enum.Parse(typeof(JoinType), value);
+                    this.JoinType = result;
                     return true;
                 }
             }
@@ -361,6 +367,11 @@ namespace Perceiveit.Data.Query
 
     internal class DBJoinList : DBClauseList<DBJoin>
     {
+
+
+#if SILVERLIGHT
+        // no statement building
+#else
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             if (this.Count > 0)
@@ -376,6 +387,8 @@ namespace Perceiveit.Data.Query
             else
                 return false;
         }
+
+#endif
 
     }
 }

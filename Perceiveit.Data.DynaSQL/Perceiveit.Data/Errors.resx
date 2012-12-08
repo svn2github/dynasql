@@ -258,4 +258,10 @@
   <data name="NoRootOrLastForHint" xml:space="preserve">
     <value>No root or last table set to add the hint to</value>
   </data>
+  <data name="CannotParseValueToType" xml:space="preserve">
+    <value>The value '{0}' could not be parsed to type '{1}'</value>
+  </data>
+  <data name="CannotDeserializeObjectTypesInSilverlight" xml:space="preserve">
+    <value>It is not possible to deserialize objects from binary format in Silverlight.</value>
+  </data>
 </root>

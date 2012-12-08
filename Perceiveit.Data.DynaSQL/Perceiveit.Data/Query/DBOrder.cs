@@ -95,6 +95,11 @@ namespace Perceiveit.Data.Query
 
     internal class DBOrderRef : DBOrder
     {
+
+
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -115,6 +120,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
         //
         // XML Serialization
         //
@@ -162,7 +168,7 @@ namespace Perceiveit.Data.Query
 
             if (this.IsAttributeMatch(XmlHelper.SortBy, reader, context))
             {
-                this.Order = (Order)Enum.Parse(typeof(Order), reader.Value, true);
+                this.Order = XmlHelper.ParseEnum<Order>(reader.Value);
                 b = true;
             }
             else 

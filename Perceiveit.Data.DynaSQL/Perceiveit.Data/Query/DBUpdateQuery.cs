@@ -307,6 +307,11 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
+
         //
         // statement build method
         //
@@ -343,6 +348,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // xml serialization methods

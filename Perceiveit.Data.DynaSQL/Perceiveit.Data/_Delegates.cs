@@ -28,16 +28,16 @@ namespace Perceiveit.Data
     /// <returns>The value of any required parameter</returns>
     public delegate object ParamValue();
 
+    
+#if SILVERLIGHT
+
+    // No Data methods in silverlight
+
+#else
+    
     //
     // callback methods for the DBDataBase.ExecuteRead method
     //
-
-    /// <summary>
-    /// Callback when an exception occurs during the execution of a statement
-    /// </summary>
-    /// <param name="onerror"></param>
-    /// <returns></returns>
-    public delegate void DBOnErrorCallback(DBExceptionEventArgs onerror);
 
     /// <summary>
     /// one of 3 callback method signatures from the DBDatabase.ExecuteRead(...) methods.
@@ -80,6 +80,15 @@ namespace Perceiveit.Data
     /// <param name="record"></param>
     /// <returns></returns>
     public delegate void DBEmptyRecordCallback(System.Data.IDataRecord record);
+
+#endif
+
+    /// <summary>
+    /// Callback when an exception occurs during the execution of a statement
+    /// </summary>
+    /// <param name="onerror"></param>
+    /// <returns></returns>
+    public delegate void DBOnErrorCallback(DBExceptionEventArgs onerror);
 
 
     #region public delegate void DBExceptionHandler(object sender, DBExceptionEventArgs args); + public class DBExceptionEventArgs : EventArgs

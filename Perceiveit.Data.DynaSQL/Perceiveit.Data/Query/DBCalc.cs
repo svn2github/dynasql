@@ -218,6 +218,9 @@ namespace Perceiveit.Data.Query
     internal class DBCalcRef : DBCalc, IDBAlias
     {
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -240,6 +243,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
+
         //
         // XML Serialization
         //
@@ -260,7 +265,7 @@ namespace Perceiveit.Data.Query
             bool b;
             if (this.IsAttributeMatch(XmlHelper.Operator, reader, context))
             {
-                this.BinaryOp = (BinaryOp)Enum.Parse(typeof(BinaryOp), reader.Value, true);
+                this.BinaryOp = XmlHelper.ParseEnum<BinaryOp>(reader.Value);
                 b = true;
             }
             else if (this.IsAttributeMatch(XmlHelper.Alias, reader, context))

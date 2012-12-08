@@ -256,6 +256,9 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.CreateIndex; }
         }
 
+        #if SILVERLIGHT
+        // no statement building
+#else
 
         public override bool BuildStatement(DBStatementBuilder builder)
         {
@@ -283,6 +286,12 @@ namespace Perceiveit.Data.Query
 
             return unique;
         }
+
+#endif
+
+        //
+        // xml serialization
+        //
 
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {
@@ -313,11 +322,7 @@ namespace Perceiveit.Data.Query
                 if (string.IsNullOrEmpty(reader.Value))
                     value = CreateOptions.None;
                 else
-                {
-                    object obj = Enum.Parse(typeof(CreateOptions), reader.Value);
-                    value = (CreateOptions)obj;
-                    
-                }
+                    value = XmlHelper.ParseEnum<CreateOptions>(reader.Value);
                 this.Options = value;
                 b = true;
             }

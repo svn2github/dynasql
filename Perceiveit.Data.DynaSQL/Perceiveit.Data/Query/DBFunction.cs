@@ -75,9 +75,10 @@ namespace Perceiveit.Data.Query
                     this._func = Perceiveit.Data.Function.Unknown;
                 else
                 {
-                    if (Array.IndexOf<string>(Enum.GetNames(typeof(Function)), value) > -1)
+                    Function result;
+                    if (XmlHelper.TryParseEnum<Function>(value, out result))
                     {
-                        this._func = (Function)Enum.Parse(typeof(Function), value);
+                        this._func = result;
                     }
                 }
 
@@ -389,6 +390,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         //
         // SQL Statement builder
         // 
@@ -427,6 +432,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
         //
         // XML serialization
         //
@@ -477,7 +483,7 @@ namespace Perceiveit.Data.Query
             if (this.IsAttributeMatch(XmlHelper.Alias, reader, context))
                 this.Alias = reader.Value;
             else if (this.IsAttributeMatch(XmlHelper.KnownFunction, reader, context))
-                this.KnownFunction = (Function)Enum.Parse(typeof(Function), reader.Value);
+                this.KnownFunction = XmlHelper.ParseEnum<Function>(reader.Value);
             else if (this.IsAttributeMatch(XmlHelper.FunctionName, reader, context))
                 this.FunctionName = reader.Value;
             else
@@ -533,6 +539,11 @@ namespace Perceiveit.Data.Query
         {
         }
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             if (string.IsNullOrEmpty(this.Owner) == false)
@@ -559,5 +570,7 @@ namespace Perceiveit.Data.Query
 
             return true;
         }
+
+#endif
     }
 }

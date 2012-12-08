@@ -478,6 +478,11 @@ namespace Perceiveit.Data.Query
 
     internal class DBTableRef : DBTable
     {
+
+
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement
         //
@@ -506,6 +511,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#endif
         //
         // XML Serialization
         //

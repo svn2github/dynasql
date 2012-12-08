@@ -267,6 +267,10 @@ namespace Perceiveit.Data.Query
         }
 
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             bool checknotexists = (this.CheckExists == DBExistState.NotExists);
@@ -307,6 +311,7 @@ namespace Perceiveit.Data.Query
             return true;
         }
 
+#endif
 
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {

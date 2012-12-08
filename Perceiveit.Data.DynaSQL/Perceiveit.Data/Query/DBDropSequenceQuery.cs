@@ -134,12 +134,18 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.DropSequence; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginDropStatement(DBSchemaTypes.Sequence, this.SequenceOwner, this.SequenceName, this.CheckExists == DBExistState.Exists);
             builder.EndDrop(DBSchemaTypes.Sequence, this.CheckExists == DBExistState.Exists);
             return true;
         }
+
+#endif
 
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {

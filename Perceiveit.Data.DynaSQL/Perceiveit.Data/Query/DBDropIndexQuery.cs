@@ -85,6 +85,10 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.DropIndex; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginDropStatement(DBSchemaTypes.Index, this.Owner, this.Name, this.CheckExists == DBExistState.Exists);
@@ -97,6 +101,12 @@ namespace Perceiveit.Data.Query
             builder.EndDrop(DBSchemaTypes.Index, this.CheckExists == DBExistState.Exists);
             return true;
         }
+
+#endif
+
+        //
+        // xml serialization
+        //
 
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {

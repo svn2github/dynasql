@@ -87,9 +87,13 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement Builder methods
-
+        //
         #region public override bool BuildStatement(DBStatementBuilder builder)
 
         public override bool BuildStatement(DBStatementBuilder builder)
@@ -106,6 +110,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // Xml Serialization methods

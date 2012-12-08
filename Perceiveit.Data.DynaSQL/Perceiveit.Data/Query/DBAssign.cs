@@ -125,6 +125,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement 
         //
@@ -140,6 +143,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         #region protected override string XmlElementName {get;}
 

@@ -170,9 +170,11 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.PrimaryKey; }
         }
 
-
+#if SILVERLIGHT
+        // no statement building
+#else
         /// <summary>
-        /// TODO:BuildStatement
+        /// 
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
@@ -186,6 +188,8 @@ namespace Perceiveit.Data.Query
 
             return true;
         }
+
+#endif
 
         private const char COLUMN_SEPARATOR = ',';
 

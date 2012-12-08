@@ -343,6 +343,9 @@ namespace Perceiveit.Data.Query
         {
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginCreate(DBSchemaTypes.Sequence, this.Owner, this.SequenceName, string.Empty, this.CheckExists == DBExistState.NotExists);
@@ -380,6 +383,8 @@ namespace Perceiveit.Data.Query
             return true;
 
         }
+
+#endif
 
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
@@ -459,12 +464,12 @@ namespace Perceiveit.Data.Query
             }
             else if (this.IsAttributeMatch(XmlHelper.SequenceCycling, reader, context))
             {
-                this.Cycling = (DBSequenceCycling)Enum.Parse(typeof(DBSequenceCycling), reader.Value);
+                this.Cycling = XmlHelper.ParseEnum<DBSequenceCycling>(reader.Value);
                 return true;
             }
             else if (this.IsAttributeMatch(XmlHelper.SequenceOrdering, reader, context))
             {
-                this.Order = (DBSequenceOrdering)Enum.Parse(typeof(DBSequenceOrdering), reader.Value);
+                this.Order = XmlHelper.ParseEnum<DBSequenceOrdering>(reader.Value);
                 return true;
             }
             else

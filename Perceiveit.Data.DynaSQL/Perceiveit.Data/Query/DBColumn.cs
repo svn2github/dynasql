@@ -225,7 +225,9 @@ namespace Perceiveit.Data.Query
         {
         }
 
-
+#if SILVERLIGHT
+        // no statement building
+#else
 
         public override bool BuildStatement(DBStatementBuilder builder)
         {
@@ -239,6 +241,8 @@ namespace Perceiveit.Data.Query
             return true;
 
         }
+
+#endif
 
         protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
         {
@@ -289,10 +293,10 @@ namespace Perceiveit.Data.Query
                     this.OtherType = reader.Value;
                     break;
                 case(XmlHelper.DbType):
-                    this.Type = (DbType)Enum.Parse(typeof(DbType), reader.Value);
+                    this.Type = XmlHelper.ParseEnum<DbType>(reader.Value);
                     break;
                 case(XmlHelper.ColumnFlags):
-                    this.Flags = (DBColumnFlags)Enum.Parse(typeof(DBColumnFlags), reader.Value);
+                    this.Flags = XmlHelper.ParseEnum<DBColumnFlags>(reader.Value);
                     break;
                 default:
                     b = base.ReadAnAttribute(reader, context);

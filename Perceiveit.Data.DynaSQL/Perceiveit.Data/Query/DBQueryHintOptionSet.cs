@@ -69,6 +69,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // sql statement building
         //
@@ -101,6 +104,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
 
         //
         // XML Serialization

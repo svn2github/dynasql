@@ -316,6 +316,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -337,7 +340,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
-
+        
+#endif
         //
         // XML Serializtion
         //
@@ -379,7 +383,7 @@ namespace Perceiveit.Data.Query
             bool b = true;
 
             if (this.IsAttributeMatch(XmlHelper.Operator, reader, context))
-                this.UnaryOperator = (UnaryOp)Enum.Parse(typeof(UnaryOp), reader.Value, true);
+                this.UnaryOperator = XmlHelper.ParseEnum<UnaryOp>(reader.Value);
             else
                 b = base.ReadAnAttribute(reader, context);
 
@@ -442,6 +446,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -461,6 +468,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
         //
         // XML Serialization
         //
@@ -512,7 +520,7 @@ namespace Perceiveit.Data.Query
         {
             bool b = true;
             if (this.IsAttributeMatch(XmlHelper.Operator, reader, context))
-                this.CompareOperator = (Compare)Enum.Parse(typeof(Compare), reader.Value, true);
+                this.CompareOperator = XmlHelper.ParseEnum<Compare>(reader.Value);
             else
                 b = base.ReadAnAttribute(reader, context);
 
@@ -604,7 +612,9 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -627,6 +637,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
         //
         // XML Serialization
         //
@@ -762,6 +773,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement building
         //
@@ -792,6 +807,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+#endif
 
         //
         // XML Serialization
@@ -846,7 +862,6 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-
         #region protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
 
         /// <summary>
@@ -860,7 +875,7 @@ namespace Perceiveit.Data.Query
             Operator op;
             if (reader.LocalName == XmlHelper.Operator)
             {
-                object value = Enum.Parse(typeof(Operator), reader.LocalName, true);
+                object value = XmlHelper.ParseEnum<Operator>(reader.LocalName);
                 op = (Operator)value;
                 this.Operation = op;
             }

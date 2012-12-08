@@ -153,6 +153,9 @@ namespace Perceiveit.Data.Query
     internal class DBAggregateRef : DBAggregate, IDBAlias
     {
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement building
         //
@@ -178,6 +181,8 @@ namespace Perceiveit.Data.Query
         }
 
         #endregion
+
+#endif
 
         //
         // XML Serialization
@@ -224,7 +229,7 @@ namespace Perceiveit.Data.Query
             bool b;
             if (this.IsAttributeMatch(XmlHelper.FunctionName, reader, context))
             {
-                this.Function = (AggregateFunction)Enum.Parse(typeof(AggregateFunction), reader.Value);
+                this.Function = XmlHelper.ParseEnum <AggregateFunction>(reader.Value);
                 b = true;
             }
             else if (this.IsAttributeMatch(XmlHelper.Alias, reader, context))

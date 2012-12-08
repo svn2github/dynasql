@@ -66,9 +66,12 @@ namespace Perceiveit.Data.Query
     {
         protected override string XmlElementName
         {
-            get { return "Index"; }
+            get { return XmlHelper.TableIndex; ; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginCreate(DBSchemaTypes.Index, string.Empty, this.Name, string.Empty, false);
@@ -83,7 +86,50 @@ namespace Perceiveit.Data.Query
             builder.EndCreate(DBSchemaTypes.Index, false);
             return true;
         }
+
+#endif
+
+        protected override bool WriteAllAttributes(System.Xml.XmlWriter writer, XmlWriterContext context)
+        {
+            if (!string.IsNullOrEmpty(this.Name))
+                this.WriteAttribute(writer, XmlHelper.Name, this.Name, context);
+            return base.WriteAllAttributes(writer, context);
+        }
+
+        protected override bool WriteInnerElements(System.Xml.XmlWriter writer, XmlWriterContext context)
+        {
+            if (this.ColumnOrders.Count > 0)
+            {
+                this.WriteStartElement(XmlHelper.ColumnList, writer, context);
+                this.ColumnOrders.WriteXml(writer, context);
+                this.WriteEndElement(XmlHelper.ColumnList, writer, context);
+            }
+
+            return base.WriteInnerElements(writer, context);
+        }
+
+        protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
+        {
+            if (this.IsAttributeMatch(XmlHelper.Name, reader, context))
+            {
+                this.Name = reader.Value;
+                return true;
+            }
+            else
+                return base.ReadAnAttribute(reader, context);
+        }
+
+        protected override bool ReadAnInnerElement(System.Xml.XmlReader reader, XmlReaderContext context)
+        {
+            if (this.IsElementMatch(XmlHelper.ColumnList, reader, context))
+            {
+                this.ColumnOrders.ReadXml(XmlHelper.ColumnList, reader, context);
+                return true;
+            }
+            return base.ReadAnInnerElement(reader, context);
+        }
     }
+
 
     public class DBTableIndexList : DBTokenList<DBTableIndex>
     {

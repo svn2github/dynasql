@@ -350,6 +350,9 @@ namespace Perceiveit.Data.Query
     public class DBScriptRef : DBScript
     {
 
+#if SILVERLIGHT
+        // no statement building
+#else
         //
         // SQL Statement builder
         //
@@ -394,6 +397,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+
+#endif
         //
         // xml serialization
         //

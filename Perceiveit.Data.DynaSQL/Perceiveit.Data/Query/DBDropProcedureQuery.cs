@@ -94,6 +94,9 @@ namespace Perceiveit.Data.Query
             get { return XmlHelper.DropSproc; }
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
 
         public override bool BuildStatement(DBStatementBuilder builder)
         {
@@ -102,6 +105,8 @@ namespace Perceiveit.Data.Query
 
             return true;
         }
+
+#endif
 
         protected override bool ReadAnAttribute(System.Xml.XmlReader reader, XmlReaderContext context)
         {

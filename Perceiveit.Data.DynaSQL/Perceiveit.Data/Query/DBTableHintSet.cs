@@ -118,6 +118,10 @@ namespace Perceiveit.Data.Query
             return this;
         }
 
+#if SILVERLIGHT
+        // no statement building
+#else
+
         //
         // statement building
         //
@@ -142,6 +146,8 @@ namespace Perceiveit.Data.Query
             else
                 return false;
         }
+
+#endif
 
         //
         // XML Serialization
@@ -172,6 +178,5 @@ namespace Perceiveit.Data.Query
             return base.WriteInnerElements(writer, context);
         }
 
-        //TODO:ReadInnerElement
     }
 }

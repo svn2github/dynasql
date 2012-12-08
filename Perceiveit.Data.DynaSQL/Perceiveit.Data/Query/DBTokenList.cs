@@ -47,6 +47,10 @@ namespace Perceiveit.Data.Query
         /// </summary>
         public virtual string ListEnd { get { return ""; } }
 
+
+#if SILVERLIGHT
+        // no statement building
+#else
         /// <summary>
         /// Builds this list of tokens onto the statement
         /// </summary>
@@ -111,6 +115,7 @@ namespace Perceiveit.Data.Query
 
         }
 
+#endif
 
     }
 }
