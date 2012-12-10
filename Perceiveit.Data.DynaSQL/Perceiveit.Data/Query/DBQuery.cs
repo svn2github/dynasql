@@ -251,6 +251,24 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public static DBSelectQuery SelectAll(string catalog, string owner, string table)
+
+        /// <summary>
+        /// Begins a new SELECT [catalog].[owner].[table].* statment
+        /// </summary>
+        /// <param name="table">The name (or alias) of the table</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <param name="catalog">The catalog or database of the table</param>
+        /// <returns>A new DBSelectQuery to support statement chaining</returns>
+        public static DBSelectQuery SelectAll(string catalog, string owner, string table)
+        {
+            DBSelectQuery q = new DBSelectQuery();
+            q.SelectSet = DBSelectSet.SelectAll(catalog, owner, table);
+            q.Last = q.SelectSet;
+            return q;
+        }
+
+        #endregion
 
         //
         // DBExecQuery factory methods
@@ -275,6 +293,15 @@ namespace Perceiveit.Data.Query
             DBExecQuery exec = new DBExecQuery();
             exec.SprocName = name;
             exec.Owner = owner;
+            return exec;
+        }
+
+        public static DBExecQuery Exec(string catalog, string owner, string name)
+        {
+            DBExecQuery exec = new DBExecQuery();
+            exec.SprocName = name;
+            exec.Owner = owner;
+            exec.Catalog = catalog;
             return exec;
         }
 
@@ -310,7 +337,7 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
-        /// Begins a new UPDATE [table] statement
+        /// Begins a new UPDATE [owner].[table] statement
         /// </summary>
         /// <param name="table">The name of the table to update the rows on</param>
         /// <param name="owner">The schema owner of the table</param>
@@ -319,6 +346,20 @@ namespace Perceiveit.Data.Query
         {
             DBUpdateQuery upd = Update();
             upd.TableSet = DBTableSet.From(owner, table);
+            upd.Last = upd.TableSet;
+            return upd;
+        }
+
+        /// <summary>
+        /// Begins a new UPDATE [catalog].[owner].[table] statement
+        /// </summary>
+        /// <param name="table">The name of the table to update the rows on</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBUpdateQuery to support statement chaining</returns>
+        public static DBUpdateQuery Update(string catalog, string owner, string table)
+        {
+            DBUpdateQuery upd = Update();
+            upd.TableSet = DBTableSet.From(catalog, owner, table);
             upd.Last = upd.TableSet;
             return upd;
         }
@@ -353,10 +394,7 @@ namespace Perceiveit.Data.Query
         public static DBInsertQuery InsertInto(string intoTable)
         {
             DBTable ts = DBTable.Table(intoTable);
-            DBInsertQuery q = new DBInsertQuery();
-            q.Into = ts;
-            q.Last = ts;
-            return q;
+            return InsertInto(ts);
         }
 
         /// <summary>
@@ -368,10 +406,13 @@ namespace Perceiveit.Data.Query
         public static DBInsertQuery InsertInto(string owner, string table)
         {
             DBTable ts = DBTable.Table(owner, table);
-            DBInsertQuery q = new DBInsertQuery();
-            q.Into = ts;
-            q.Last = ts;
-            return q;
+            return InsertInto(ts);
+        }
+
+        public static DBInsertQuery InsertInto(string catalog, string owner, string table)
+        {
+            DBTable tbl = DBTable.Table(catalog, owner, table);
+            return InsertInto(tbl);
         }
 
 
@@ -415,10 +456,7 @@ namespace Perceiveit.Data.Query
         public static DBDeleteQuery DeleteFrom(string table)
         {
             DBTable ts = DBTable.Table(table);
-            DBDeleteQuery q = new DBDeleteQuery();
-            q.FromTable = ts;
-            q.Last = ts;
-            return q;
+            return DeleteFrom(ts);
         }
 
         /// <summary>
@@ -430,10 +468,21 @@ namespace Perceiveit.Data.Query
         public static DBDeleteQuery DeleteFrom(string owner, string table)
         {
             DBTable ts = DBTable.Table(owner, table);
-            DBDeleteQuery q = new DBDeleteQuery();
-            q.FromTable = ts;
-            q.Last = ts;
-            return q;
+            return DeleteFrom(ts);
+
+        }
+
+        /// <summary>
+        /// begins a new DELETE FROM [catalog].[owner].[table] statement
+        /// </summary>
+        /// <param name="table">The name of the table to delete from</param>
+        /// <param name="owner">The schema owner of the table</param>
+        /// <returns>A new DBDeleteQuery to support statement chaining</returns>
+        public static DBDeleteQuery DeleteFrom(string catalog, string owner, string table)
+        {
+            DBTable ts = DBTable.Table(catalog, owner, table);
+            return DeleteFrom(ts);
+
         }
 
 
@@ -522,6 +571,10 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        //
+        // DBDecaration
+        //
+
         #region public static DBDeclaration Declare(DBParam param)
 
         /// <summary>
@@ -536,7 +589,27 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #if SILVERLIGHT
+        //
+        // DBUseQuery
+        //
+
+        #region public static DBUseQuery Use(string name)
+
+        /// <summary>
+        /// Supports the USE [DatabaseName] statement
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static DBUseQuery Use(string name)
+        {
+            return DBUseQuery.Use(name);
+        }
+
+        #endregion
+
+
+
+#if SILVERLIGHT
         // no statement building
 #else
         //

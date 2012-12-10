@@ -111,14 +111,14 @@ namespace Perceiveit.Data.Oracle
         }
 
         
-        public override void BeginIdentifier()
+        public override char GetStartIdentifier()
         {
-            this.WriteRaw("\"");
+            return '"';
         }
 
-        public override void EndIdentifier()
+        public override char GetEndIdentifier()
         {
-            this.WriteRaw("\"");
+            return '"';
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Perceiveit.Data.Oracle
             {
                 this.WriteSpace();
                 this.BeginIdentifier();
-                this.WriteRaw(alias);
+                this.WriteObjectName(alias);
                 this.EndIdentifier();
             }
         }
@@ -194,39 +194,39 @@ namespace Perceiveit.Data.Oracle
             switch (option)
             {
                 case DBSequenceBuilderOption.Minimum:
-                    this.WriteRaw(" MINVALUE ");
-                    this.WriteRaw(value.ToString());
+                    this.WriteRawSQLString(" MINVALUE ");
+                    this.Write(value);
                     break;
                 case DBSequenceBuilderOption.Maximim:
-                    this.WriteRaw(" MAXVALUE ");
-                    this.WriteRaw(value.ToString());
+                    this.WriteRawSQLString(" MAXVALUE ");
+                    this.Write(value);
                     break;
                 case DBSequenceBuilderOption.StartValue:
-                    this.WriteRaw(" START WITH ");
-                    this.WriteRaw(value.ToString());
+                    this.WriteRawSQLString(" START WITH ");
+                    this.Write(value);
                     break;
                 case DBSequenceBuilderOption.Cycling:
-                    this.WriteRaw(" CYCLE");
+                    this.WriteRawSQLString(" CYCLE");
                     break;
                 case DBSequenceBuilderOption.NoCycling:
-                    this.WriteRaw(" NOCYCLE");
+                    this.WriteRawSQLString(" NOCYCLE");
                     break;
                 case DBSequenceBuilderOption.Ordered:
-                    this.WriteRaw(" ORDER");
+                    this.WriteRawSQLString(" ORDER");
                     break;
                 case DBSequenceBuilderOption.NotOrdered:
-                    this.WriteRaw(" NOORDER");
+                    this.WriteRawSQLString(" NOORDER");
                     break;
                 case DBSequenceBuilderOption.Increment:
-                    this.WriteRaw(" INCREMENT BY ");
-                    this.WriteRaw(value.ToString());
+                    this.WriteRawSQLString(" INCREMENT BY ");
+                    this.Write(value);
                     break;
                 case DBSequenceBuilderOption.Cache:
-                    this.WriteRaw(" CACHE ");
-                    this.WriteRaw(value.ToString());
+                    this.WriteRawSQLString(" CACHE ");
+                    this.Write(value);
                     break;
                 case DBSequenceBuilderOption.NoCaching:
-                    this.WriteRaw(" NOCACHE");
+                    this.WriteRawSQLString(" NOCACHE");
                     break;
                 default:
                     break;
@@ -303,7 +303,7 @@ namespace Perceiveit.Data.Oracle
         public override void BeginDeclareStatement(DBParam param)
         {
             if (_scriptDeclareCount == 0)
-                this.WriteRaw("DECLARE ");
+                this.WriteRawSQLString("DECLARE ");
             this.ParameterExclusions.Add(param.Name);
             this.WriteParameter(param, false);
             _scriptDeclareCount ++;
@@ -332,11 +332,11 @@ namespace Perceiveit.Data.Oracle
         /// </summary>
         private void AppendRowNumberField()
         {
-            this.AppendReferenceSeparator();
-            this.WriteRaw(SELECTROWNUM);
+            this.WriteReferenceSeparator();
+            this.WriteRawSQLString(SELECTROWNUM);
             this.BeginAlias();
             this.BeginIdentifier();
-            this.WriteRaw(ROWNUMALIAS);
+            this.WriteRawSQLString(ROWNUMALIAS);
             this.EndIdentifier();
             this.EndAlias();
         }
@@ -369,14 +369,14 @@ namespace Perceiveit.Data.Oracle
 
         protected virtual void WriteIntoOperator()
         {
-            this.WriteRaw(" INTO ");
+            this.WriteRawSQLString(" INTO ");
         }
         
 
         public override void WriteNativeParameterReference(string paramname)
         {
             if (this._scriptDepth > 0 && this.ParameterExclusions.Contains(paramname))
-                this.WriteRaw(paramname);
+                this.WriteObjectName(paramname);
             else
                 base.WriteNativeParameterReference(paramname);
         }
@@ -457,17 +457,17 @@ namespace Perceiveit.Data.Oracle
         {
             if (function == Function.LastID)
             {
-                this.WriteRaw(FUNC_SEQUENCE_CURRVALUE);
+                this.WriteRawSQLString(FUNC_SEQUENCE_CURRVALUE);
                 _isFunctionThatExcludesParentheses = true;
             }
             else if (function == Function.GetDate)
             {
-                this.WriteRaw(FUNC_SYSDATE);
+                this.WriteRawSQLString(FUNC_SYSDATE);
                 _isFunctionThatExcludesParentheses = true;
             }
             else if (function == Function.NextID)
             {
-                this.WriteRaw(FUNC_SEQUENCE_NEXTVALUE);
+                this.WriteRawSQLString(FUNC_SEQUENCE_NEXTVALUE);
                 _isFunctionThatExcludesParentheses = true;
             }
             else
@@ -714,14 +714,15 @@ namespace Perceiveit.Data.Oracle
         public override void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
         {
             if ((flags & DBColumnFlags.PrimaryKey) > 0)
-                this.WriteRaw(" PRIMARY KEY");
+                this.WriteRawSQLString(" PRIMARY KEY");
 
             if ((flags & DBColumnFlags.HasDefault) == 0)
             {
+                this.WriteSpace();
                 if ((flags & DBColumnFlags.Nullable) > 0)
-                    this.WriteRaw(" NULL");
+                    this.WriteNull();
                 else
-                    this.WriteRaw(" NOT NULL");
+                    this.WriteNotNull();
             }
 
             if ((flags & DBColumnFlags.AutoAssign) > 0)
@@ -729,7 +730,7 @@ namespace Perceiveit.Data.Oracle
 
             if ((flags & DBColumnFlags.HasDefault) > 0)
             {
-                this.WriteRaw(" DEFAULT ");
+                this.WriteRawSQLString(" DEFAULT ");
                 defaultValue.BuildStatement(this);
             }
         }
@@ -765,11 +766,11 @@ namespace Perceiveit.Data.Oracle
                 this.BeginFunction(Function.Unknown, "to_date");
                 this.BeginFunctionParameterList();
                 this.BeginDateLiteral();
-                this.WriteRaw(dtval.ToString(internalformat));
+                this.WriteRawSQLString(dtval.ToString(internalformat));
                 this.EndDateLiteral();
-                this.AppendReferenceSeparator();
+                this.WriteReferenceSeparator();
                 this.BeginDateLiteral();
-                this.WriteRaw(nativeformat);
+                this.WriteRawSQLString(nativeformat);
                 this.EndDateLiteral();
                 this.EndFunctionParameterList();
                 this.EndFunction(Function.Unknown, "to_date");

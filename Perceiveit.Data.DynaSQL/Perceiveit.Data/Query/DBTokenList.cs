@@ -76,7 +76,7 @@ namespace Perceiveit.Data.Query
 
             string start = this.ListStart;
             if (!string.IsNullOrEmpty(start))
-                builder.WriteRaw(this.ListStart);
+                builder.WriteRawSQLString(this.ListStart);
             else if (eachOnNewLine)
                 builder.BeginNewLine();
 
@@ -87,10 +87,10 @@ namespace Perceiveit.Data.Query
                 if (outputSeparator)
                 {
                     if (this.UseBuilderSeparator)
-                        builder.AppendReferenceSeparator();
+                        builder.WriteReferenceSeparator();
 
                     else if (!string.IsNullOrEmpty(this.TokenSeparator))
-                        builder.WriteRaw(this.TokenSeparator);
+                        builder.WriteRawSQLString(this.TokenSeparator);
 
                     if (eachOnNewLine)
                         builder.BeginNewLine();
@@ -105,7 +105,7 @@ namespace Perceiveit.Data.Query
 
             string end = this.ListEnd;
             if (!string.IsNullOrEmpty(end))
-                builder.WriteRaw(end);
+                builder.WriteRawSQLString(end);
 
             //did we write anything
             if (count > 0 || !string.IsNullOrEmpty(start) || !string.IsNullOrEmpty(end))

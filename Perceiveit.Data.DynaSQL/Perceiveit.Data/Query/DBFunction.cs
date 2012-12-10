@@ -549,12 +549,12 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(this.Owner) == false)
             {
                 builder.BeginIdentifier();
-                builder.WriteRaw(this.Owner);
+                builder.WriteObjectName(this.Owner);
                 builder.EndIdentifier();
                 builder.AppendIdSeparator();
             }
             builder.BeginIdentifier();
-            builder.WriteRaw(this.SequenceName);
+            builder.WriteObjectName(this.SequenceName);
             builder.EndIdentifier();
             builder.AppendIdSeparator();
             builder.BeginFunction(this.KnownFunction, string.Empty);

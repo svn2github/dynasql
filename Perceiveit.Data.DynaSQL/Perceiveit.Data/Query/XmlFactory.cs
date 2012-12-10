@@ -65,6 +65,10 @@ namespace Perceiveit.Data.Query
                     c = DBQuery.Script();
                     break;
 
+                case(XmlHelper.Use):
+                    c = DBUseQuery.Use();
+                    break;
+
                 case(XmlHelper.Table):
                     c = DBTable.Table();
                     break;

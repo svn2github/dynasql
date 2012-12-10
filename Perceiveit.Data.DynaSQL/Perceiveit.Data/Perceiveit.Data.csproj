@@ -147,6 +147,7 @@
     <Compile Include="OleDb\DBMSAccessSchemaProvider.cs" />
     <Compile Include="OleDb\DBOleDbStatementBuilder.cs" />
     <Compile Include="Query\DBTokenList.cs" />
+    <Compile Include="Query\DBUseQuery.cs" />
     <Compile Include="Schema\DBSchemaColumn.cs" />
     <Compile Include="Schema\DBSchemaForeignKey.cs" />
     <Compile Include="Schema\DBSchemaForeignKeyMapping.cs" />

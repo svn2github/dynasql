@@ -58,11 +58,11 @@ namespace Perceiveit.Data.SqLite
         public override void BeginFunction(Function function, string name)
         {
             if (function == Function.LastID)
-                this.WriteRaw("last_insert_rowid");
+                this.WriteRawSQLString("last_insert_rowid");
 
             else if (function == Function.GetDate)
             {
-                this.WriteRaw("CURRENT_TIMESTAMP");
+                this.WriteRawSQLString("CURRENT_TIMESTAMP");
                 //this.WriteRaw("date");
                 this._lastwasdatefunction = true;
             }
@@ -96,15 +96,15 @@ namespace Perceiveit.Data.SqLite
         public override void BeginFunctionParameter(int index)
         {
             if(_concatfunction == 1 && index > 0)
-                this.WriteRaw(" || ");
+                this.WriteRawSQLString(" || ");
             else
                 base.BeginFunctionParameter(index);
         }
 
-        public override void AppendReferenceSeparator()
+        public override void WriteReferenceSeparator()
         {
             
-            base.AppendReferenceSeparator();
+            base.WriteReferenceSeparator();
         }
 
         public override void BeginScript()
@@ -167,12 +167,12 @@ namespace Perceiveit.Data.SqLite
             _insertOrUpdateSelectCount--;
             if (this.StatementDepth == 1 && this._limits > 0)
             {
-                this.WriteRaw(" LIMIT ");
-                this.WriteRaw(_limits.ToString());
+                this.WriteRawSQLString(" LIMIT ");
+                this.Write(_limits);
                 if (this._offset > 0)
                 {
-                    this.WriteRaw(" OFFSET ");
-                    this.WriteRaw(_offset.ToString());
+                    this.WriteRawSQLString(" OFFSET ");
+                    this.Write(_offset);
                 }
             }
             base.EndSelectStatement();
@@ -181,20 +181,21 @@ namespace Perceiveit.Data.SqLite
         public override void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
         {
             if ((flags & DBColumnFlags.PrimaryKey) > 0)
-                this.WriteRaw(" PRIMARY KEY");
+                this.WriteRawSQLString(" PRIMARY KEY");
 
             if ((flags & DBColumnFlags.AutoAssign) > 0)
-                this.WriteRaw(" AUTOINCREMENT");
+                this.WriteRawSQLString(" AUTOINCREMENT");
 
+            this.WriteSpace();
             if ((flags & DBColumnFlags.Nullable) > 0)
-                this.WriteRaw(" NULL");
+                this.WriteNull();
             else
-                this.WriteRaw(" NOT NULL");
+                this.WriteNotNull();
 
             
             if ((flags & DBColumnFlags.HasDefault) > 0)
             {
-                this.WriteRaw(" DEFAULT ");
+                this.WriteRawSQLString(" DEFAULT ");
                 defaultValue.BuildStatement(this);
             }
         }
@@ -225,7 +226,7 @@ namespace Perceiveit.Data.SqLite
 
         public override void BeginEntityDefinition()
         {
-            this.WriteRaw(" AS ");
+            this.WriteRawSQLString(" AS ");
         }
 
         public override void EndEntityDefinition()
@@ -285,7 +286,7 @@ namespace Perceiveit.Data.SqLite
 
         private void WriteCheckExists(DBSchemaTypes type, string owner, string name)
         {
-            this.WriteRaw(" IF EXISTS ");
+            this.WriteRawSQLString(" IF EXISTS ");
         }
 
         public override void BeginCheckExists(DBSchemaTypes type, string owner, string name)
@@ -310,11 +311,11 @@ namespace Perceiveit.Data.SqLite
 
             if (isconstraint && !string.IsNullOrEmpty(name))
             {
-                this.WriteRaw("CONSTRAINT ");
+                this.WriteRawSQLString("CONSTRAINT ");
                 this.BeginIdentifier();
-                this.WriteRaw(name);
+                this.WriteObjectName(name);
                 this.EndIdentifier();
-                this.WriteRaw(" ");
+                this.WriteSpace();
             }
 
             this.BeginCreate(type, options);
@@ -349,7 +350,7 @@ namespace Perceiveit.Data.SqLite
 
         private void WriteCheckNotExists(DBSchemaTypes type, string owner, string name)
         {
-            this.WriteRaw(" IF NOT EXISTS ");
+            this.WriteRawSQLString(" IF NOT EXISTS ");
         }
 
         public override void BeginCheckNotExists(DBSchemaTypes type, string owner, string name)

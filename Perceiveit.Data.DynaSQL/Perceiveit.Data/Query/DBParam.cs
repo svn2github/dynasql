@@ -952,7 +952,7 @@ namespace Perceiveit.Data.Query
             {
                 if (outputseparator)
                 {
-                    builder.AppendReferenceSeparator();
+                    builder.WriteReferenceSeparator();
 
                     if (newline)
                         builder.BeginNewLine();

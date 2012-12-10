@@ -135,7 +135,7 @@ namespace Perceiveit.Data.Query
                 foreach (DBTableHintOption hint in this.Hints)
                 {
                     if (count > 0)
-                        builder.AppendReferenceSeparator();
+                        builder.WriteReferenceSeparator();
                     
                     hint.BuildStatement(builder);
                     count++;

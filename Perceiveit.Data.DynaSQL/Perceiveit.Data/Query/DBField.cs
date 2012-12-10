@@ -31,7 +31,7 @@ namespace Perceiveit.Data.Query
         private string _name;
         private string _tbl;
         private string _owner;
-        
+        private string _catalog;
 
         //
         // properties
@@ -72,6 +72,19 @@ namespace Perceiveit.Data.Query
         {
             get { return _owner; }
             set { _owner = value; }
+        }
+
+        #endregion
+
+        #region public string Catalog {get;set;}
+
+        /// <summary>
+        /// Gets or sets the catalog (or database) for the field
+        /// </summary>
+        public string Catalog
+        {
+            get { return _catalog; }
+            set { _catalog = value; }
         }
 
         #endregion
@@ -149,7 +162,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public static DBField Field(string owner, string table, string field)
+        #region public static DBField Field(string catalog, string owner, string table, string field)
+        
         /// <summary>
         /// Creates a new DBField reference with the specified owner.table.field name - do not enclose in delimiters
         /// </summary>
@@ -169,6 +183,27 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public static DBField Field(string owner, string table, string field)
+        
+        /// <summary>
+        /// Creates a new DBField reference with the specified owner.table.field name - do not enclose in delimiters
+        /// </summary>
+        /// <param name="table">The table (or table alias) this field belongs to</param>
+        /// <param name="field">The name of the field</param>
+        /// <param name="owner">The schema owner</param>
+        /// <param name="catalog">The catalog / database of the field</param>
+        /// <returns></returns>
+        public static DBField Field(string catalog, string owner, string table, string field)
+        {
+            DBFieldRef fref = new DBFieldRef();
+            fref.Name = field;
+            fref.Table = table;
+            fref.Owner = owner;
+            fref.Catalog = catalog;
+            return fref;
+        }
+
+        #endregion
 
         #region public static DBField AllFields()
 
@@ -214,6 +249,27 @@ namespace Perceiveit.Data.Query
             DBFieldAllRef all = new DBFieldAllRef();
             all.Table = table;
             all.Owner = owner;
+            return all;
+        }
+
+        #endregion
+
+
+        #region public static DBField AllFields(string catalog, string owner, string table)
+
+        /// <summary>
+        /// Creates a new DBField reference to all fields (*) with the specified owner.table - do not enclose in delimiters
+        /// </summary>
+        /// <param name="table">The table (or table alias) the fields belong to</param>
+        /// <param name="owner">The schema owner</param>
+        /// <param name="catalog">The catalog / database for all fields table</param>
+        /// <returns></returns>
+        public static DBField AllFields(string catalog, string owner, string table)
+        {
+            DBFieldAllRef all = new DBFieldAllRef();
+            all.Table = table;
+            all.Owner = owner;
+            all.Catalog = catalog;
             return all;
         }
 
@@ -278,7 +334,7 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(this.Name))
                 return false;
 
-            builder.WriteSourceField(this.Owner, this.Table, this.Name, this.Alias);
+            builder.WriteSourceField(this.Catalog, this.Owner, this.Table, this.Name, this.Alias);
 
             return true;
         }
@@ -437,7 +493,7 @@ namespace Perceiveit.Data.Query
         /// <returns></returns>
         public override bool BuildStatement(DBStatementBuilder builder)
         {
-            builder.WriteAllFieldIdentifier(this.Owner, this.Table);
+            builder.WriteAllFieldIdentifier(this.Catalog, this.Owner, this.Table);
 
             return true;
         }

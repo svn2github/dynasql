@@ -133,6 +133,12 @@ namespace Perceiveit.Data.Query
             return From(tref);
         }
 
+        public static DBTableSet From(string catalog, string owner, string roottable)
+        {
+            DBTable tref = DBTable.Table(catalog, owner, roottable);
+            return From(tref);
+        }
+
         public static DBTableSet From(DBTable roottable)
         {
             DBTableSet set = new DBTableSet();

@@ -408,6 +408,7 @@ namespace Perceiveit.Data.Query
         public const string Delete = "delete";
         public const string Exec = "exec";
         public const string Script = "script";
+        public const string Use = "use";
 
         public const string Alias = "alias";
         public const string Distinct = "distinct";

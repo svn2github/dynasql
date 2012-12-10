@@ -232,9 +232,9 @@ namespace Perceiveit.Data.Query
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginIdentifier();
-            builder.WriteRaw(this.Name);
+            builder.WriteObjectName(this.Name);
             builder.EndIdentifier();
-            builder.WriteRaw(" ");
+            builder.WriteSpace();
             builder.WriteColumnDataType(this.Type, this.Length, this.Precision, this.Flags);
             builder.WriteColumnFlags(this.Flags, this.DefaultValue);
 

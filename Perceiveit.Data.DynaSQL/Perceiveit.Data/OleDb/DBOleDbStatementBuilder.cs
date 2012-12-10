@@ -37,13 +37,13 @@ namespace Perceiveit.Data.OleDb
 
         public override void BeginDateLiteral()
         {
-            this.WriteRaw("#");
+            this.WriteRawSQLString("#");
             //base.BeginDateLiteral();
         }
 
         public override void EndDateLiteral()
         {
-            this.WriteRaw("#");
+            this.WriteRawSQLString("#");
             //base.EndDateLiteral();
         }
 
@@ -85,13 +85,13 @@ namespace Perceiveit.Data.OleDb
         {
             if (function == Function.LastID)
             {
-                this.WriteRaw("@@Identity");//don't like this, but it looks like the only way
+                this.WriteRawSQLString("@@Identity");//don't like this, but it looks like the only way
                                             //any other options then I'd go with them happily
                 _lastwasIdentityFunction = true;
             }
             else if (function == Function.GetDate)
             {
-                this.WriteRaw("Now");
+                this.WriteRawSQLString("Now");
             }
             else
                 base.BeginFunction(function, name);
@@ -171,17 +171,17 @@ namespace Perceiveit.Data.OleDb
                 throw new NotSupportedException(Errors.OLEDbDoesNotSupportDefaultValues);
 
             if ((flags & DBColumnFlags.PrimaryKey) > 0)
-                this.WriteRaw(" PRIMARY KEY");
+                this.WriteRawSQLString(" PRIMARY KEY");
 
             if ((flags & DBColumnFlags.Nullable) > 0)
-                this.WriteRaw(" NULL");
+                this.WriteRawSQLString(" NULL");
             else
-                this.WriteRaw(" NOT NULL");
+                this.WriteRawSQLString(" NOT NULL");
         }
 
         public override void BeginEntityDefinition()
         {
-            this.WriteRaw(" AS ");
+            this.WriteRawSQLString(" AS ");
         }
 
         public override void EndEntityDefinition()
@@ -199,11 +199,11 @@ namespace Perceiveit.Data.OleDb
 
             if (type == DBSchemaTypes.ForeignKey && !string.IsNullOrEmpty(name))
             {
-                this.WriteRaw("CONSTRAINT ");
+                this.WriteRawSQLString("CONSTRAINT ");
                 this.BeginIdentifier();
-                this.WriteRaw(name);
+                this.WriteObjectName(name);
                 this.EndIdentifier();
-                this.WriteRaw(" ");
+                this.WriteSpace();
             }
 
             this.BeginCreate(type, options);

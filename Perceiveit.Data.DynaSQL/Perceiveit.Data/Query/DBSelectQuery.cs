@@ -541,7 +541,7 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
-        /// Adds an aggregate SUM([table].[field]) to the select columns
+        /// Adds an aggregate SUM([owner].[table].[field]) to the select columns
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="table"></param>
@@ -550,6 +550,19 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery Sum(string owner, string table, string field)
         {
             DBField fld = DBField.Field(owner, table, field);
+            return Sum(fld);
+        }
+
+        /// <summary>
+        /// Adds an aggregate SUM([catalog].[owner].[table].[field]) to the select columns
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public DBSelectQuery Sum(string catalog, string owner, string table, string field)
+        {
+            DBField fld = DBField.Field(catalog, owner, table, field);
             return Sum(fld);
         }
 
@@ -604,6 +617,19 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
+        /// Adds an aggregate AVG([catalog].[owner].[table].[field]) to the select columns
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public DBSelectQuery Avg(string catalog, string owner, string table, string field)
+        {
+            DBField fld = DBField.Field(catalog, owner, table, field);
+            return Avg(fld);
+        }
+
+        /// <summary>
         /// Adds an aggregate AVG([clause]) to the select columns
         /// </summary>
         /// <param name="clause">Any individual or combination of clauses</param>
@@ -649,6 +675,19 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery Min(string owner, string table, string field)
         {
             DBField fld = DBField.Field(owner, table, field);
+            return Min(fld);
+        }
+
+        /// <summary>
+        ///  Adds an aggregate MIN([catalog].[owner].[table].[field]) to the select columns
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public DBSelectQuery Min(string catalog, string owner, string table, string field)
+        {
+            DBField fld = DBField.Field(catalog, owner, table, field);
             return Min(fld);
         }
 
@@ -699,6 +738,19 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery Max(string owner, string table, string field)
         {
             DBField fld = DBField.Field(owner, table, field);
+            return Max(fld);
+        }
+
+        /// <summary>
+        /// Adds an aggregate MAX([catalog].[owner].[table].[field]) to the select columns
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public DBSelectQuery Max(string catalog, string owner, string table, string field)
+        {
+            DBField fld = DBField.Field(catalog, owner, table, field);
             return Max(fld);
         }
 
@@ -759,6 +811,20 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery Count(string owner, string table, string field)
         {
             DBField fld = DBField.Field(owner, table, field);
+            return Count(fld);
+        }
+
+
+        /// <summary>
+        /// Adds an aggregate COUNT([catalog].[owner].[table].[field]) to the select columns
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public DBSelectQuery Count(string catalog, string owner, string table, string field)
+        {
+            DBField fld = DBField.Field(catalog, owner, table, field);
             return Count(fld);
         }
 
@@ -861,6 +927,19 @@ namespace Perceiveit.Data.Query
             return this.Field(fld);
         }
 
+        /// <summary>
+        /// Adds a [catalog].[owner].[table].[field] clause to the select list, or the last clause in the statement
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public DBSelectQuery Field(string catalog, string owner, string table, string field)
+        {
+            DBField fld = DBField.Field(catalog, owner, table, field);
+            return this.Field(fld);
+        }
+
         #endregion
 
         #region public DBSelectQuery Fields(params string[] fieldnames)
@@ -887,7 +966,7 @@ namespace Perceiveit.Data.Query
         // From, Join, On
         //
 
-        #region public DBQuery From(string table) + 2 overloads
+        #region public DBQuery From(string table) + 4 overloads
 
         /// <summary>
         /// Specifies the root table or view to select data from in this statement
@@ -910,6 +989,19 @@ namespace Perceiveit.Data.Query
         {
             DBTable tr = DBTable.Table(owner, table);
             return From(tr);
+        }
+
+        /// <summary>
+        /// Specifies the root catalog.owner.table or owner.view to select data from in this statement
+        /// </summary>
+        /// <param name="catalog"></param>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public DBSelectQuery From(string catalog, string owner, string table)
+        {
+            DBTable tb = DBTable.Table(catalog, owner, table);
+            return From(tb);
         }
 
         /// <summary>
@@ -944,7 +1036,8 @@ namespace Perceiveit.Data.Query
         #endregion
 
 
-        #region public DBQuery InnerJoin(string table, string parentfield, string childfield) + 4 overloads
+        #region public DBQuery InnerJoin(string table, string parentfield, string childfield) + 16 overloads
+        
         /// <summary>
         /// Specifies an INNER JOIN on the specified [table] ON [parentfield] = [childfield]
         /// </summary>
@@ -958,6 +1051,33 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
+        /// Specifies an INNER JOIN on the specified [owner].[table] ON [parentfield] = [childfield]
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="parentfield"></param>
+        /// <param name="childfield"></param>
+        /// <returns></returns>
+        public DBSelectQuery InnerJoin(string owner, string table, string parentfield, string childfield)
+        {
+            return this.InnerJoin(owner, table, parentfield, Compare.Equals, childfield);
+        }
+
+        /// <summary>
+        /// Specifies an INNER JOIN on the specified [catalog].[owner].[table] ON [parentfield] = [childfield]
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="parentfield"></param>
+        /// <param name="childfield"></param>
+        /// <returns></returns>
+        public DBSelectQuery InnerJoin(string catalog, string owner, string table, string parentfield, string childfield)
+        {
+            return this.InnerJoin(catalog, owner, table, parentfield, Compare.Equals, childfield);
+        }
+
+
+        /// <summary>
         /// Specifies an INNER JOIN on the specified [table] ON [parentfield] [op] [childfield]
         /// </summary>
         /// <param name="table"></param>
@@ -968,6 +1088,42 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery InnerJoin(string table, string parentfield, Compare op, string childfield)
         {
             DBTable tbl = DBTable.Table(table);
+            DBField par = DBField.Field(parentfield);
+            DBField child = DBField.Field(childfield);
+
+            return this.InnerJoin(tbl, par, op, child);
+        }
+
+        /// <summary>
+        /// Specifies an INNER JOIN on the specified [owner].[table] ON [parentfield] [op] [childfield]
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="parentfield"></param>
+        /// <param name="op"></param>
+        /// <param name="childfield"></param>
+        /// <returns></returns>
+        public DBSelectQuery InnerJoin(string owner, string table, string parentfield, Compare op, string childfield)
+        {
+            DBTable tbl = DBTable.Table(owner, table);
+            DBField par = DBField.Field(parentfield);
+            DBField child = DBField.Field(childfield);
+
+            return this.InnerJoin(tbl, par, op, child);
+        }
+
+        /// <summary>
+        /// Specifies an INNER JOIN on the specified [catalog].[owner].[table] ON [parentfield] [op] [childfield]
+        /// </summary>
+        /// <param name="owner"></param>
+        /// <param name="table"></param>
+        /// <param name="parentfield"></param>
+        /// <param name="op"></param>
+        /// <param name="childfield"></param>
+        /// <returns></returns>
+        public DBSelectQuery InnerJoin(string catalog, string owner, string table, string parentfield, Compare op, string childfield)
+        {
+            DBTable tbl = DBTable.Table(catalog, owner, table);
             DBField par = DBField.Field(parentfield);
             DBField child = DBField.Field(childfield);
 
@@ -1004,6 +1160,36 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
+        ///  Specifies an INNER JOIN on the specified [owner].[table] ON [left] [op] [right]
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="left"></param>
+        /// <param name="op"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public DBSelectQuery InnerJoin(string owner, string table, DBClause left, Compare op, DBClause right)
+        {
+            DBTable tbl = DBTable.Table(owner, table);
+            this._last = this._root.InnerJoin(tbl, left, op, right);
+            return this;
+        }
+
+        /// <summary>
+        ///  Specifies an INNER JOIN on the specified [table] ON [left] [op] [right]
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="left"></param>
+        /// <param name="op"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public DBSelectQuery InnerJoin(string catalog, string owner, string table, DBClause left, Compare op, DBClause right)
+        {
+            DBTable tbl = DBTable.Table(catalog, owner, table);
+            this._last = this._root.InnerJoin(tbl, left, op, right);
+            return this;
+        }
+
+        /// <summary>
         /// Specifies an INNER JOIN on the specified [table] ON [left] [op] [right]
         /// </summary>
         /// <param name="table"></param>
@@ -1030,7 +1216,7 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
-        /// Specifies an INNER JOIN on the specified [table] - follow with an .On(...) statement
+        /// Specifies an INNER JOIN on the specified [table] - follow with an .On(...) statement or an .As(Name).On(...)
         /// </summary>
         /// <param name="table"></param>
         /// <returns></returns>
@@ -1041,7 +1227,7 @@ namespace Perceiveit.Data.Query
         }
 
         /// <summary>
-        /// Specifies an INNER JOIN on the specified [owner].[table] - follow with an .On(...) statement
+        /// Specifies an INNER JOIN on the specified [owner].[table] - follow with an .On(...) statement or an .As(Name).On(...)
         /// </summary>
         /// <param name="owner"></param>
         /// <param name="table"></param>
@@ -1052,8 +1238,23 @@ namespace Perceiveit.Data.Query
             return this.InnerJoin(tbl) ;
         }
 
+        //This conflicts with InnerJoin(Table, leftfield, rightfield) - Have to resort to InnerJoin(DBTable.Table(catalog, owner, table))...
+
+        ///// <summary>
+        ///// Specifies an INNER JOIN on the specified [catalog].[owner].[table] - follow with an .On(...) statement or an .As(Name).On(...)
+        ///// </summary>
+        ///// <param name="owner"></param>
+        ///// <param name="table"></param>
+        ///// <returns></returns>
+        //public DBSelectQuery InnerJoin(string catalog, string owner, string table)
+        //{
+        //    DBTable tbl = DBTable.Table(catalog, owner, table);
+        //    return this.InnerJoin(tbl);
+        //}
+
+
         /// <summary>
-        /// Specifies an INNER JOIN on the specified [table] - follow with an .On(...) statement
+        /// Specifies an INNER JOIN on the specified [table] - follow with an .On(...) statement or an .As(Name).On(...)
         /// </summary>
         /// <param name="table"></param>
         /// <returns></returns>
@@ -1065,7 +1266,7 @@ namespace Perceiveit.Data.Query
 
 
         /// <summary>
-        /// Specifies an INNER JOIN on the specified sub select statement - follow with an .On(...) statement
+        /// Specifies an INNER JOIN on the specified sub select statement - follow with an .On(...) statement or an .As(Name).On(...)
         /// </summary>
         /// <param name="inner">An inner select query</param>
         /// <returns></returns>
@@ -1103,6 +1304,18 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery LeftJoin(string owner, string table)
         {
             DBTable tbl = DBTable.Table(owner, table);
+            return LeftJoin(tbl);
+        }
+
+        /// <summary>
+        /// Performs a Left Join from the previous table onto the table with the specified name and schema/owner.
+        /// </summary>
+        /// <param name="owner">The name of the table schema/owner</param>
+        /// <param name="table">The name of the table</param>
+        /// <returns></returns>
+        public DBSelectQuery LeftJoin(string catalog, string owner, string table)
+        {
+            DBTable tbl = DBTable.Table(catalog, owner, table);
             return LeftJoin(tbl);
         }
 
@@ -1156,6 +1369,18 @@ namespace Perceiveit.Data.Query
         public DBSelectQuery RightJoin(string owner, string table)
         {
             DBTable tbl = DBTable.Table(table);
+            return RightJoin(tbl);
+        }
+
+        /// <summary>
+        /// Performs a Right Join from the previous table to the table with the specified name and owner.
+        /// </summary>
+        /// <param name="owner">The table schema/owner</param>
+        /// <param name="table">The name of the table to join to</param>
+        /// <returns></returns>
+        public DBSelectQuery RightJoin(string catalog, string owner, string table)
+        {
+            DBTable tbl = DBTable.Table(catalog, owner, table);
             return RightJoin(tbl);
         }
 

@@ -286,8 +286,8 @@ namespace Perceiveit.Data.Query
                     foreach (DBParam p in this.Parameters)
                     {
                         if (outputSeparator)
-                            builder.AppendReferenceSeparator();
-                        builder.WriteRaw(" ");
+                            builder.WriteReferenceSeparator();
+                        builder.WriteSpace();
                         builder.WriteParameter(p, true);
                         outputSeparator = true;
                     }

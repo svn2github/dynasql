@@ -56,8 +56,8 @@ namespace Perceiveit.Data.Query
                 if (first)
                     first = false;
                 else
-                    builder.AppendReferenceSeparator();
-                builder.WriteSourceField(string.Empty, string.Empty, col.Name, string.Empty);
+                    builder.WriteReferenceSeparator();
+                builder.WriteSourceField(string.Empty, string.Empty, string.Empty, col.Name, string.Empty);
             }
             builder.EndBlock();
         }

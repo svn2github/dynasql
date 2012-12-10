@@ -31,6 +31,7 @@ namespace Perceiveit.Data.Query
         private DBClauseList _params;
         private string _owner;
         private string _name;
+        private string _catalog;
 
         //
         // properties
@@ -80,6 +81,19 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public string Catalog
+
+        /// <summary>
+        /// Gets or sets the catalog / database for this exec statement
+        /// </summary>
+        public string Catalog
+        {
+            get { return _catalog; }
+            set { _catalog = value; }
+        }
+
+        #endregion
+
         #region public string SprocName {get;set;}
 
         /// <summary>
@@ -124,15 +138,28 @@ namespace Perceiveit.Data.Query
         public override bool BuildStatement(DBStatementBuilder builder)
         {
             builder.BeginExecuteStatement();
-            if (string.IsNullOrEmpty(this.Owner) == false)
+            if (string.IsNullOrEmpty(this.Catalog) == false)
             {
                 builder.BeginIdentifier();
-                builder.WriteRaw(this.Owner);
+                builder.WriteObjectName(this.Owner);
                 builder.EndIdentifier();
                 builder.AppendIdSeparator();
             }
+
+            if (string.IsNullOrEmpty(this.Owner) == false)
+            {
+                builder.BeginIdentifier();
+                builder.WriteObjectName(this.Owner);
+                builder.EndIdentifier();
+                builder.AppendIdSeparator();
+            }
+            else if (string.IsNullOrEmpty(this.Catalog) == false)
+            {
+                builder.AppendIdSeparator(); //need to include the dot - [Catalog]..[SprocName]
+            }
+
             builder.BeginIdentifier();
-            builder.WriteRaw(this.SprocName);
+            builder.WriteObjectName(this.SprocName);
             builder.EndIdentifier();
 
 

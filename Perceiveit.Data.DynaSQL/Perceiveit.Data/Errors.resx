@@ -264,4 +264,7 @@
   <data name="CannotDeserializeObjectTypesInSilverlight" xml:space="preserve">
     <value>It is not possible to deserialize objects from binary format in Silverlight.</value>
   </data>
+  <data name="ObjectNamesCannotContainIdentifierCharacters" xml:space="preserve">
+    <value>Object name such as '{0}' are not allowed to contain the control characters that start and terminate identifiers - {1} or {2}</value>
+  </data>
 </root>

@@ -314,6 +314,12 @@ namespace Perceiveit.Data.Query
             return Select(allRef);
         }
 
+        public static DBSelectSet SelectAll(string catalog, string owner, string table)
+        {
+            DBField allref = DBField.AllFields(catalog, owner, table);
+            return Select(allref);
+        }
+
         #endregion
 
         #region public static DBSelectSet Select(DBClause fref) + 3 overloads

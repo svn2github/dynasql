@@ -91,7 +91,7 @@ namespace Perceiveit.Data.Query
                 foreach (DBQueryHintOption hint in this.Items)
                 {
                     if (count > 0)
-                        builder.AppendReferenceSeparator();
+                        builder.WriteReferenceSeparator();
 
                     hint.BuildStatement(builder);
                     count++;

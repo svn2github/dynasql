@@ -86,7 +86,7 @@ namespace Perceiveit.Data.SqlClient
                 base.WriteTop(count, offset, topType);
         }
 
-        public override void WriteAllFieldIdentifier(string schemaOwner, string sourceTable)
+        public override void WriteAllFieldIdentifier(string catalog, string schemaOwner, string sourceTable)
         {
             if (null != _range)
             {
@@ -96,7 +96,7 @@ namespace Perceiveit.Data.SqlClient
                     _range.Fields.Add("*");
             }
 
-            base.WriteAllFieldIdentifier(schemaOwner, sourceTable);
+            base.WriteAllFieldIdentifier(catalog, schemaOwner, sourceTable);
         }
 
         public override void BeginFromList()
@@ -127,7 +127,7 @@ namespace Perceiveit.Data.SqlClient
             base.EndOrderStatement();
         }
 
-        public override void WriteSourceField(string schemaOwner, string sourceTable, string columnName, string alias)
+        public override void WriteSourceField(string catalog, string schemaOwner, string sourceTable, string columnName, string alias)
         {
             if (null != _range)
             {
@@ -138,7 +138,7 @@ namespace Perceiveit.Data.SqlClient
                     _range.Sorts.Add(full);
             }
 
-            base.WriteSourceField(schemaOwner, sourceTable, columnName, alias);
+            base.WriteSourceField(catalog, schemaOwner, sourceTable, columnName, alias);
         }
 
         const string ROWSELECT_FORMAT = " ROW_NUMBER() OVER( {0}) AS {1}, {2}";

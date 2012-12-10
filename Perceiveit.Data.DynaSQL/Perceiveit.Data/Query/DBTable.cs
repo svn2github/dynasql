@@ -23,7 +23,7 @@ using System.Text;
 namespace Perceiveit.Data.Query
 {
     /// <summary>
-    /// Defines a table reference in a DBQuery
+    /// Defines a table reference in a DBQuery (Catalog.Owner.Name)
     /// </summary>
     public abstract class DBTable : DBClause, IDBAlias, IDBJoinable, IDBBoolean
     {
@@ -56,6 +56,21 @@ namespace Perceiveit.Data.Query
         {
             get { return _owner; }
             protected set { _owner = value; }
+        }
+
+        #endregion
+
+        #region public string Catalog { get; set }
+
+        private string _catalog;
+
+        /// <summary>
+        /// Gets or sets the catalog for this table.
+        /// </summary>
+        public string Catalog
+        {
+            get { return this._catalog; }
+            set { this._catalog = value; }
         }
 
         #endregion
@@ -173,7 +188,8 @@ namespace Perceiveit.Data.Query
         // instance methods
         //
 
-        #region public DBJoin InnerJoin(string table, string parentfield, string childfield) + 2 overloads
+        #region public DBJoin InnerJoin(string table, string parentfield, string childfield) + 4 overloads
+        
         /// <summary>
         /// Appends a new INNER JOIN between this table an the specified table matching between this tables parentfield and the other tables child field
         /// </summary>
@@ -184,10 +200,47 @@ namespace Perceiveit.Data.Query
         public DBJoin InnerJoin(string table, string parentfield, string childfield)
         {
             DBTable tbl = Table(table);
-            DBField parent = DBField.Field(this.Owner, this.Name, parentfield);
-            DBField child = DBField.Field(table, childfield);
+            return InnerJoin(tbl, parentfield, childfield);
+        }
 
-            return InnerJoin(tbl, parent, child);
+        /// <summary>
+        /// Appends a new INNER JOIN between this table an the specified table matching between this tables parentfield and the other tables child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentField"></param>
+        /// <param name="childField"></param>
+        /// <returns></returns>
+        public DBJoin InnerJoin(string owner, string table, string parentfield, string childfield)
+        {
+            DBTable tbl = Table(owner, table);
+            return InnerJoin(tbl, parentfield, childfield);
+        }
+
+        /// <summary>
+        /// Appends a new INNER JOIN between this table an the specified table matching between this tables parentfield and the other tables child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentField"></param>
+        /// <param name="childField"></param>
+        /// <returns></returns>
+        public DBJoin InnerJoin(string catalog, string owner, string table, string parentfield, string childfield)
+        {
+            DBTable tbl = Table(catalog, owner, table);
+            return InnerJoin(tbl, parentfield, childfield);
+        }
+
+        /// <summary>
+        /// Appends a new INNER JOIN between this table an the specified table matching between this tables parentfield and the other tables child field
+        /// </summary>
+        /// <param name="table"></param>
+        /// <param name="parentField"></param>
+        /// <param name="childField"></param>
+        /// <returns></returns>
+        public DBJoin InnerJoin(DBTable table, string parentfield, string childfield)
+        {
+            DBField parent = DBField.Field(this.Catalog, this.Owner, this.Name, parentfield);
+            DBField child = DBField.Field(table.Catalog, table.Owner, table.Name, childfield);
+            return InnerJoin(table, parent, child);
         }
 
         /// <summary>
@@ -283,7 +336,7 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region WithHint(s) + ClearHints()
+        #region WithHint(DBTableHint hint) + ClearHints()
 
 
         /// <summary>
@@ -385,6 +438,24 @@ namespace Perceiveit.Data.Query
             tref.Name = name;
             tref.Owner = owner;
             return tref;
+        }
+
+        #endregion
+
+        #region public static DBTable Table(string catalog, string owner, string name)
+
+        /// <summary>
+        /// Creates an returns a new DBTable reference with the specified schema owner and catalog / database
+        /// </summary>
+        /// <param name="catalog"></param>
+        /// <param name="owner"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static DBTable Table(string catalog, string owner, string name)
+        {
+            DBTable table = Table(owner, name);
+            table.Catalog = catalog;
+            return table;
         }
 
         #endregion

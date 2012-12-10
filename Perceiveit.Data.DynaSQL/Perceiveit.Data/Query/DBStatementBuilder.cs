@@ -490,7 +490,7 @@ namespace Perceiveit.Data.Query
         public virtual void BeginFunctionParameter(int index)
         {
             if (index > 0)
-                this.AppendReferenceSeparator();
+                this.WriteReferenceSeparator();
         }
 
         public virtual void EndFunctionParameter(int index)
@@ -500,7 +500,7 @@ namespace Perceiveit.Data.Query
         /// <summary>
         /// Appends an individual separator to the statement ', '
         /// </summary>
-        public virtual void AppendReferenceSeparator()
+        public virtual void WriteReferenceSeparator()
         {
             this.Writer.Write(", ");
         }
@@ -511,18 +511,18 @@ namespace Perceiveit.Data.Query
 
         public virtual void BeginQueryHints()
         {
-            this.WriteRaw(" OPTIONS (");
+            this.WriteRawSQLString(" OPTIONS (");
         }
 
         public virtual void EndQueryHints()
         {
-            this.WriteRaw(")");
+            this.EndBlock();
         }
 
         public virtual void BeginAQueryHint(DBQueryOption hint)
         {
             string s = this.GetQueryHintWord(hint);
-            this.WriteRaw(s);
+            this.WriteRawSQLString(s);
         }
 
         public virtual void EndAQueryHint(DBQueryOption hint)
@@ -615,18 +615,19 @@ namespace Perceiveit.Data.Query
 
         public virtual void BeginTableHints()
         {
-            this.WriteRaw(" WITH (");
+            this.WriteRawSQLString(" WITH ");
+            this.BeginBlock();
         }
 
         public virtual void EndTableHints()
         {
-            this.WriteRaw(")");
+            this.EndBlock();
         }
 
         public virtual void BeginTableHint(DBTableHint hint)
         {
             string s = this.GetTableHintWord(hint);
-            this.WriteRaw(s);
+            this.WriteRawSQLString(s);
         }
 
         public virtual void EndTableHint(DBTableHint hint)
@@ -635,19 +636,19 @@ namespace Perceiveit.Data.Query
 
         public virtual void BeginHintParameterList()
         {
-            this.WriteRaw("(");
+            this.BeginBlock();
         }
 
         public virtual void EndHintParameterList()
         {
-            this.WriteRaw(")");
+            this.EndBlock();
         }
 
         public virtual void WriteHintParameter(int index, string parameter)
         {
             if (index > 0)
-                this.WriteRaw(",");
-            this.WriteRaw(parameter);
+                this.WriteReferenceSeparator();
+            this.WriteObjectName(parameter);
         }
 
         public virtual string GetTableHintWord(DBTableHint hint)
@@ -685,21 +686,55 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public virtual void BeginIdentifier() + EndIdentifier() + AppendIdSeparator()
+        #region public virtual char GetStartIdentifier() + GetEndIdentifier() + GetIdentifierSeparator()
 
-        public virtual void BeginIdentifier()
+        /// <summary>
+        /// returns the character that marks the start of an object identifier (default '[')
+        /// </summary>
+        /// <returns></returns>
+        public virtual char GetStartIdentifier()
         {
-            this.Writer.Write("[");
+            return '[';
         }
 
-        public virtual void EndIdentifier()
+        /// <summary>
+        /// returns the character that marks the end of an object identifier (default ']')
+        /// </summary>
+        /// <returns></returns>
+        public virtual char GetEndIdentifier()
         {
-            this.Writer.Write("]");
+            return ']';
         }
 
-        public virtual void AppendIdSeparator()
+        /// <summary>
+        /// returns the character that separates object identifiers (default '.')
+        /// </summary>
+        /// <returns></returns>
+        public virtual char GetIdentifierSeparator()
         {
-            this.Writer.Write(".");
+            return '.';
+        }
+
+        #endregion
+
+        #region public void BeginIdentifier() + EndIdentifier() + AppendIdSeparator()
+
+        public void BeginIdentifier()
+        {
+            char start = GetStartIdentifier();
+            this.Writer.Write(start);
+        }
+
+        public void EndIdentifier()
+        {
+            char end = GetEndIdentifier();
+            this.Writer.Write(end);
+        }
+
+        public void AppendIdSeparator()
+        {
+            char id = GetIdentifierSeparator();
+            this.Writer.Write(id);
         }
 
         #endregion
@@ -726,7 +761,7 @@ namespace Perceiveit.Data.Query
             if (this.StatementDepth > 0)
                 this.BeginSubStatement();
 
-            this.Writer.Write("SELECT ");
+            this.WriteRawSQLString("SELECT ");
             this.IncrementStatementDepth();
         }
 
@@ -743,7 +778,7 @@ namespace Perceiveit.Data.Query
 
         public virtual void WriteStatementTerminator()
         {
-            this.WriteRaw(";");
+            this.Writer.Write(";");
         }
 
         #endregion
@@ -817,7 +852,7 @@ namespace Perceiveit.Data.Query
         /// </summary>
         public virtual void BeginEntityDefinition()
         {
-            this.WriteRaw(" AS "); 
+            this.WriteRawSQLString(" AS "); 
             this.BeginNewLine();
         }
 
@@ -887,7 +922,8 @@ namespace Perceiveit.Data.Query
                 default:
                     throw new ArgumentOutOfRangeException("The value of the order by enumeration '" + order.ToString() + "' could not be recognised");
             }
-            this.WriteRaw(o);
+            if(!string.IsNullOrEmpty(o))
+                this.WriteRawSQLString(o);
         }
 
         #endregion
@@ -1038,7 +1074,7 @@ namespace Perceiveit.Data.Query
         public virtual void BeginSetValueList()
         {
             this.BeginNewLine();
-            this.WriteRaw(" SET ");
+            this.WriteRawSQLString(" SET ");
         }
 
         public virtual void EndSetValueList()
@@ -1061,6 +1097,13 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public virtual void WriteAssignValue(DBClause receiver, DBClause value)
+
+        /// <summary>
+        /// Writes an assignment (e.g. receiver = value )
+        /// </summary>
+        /// <param name="receiver"></param>
+        /// <param name="value"></param>
         public virtual void WriteAssignValue(DBClause receiver, DBClause value)
         {
             receiver.BuildStatement(this);
@@ -1068,10 +1111,19 @@ namespace Perceiveit.Data.Query
             value.BuildStatement(this);
         }
 
+        #endregion
+
+        #region protected virtual void WriteAssignmentOperator()
+
+        /// <summary>
+        /// Writes the asignment operator (=)
+        /// </summary>
         protected virtual void WriteAssignmentOperator()
         {
             this.WriteOperator(Operator.Equals);
         }
+
+        #endregion
 
         //
         // insert
@@ -1358,7 +1410,7 @@ namespace Perceiveit.Data.Query
             this.BeginNewLine();
             this.IncrementStatementDepth();
 
-            this.WriteRaw("DROP ");
+            this.WriteRawSQLString("DROP ");
             WriteDropType(type);
         }
 
@@ -1391,7 +1443,7 @@ namespace Perceiveit.Data.Query
 
         protected void WriteDropType(string type)
         {
-            this.WriteRaw(type);
+            this.WriteRawSQLString(type);
         }
 
         public virtual void EndDrop(DBSchemaTypes type, bool checkExists)
@@ -1409,7 +1461,7 @@ namespace Perceiveit.Data.Query
         /// </summary>
         public virtual void BeginReferenceOn()
         {
-            this.WriteRaw(" ON ");
+            this.WriteRawSQLString(" ON ");
         }
 
         /// <summary>
@@ -1471,11 +1523,11 @@ namespace Perceiveit.Data.Query
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    this.WriteRaw("CONSTRAINT ");
+                    this.WriteRawSQLString("CONSTRAINT ");
                     this.BeginIdentifier();
-                    this.WriteRaw(name);
+                    this.WriteObjectName(name);
                     this.EndIdentifier();
-                    this.WriteRaw(" ");
+                    this.WriteSpace();
                 }
             }
             else
@@ -1550,17 +1602,17 @@ namespace Perceiveit.Data.Query
         protected virtual void WriteCreateType(string nativeType, string options, bool isconstraint)
         {
             if (!isconstraint)
-                this.WriteRaw("CREATE ");
+                this.WriteRawSQLString("CREATE ");
 
             if (string.IsNullOrEmpty(options) == false)
             {
                 if (options.EndsWith(" ") == false)
                     options = options + " ";
 
-                this.WriteRaw(options);
+                this.WriteRawSQLString(options);
             }
 
-            this.WriteRaw(nativeType);
+            this.WriteRawSQLString(nativeType);
         }
 
         public virtual void EndCreate(DBSchemaTypes type, bool checknotexists)
@@ -1593,7 +1645,7 @@ namespace Perceiveit.Data.Query
         public virtual void BeginTableConstraints()
         {
             //We must have columns on the table, so we append a comma and start the constraints.
-            this.AppendReferenceSeparator();
+            this.WriteReferenceSeparator();
             //this.BeginNewLine();
             //this.IncrementStatementDepth();
         }
@@ -1662,15 +1714,15 @@ namespace Perceiveit.Data.Query
             switch (perform)
             {
                 case DBFKAction.Cascade:
-                    this.WriteRaw(" ON ");
-                    this.WriteRaw(actionOn);
-                    this.WriteRaw(" CASCADE");
+                    this.WriteRawSQLString(" ON ");
+                    this.WriteRawSQLString(actionOn);
+                    this.WriteRawSQLString(" CASCADE");
 
                     break;
                 case DBFKAction.NoAction:
-                    this.WriteRaw(" ON ");
-                    this.WriteRaw(actionOn);
-                    this.WriteRaw(" NO ACTION");
+                    this.WriteRawSQLString(" ON ");
+                    this.WriteRawSQLString(actionOn);
+                    this.WriteRawSQLString(" NO ACTION");
 
                     break;
                 case DBFKAction.Undefined:
@@ -1701,7 +1753,7 @@ namespace Perceiveit.Data.Query
         /// <param name="p_2"></param>
         public void BeginReferences(string owner, string name)
         {
-            this.WriteRaw(" REFERENCES ");
+            this.WriteRawSQLString(" REFERENCES ");
             this.WriteSourceTable(owner, name, string.Empty);
         }
 
@@ -1736,9 +1788,7 @@ namespace Perceiveit.Data.Query
         /// <param name="name"></param>
         public virtual void BeginCheckExists(DBSchemaTypes type, string owner, string name)
         {
-            this.WriteRaw("IF");
-            this.WriteRaw(" EXISTS");
-
+            this.WriteRawSQLString("IF EXISTS");
             this.IncrementStatementDepth();
             BuildInfoSchemaLookup(type, owner, name);
 
@@ -1767,8 +1817,7 @@ namespace Perceiveit.Data.Query
         /// <param name="name"></param>
         public virtual void BeginCheckNotExists(DBSchemaTypes type, string owner, string name)
         {
-            this.WriteRaw("IF NOT");
-            this.WriteRaw(" EXISTS");
+            this.WriteRawSQLString("IF NOT EXISTS");
             this.IncrementStatementDepth();
             BuildInfoSchemaLookup(type, owner, name);
         }
@@ -1822,7 +1871,7 @@ namespace Perceiveit.Data.Query
 
         public virtual void BeginDeclareStatement(DBParam param)
         {
-            this.WriteRaw("DECLARE ");
+            this.WriteRawSQLString("DECLARE ");
             this.WriteParameter(param, false);
             this.ParameterExclusions.Add(param.Name);
         }
@@ -1832,7 +1881,7 @@ namespace Perceiveit.Data.Query
         public virtual void EndDeclareStatement()
         {
             if (this.StatementDepth < 1)
-                this.WriteRaw(";");
+                this.WriteStatementTerminator();
             this.BeginNewLine();
         }
 
@@ -1871,6 +1920,8 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
+        #region public virtual void WriteParameter(DBParam param, bool includeDirection) + 1 overload
+
         public virtual void WriteParameter(DBParam param, bool includeDirection)
         {
             bool writeType = true;
@@ -1886,16 +1937,16 @@ namespace Perceiveit.Data.Query
 
             if (writetype)
             {
-                this.WriteRaw(" ");
+                this.WriteSpace();
                 string options;
                 string type = this.GetNativeTypeForDbType(param.DbType, param.Size, param.Precision, DBColumnFlags.Nullable, out options);
 
-                this.WriteRaw(type);
+                this.WriteRawSQLString(type);
                 if (!string.IsNullOrEmpty(options))
                 {
-                    this.WriteRaw(options);
+                    this.WriteRawSQLString(options);
                     if (!options.EndsWith(" "))
-                        this.WriteRaw(" ");
+                        this.WriteSpace();
                 }
             }
 
@@ -1905,7 +1956,7 @@ namespace Perceiveit.Data.Query
                 {
                     case ParameterDirection.InputOutput:
                     case ParameterDirection.Output:
-                        this.WriteRaw("OUTPUT ");
+                        this.WriteRawSQLString("OUTPUT ");
                         break;
                     case ParameterDirection.ReturnValue:
                         break;
@@ -1916,19 +1967,21 @@ namespace Perceiveit.Data.Query
 
         }
 
+        #endregion
+
         #region public virtual void Begin/End SetStatement()
 
         public virtual void BeginSetStatement()
         {
             this.BeginNewLine();
 
-            this.WriteRaw("SET ");
+            this.WriteRawSQLString("SET ");
         }
 
         public virtual void EndSetStatement()
         {
             if (this.StatementDepth < 1)
-                this.WriteRaw(";");
+                this.WriteStatementTerminator();
             this.BeginNewLine();
         }
 
@@ -1940,14 +1993,32 @@ namespace Perceiveit.Data.Query
         {
             this.BeginNewLine();
 
-            this.WriteRaw("RETURN ");
+            this.WriteRawSQLString("RETURN ");
         }
 
         public virtual void EndReturnsStatement()
         {
             if (this.StatementDepth < 1)
-                this.WriteRaw(";");
+                this.WriteStatementTerminator();
             this.BeginNewLine();
+        }
+
+        #endregion
+
+        #region public virtual void BeginUseStatement() + EndUseStatement()
+
+        public virtual void BeginUseStatement()
+        {
+            this.WriteRawSQLString("USE ");
+        }
+
+        public virtual void EndUseStatement()
+        {
+            if(this.StatementDepth < 1)
+                this.WriteStatementTerminator();
+
+            this.BeginNewLine();
+
         }
 
         #endregion
@@ -2176,7 +2247,7 @@ namespace Perceiveit.Data.Query
         /// </summary>
         public virtual void WriteSpace()
         {
-            this.WriteRaw(" ");
+            this.Writer.Write(" ");
         }
 
         #endregion
@@ -2188,22 +2259,22 @@ namespace Perceiveit.Data.Query
             if (Array.IndexOf<TopType>(this.DatabaseProperties.SupportedTopTypes, topType) < 0)
                 throw new NotSupportedException("The top type '" + topType.ToString() + "' is not supported by this database");
 
-            this.Writer.Write(" TOP ");
+            this.WriteRawSQLString(" TOP ");
             if (topType == TopType.Percent)
             {
-                this.Writer.Write(count);
-                this.Writer.Write(" PERCENT ");
+                this.Write(count);
+                this.WriteRawSQLString(" PERCENT ");
             }
             else if(topType == TopType.Count)
             {
                 this.Writer.Write((int)count);
-                this.Writer.Write(" ");
+                this.WriteSpace();
             }
             else if (topType == TopType.Range)
             {
-                this.Writer.Write((int)count);
-                this.Writer.Write(", ");
-                this.Writer.Write((int)offset);
+                this.Write((int)count);
+                this.WriteReferenceSeparator();
+                this.Write((int)offset);
             }
 
         }
@@ -2219,11 +2290,34 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public virtual void WriteRaw(string str)
+        #region public virtual void WriteRawSQLString(string value)
 
-        public virtual void WriteRaw(string str)
+        /// <summary>
+        /// Writes a SQL string that is not validated - as it is expected to contain cotrol characters
+        /// </summary>
+        /// <param name="value"></param>
+        public virtual void WriteRawSQLString(string value)
         {
-            this.Writer.Write(str);
+            this.Writer.Write(value);
+        }
+
+        #endregion
+
+        #region public virtual void WriteObjectName(string name)
+
+        /// <summary>
+        /// Writes the name of an object in the database - Does not include the Identifier separators
+        /// </summary>
+        /// <param name="name">The name of the object</param>
+        /// <exception cref="System.ArgumentException" >Thrown if the name contains one of the start or end object identifier characters</exception>
+        public virtual void WriteObjectName(string name)
+        {
+            char start = this.GetStartIdentifier();
+            char end = this.GetEndIdentifier();
+            if (name.IndexOf(start) > -1 || name.IndexOf(end) > -1)
+                throw new ArgumentException(String.Format(Errors.ObjectNamesCannotContainIdentifierCharacters, name, start, end));
+
+            this.Writer.Write(name);
         }
 
         #endregion
@@ -2430,7 +2524,7 @@ namespace Perceiveit.Data.Query
                         break;
                     default:
                         if (value is DBNull)
-                            this.Writer.Write("NULL");
+                            this.WriteNull();
                         else
                             this.Writer.Write(value);
                         break;
@@ -2440,44 +2534,61 @@ namespace Perceiveit.Data.Query
 
         #endregion
 
-        #region public virtual void WriteNull()
+        #region public virtual void WriteNull() + WriteNotNull()
 
         public virtual void WriteNull()
         {
             this.Writer.Write("NULL");
         }
 
+        public virtual void WriteNotNull()
+        {
+            this.Writer.Write("NOT NULL");
+        }
+
         #endregion
 
-        #region public virtual void WriteAllFieldIdentifier(string schemaOwner, string sourceTable)
+        #region public virtual void WriteAllFieldIdentifier(string catalogOwner,string schemaOwner, string sourceTable)
 
-        public virtual void WriteAllFieldIdentifier(string schemaOwner, string sourceTable)
+        public virtual void WriteAllFieldIdentifier(string catalogOwner, string schemaOwner, string sourceTable)
         {
             if (string.IsNullOrEmpty(sourceTable) && !string.IsNullOrEmpty(schemaOwner))
                 throw new ArgumentNullException("sourceTable", Errors.CannotSpecifySchemaOwnerAndNotTable);
 
-            if (string.IsNullOrEmpty(schemaOwner) == false)
+            if (string.IsNullOrEmpty(catalogOwner) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(schemaOwner);
+                this.WriteObjectName(catalogOwner);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
 
-            if (string.IsNullOrEmpty(sourceTable) == false)
+            if (string.IsNullOrEmpty(schemaOwner) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(sourceTable);
+                this.WriteObjectName(schemaOwner);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
+            else if (!string.IsNullOrEmpty(catalogOwner))
+                this.AppendIdSeparator();
+
+            if (string.IsNullOrEmpty(sourceTable) == false)
+            {
+                this.BeginIdentifier();
+                this.WriteObjectName(sourceTable);
+                this.EndIdentifier();
+                this.AppendIdSeparator();
+            }
+            else if (!string.IsNullOrEmpty(catalogOwner) || !string.IsNullOrEmpty(sourceTable))
+                this.AppendIdSeparator(); //catalog...* or catalog.dbo..*
 
             this.Writer.Write(this.GetAllFieldIdentifier());
         }
 
         #endregion
 
-        #region public virtual void WriteSourceField(string schemaOwner, string sourceTable, string columnName, string alias)
+        #region public virtual void WriteSourceField(string catalog, string schemaOwner, string sourceTable, string columnName, string alias)
 
         /// <summary>
         /// Appends the owner (optional), table (optional unless owner is specified) and column (required) to the statement and
@@ -2487,7 +2598,7 @@ namespace Perceiveit.Data.Query
         /// <param name="sourceTable"></param>
         /// <param name="columnName"></param>
         /// <param name="alias"></param>
-        public virtual void WriteSourceField(string schemaOwner, string sourceTable, string columnName, string alias)
+        public virtual void WriteSourceField(string catalog, string schemaOwner, string sourceTable, string columnName, string alias)
         {
             if (string.IsNullOrEmpty(columnName))
                 throw new ArgumentNullException("columnName", Errors.NoColumnNameSpecifiedForAField);
@@ -2495,24 +2606,36 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(sourceTable) && !string.IsNullOrEmpty(schemaOwner))
                 throw new ArgumentNullException("sourceTable", Errors.CannotSpecifySchemaOwnerAndNotTable);
 
-            if (string.IsNullOrEmpty(schemaOwner) == false)
+            if (string.IsNullOrEmpty(catalog) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(schemaOwner);
+                this.WriteObjectName(catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
+
+            if (string.IsNullOrEmpty(schemaOwner) == false)
+            {
+                this.BeginIdentifier();
+                this.WriteObjectName(schemaOwner);
+                this.EndIdentifier();
+                this.AppendIdSeparator();
+            }
+            else if (!string.IsNullOrEmpty(catalog))
+                this.AppendIdSeparator();
 
             if (string.IsNullOrEmpty(sourceTable) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(sourceTable);
+                this.WriteObjectName(sourceTable);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
+            else if (!string.IsNullOrEmpty(schemaOwner) || !string.IsNullOrEmpty(catalog))
+                this.AppendIdSeparator(); //catalog...field || catalog.dbo..field
 
             this.BeginIdentifier();
-            this.WriteRaw(columnName);
+            this.WriteObjectName(columnName);
             this.EndIdentifier();
 
             if (string.IsNullOrEmpty(alias) == false)
@@ -2540,10 +2663,10 @@ namespace Perceiveit.Data.Query
         #endregion
 
 
-        #region public virtual void WriteSourceTable(string schemaOwner, string sourceTable, bool temporary, string alias)
+        #region public virtual void WriteSourceTable(string catalog, string schemaOwner, string sourceTable, string alias)
 
         /// <summary>
-        /// Appends the owner (optional) and table (required) to the statement and sets the alias name (optional).
+        /// Appends the catalog (optional) owner (optional) and table (required) to the statement and sets the alias name (optional).
         /// All the identifiers are wrapped with the delimiter characters
         /// </summary>
         /// <param name="schemaOwner"></param>
@@ -2558,7 +2681,7 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(catalog) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(catalog);
+                this.WriteObjectName(catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
@@ -2566,13 +2689,15 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(schemaOwner) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(schemaOwner);
+                this.WriteObjectName(schemaOwner);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
+            else if (string.IsNullOrEmpty(catalog) == false)
+                this.AppendIdSeparator(); //catalog..table
 
             this.BeginIdentifier();
-            this.WriteRaw(sourceTable);
+            this.WriteObjectName(sourceTable);
             this.EndIdentifier();
 
             if (string.IsNullOrEmpty(alias) == false)
@@ -2601,7 +2726,7 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(catalog) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(catalog);
+                this.WriteObjectName(catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
@@ -2609,15 +2734,17 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(schemaOwner) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(schemaOwner);
+                this.WriteObjectName(schemaOwner);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
             }
+            else if (!string.IsNullOrEmpty(catalog))
+                this.AppendIdSeparator(); // catalog..source
 
             if (string.IsNullOrEmpty(source) == false)
             {
                 this.BeginIdentifier();
-                this.WriteRaw(source);
+                this.WriteObjectName(source);
                 this.EndIdentifier();
             }
 
@@ -2631,7 +2758,7 @@ namespace Perceiveit.Data.Query
         {
             this.BeginAlias();
             this.BeginIdentifier();
-            this.WriteRaw(alias);
+            this.WriteObjectName(alias);
             this.EndIdentifier();
             this.EndAlias();
         }
@@ -2664,9 +2791,9 @@ namespace Perceiveit.Data.Query
         {
             string opts;
             string sqltype = GetNativeTypeForDbType(type, length, accuracy, flags, out opts);
-            this.WriteRaw(sqltype);
+            this.WriteRawSQLString(sqltype);
             if (!string.IsNullOrEmpty(opts))
-                this.WriteRaw(opts);
+                this.WriteRawSQLString(opts);
         }
 
         #endregion
@@ -2681,19 +2808,20 @@ namespace Perceiveit.Data.Query
         public virtual void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
         {
             if ((flags & DBColumnFlags.PrimaryKey) > 0)
-                this.WriteRaw(" PRIMARY KEY");
-            
+                this.WriteRawSQLString(" PRIMARY KEY");
+
+            this.WriteSpace();
             if ((flags & DBColumnFlags.Nullable) > 0)
-                this.WriteRaw(" NULL");
+                this.WriteNull();
             else
-                this.WriteRaw(" NOT NULL");
+                this.WriteNotNull();
 
             if ((flags & DBColumnFlags.AutoAssign) > 0)
-                this.WriteRaw(" IDENTITY");
+                this.WriteRawSQLString(" IDENTITY");
 
             if ((flags & DBColumnFlags.HasDefault) > 0)
             {
-                this.WriteRaw(" DEFAULT ");
+                this.WriteRawSQLString(" DEFAULT ");
                 defaultValue.BuildStatement(this);
             }
         }
@@ -2815,7 +2943,7 @@ namespace Perceiveit.Data.Query
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
             {
-                this.WriteRaw(itemRef.Catalog);
+                this.WriteObjectName(itemRef.Catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
                 this.BeginIdentifier();
@@ -2823,13 +2951,15 @@ namespace Perceiveit.Data.Query
 
             if (string.IsNullOrEmpty(itemRef.Schema) == false)
             {
-                this.WriteRaw(itemRef.Schema);
+                this.WriteObjectName(itemRef.Schema);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
                 this.BeginIdentifier();
             }
+            else if (!string.IsNullOrEmpty(itemRef.Catalog))
+                this.AppendIdSeparator();
 
-            this.WriteRaw(itemRef.Name);
+            this.WriteObjectName(itemRef.Name);
             this.EndIdentifier();
             this.EndDrop(itemRef.Type, false);
         }
@@ -2855,47 +2985,53 @@ namespace Perceiveit.Data.Query
                 throw new ArgumentNullException("itemRef.Container", Errors.ContainerNotSetOnIndexReference);
 
             this.BeginDropStatement(DBSchemaTypes.Index);
-            this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
             {
-                this.WriteRaw(itemRef.Catalog);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
+                
             }
 
             if (string.IsNullOrEmpty(itemRef.Schema) == false)
             {
-                this.WriteRaw(itemRef.Schema);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Schema);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
+            else if (!string.IsNullOrEmpty(itemRef.Catalog))
+                this.AppendIdSeparator();
 
-            this.WriteRaw(itemRef.Name);
+            this.BeginIdentifier();
+            this.WriteObjectName(itemRef.Name);
             this.EndIdentifier();
-            this.WriteRaw(" ON ");
+            this.WriteRawSQLString(" ON ");
 
             //write the table reference
             itemRef = itemRef.Container;
             this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
             {
-                this.WriteRaw(itemRef.Catalog);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
 
             if (string.IsNullOrEmpty(itemRef.Schema) == false)
             {
-                this.WriteRaw(itemRef.Schema);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Schema);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
+            else if (!string.IsNullOrEmpty(itemRef.Catalog))
+                this.AppendIdSeparator();
 
-            this.WriteRaw(itemRef.Name);
+            this.BeginIdentifier();
+            this.WriteObjectName(itemRef.Name);
             this.EndIdentifier();
             this.EndDrop(DBSchemaTypes.Index, false);
         }
@@ -2919,24 +3055,27 @@ namespace Perceiveit.Data.Query
 
             this.BeginDropStatement(itemRef.Type);
 
-            this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
             {
-                this.WriteRaw(itemRef.Catalog);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
-            }
+                }
 
             if (string.IsNullOrEmpty(itemRef.Schema) == false)
             {
-                this.WriteRaw(itemRef.Schema);
+                
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Schema);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
+            else if (!string.IsNullOrEmpty(itemRef.Catalog))
+                this.AppendIdSeparator();
 
-            this.WriteRaw(itemRef.Name);
+            this.BeginIdentifier();
+            this.WriteObjectName(itemRef.Name);
             this.EndIdentifier();
             this.EndDrop(itemRef.Type, false);
         }
@@ -2959,24 +3098,26 @@ namespace Perceiveit.Data.Query
 
             this.BeginDropStatement(itemRef.Type);
 
+           if (string.IsNullOrEmpty(itemRef.Catalog) == false)
+            {
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Catalog);
+                this.EndIdentifier();
+                this.AppendIdSeparator();
+            }
+
+           if (string.IsNullOrEmpty(itemRef.Schema) == false)
+           {
+               this.BeginIdentifier();
+               this.WriteObjectName(itemRef.Schema);
+               this.EndIdentifier();
+               this.AppendIdSeparator();
+           }
+           else if (!string.IsNullOrEmpty(itemRef.Catalog))
+               this.AppendIdSeparator();
+
             this.BeginIdentifier();
-            if (string.IsNullOrEmpty(itemRef.Catalog) == false)
-            {
-                this.WriteRaw(itemRef.Catalog);
-                this.EndIdentifier();
-                this.AppendIdSeparator();
-                this.BeginIdentifier();
-            }
-
-            if (string.IsNullOrEmpty(itemRef.Schema) == false)
-            {
-                this.WriteRaw(itemRef.Schema);
-                this.EndIdentifier();
-                this.AppendIdSeparator();
-                this.BeginIdentifier();
-            }
-
-            this.WriteRaw(itemRef.Name);
+            this.WriteObjectName(itemRef.Name);
             this.EndIdentifier();
             this.EndDrop(itemRef.Type, false);
         }
@@ -2999,24 +3140,26 @@ namespace Perceiveit.Data.Query
 
             this.BeginDropStatement(itemRef.Type);
 
-            this.BeginIdentifier();
             if (string.IsNullOrEmpty(itemRef.Catalog) == false)
             {
-                this.WriteRaw(itemRef.Catalog);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
 
             if (string.IsNullOrEmpty(itemRef.Schema) == false)
             {
-                this.WriteRaw(itemRef.Schema);
+                this.BeginIdentifier();
+                this.WriteObjectName(itemRef.Schema);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
+            else if (!string.IsNullOrEmpty(itemRef.Catalog))
+                this.AppendIdSeparator();
 
-            this.WriteRaw(itemRef.Name);
+            this.BeginIdentifier();
+            this.WriteObjectName(itemRef.Name);
             this.EndIdentifier();
             this.EndDrop(itemRef.Type, false);
         }

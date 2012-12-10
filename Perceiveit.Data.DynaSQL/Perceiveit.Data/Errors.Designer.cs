@@ -385,6 +385,15 @@ namespace Perceiveit.Data {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Object name such as &apos;{0}&apos; are not allowed to contain the control characters that start and terminate identifiers - {1} or {2}.
+        /// </summary>
+        internal static string ObjectNamesCannotContainIdentifierCharacters {
+            get {
+                return ResourceManager.GetString("ObjectNamesCannotContainIdentifierCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The Ole Db Create Table statement does not support default values on a column..
         /// </summary>
         internal static string OLEDbDoesNotSupportDefaultValues {

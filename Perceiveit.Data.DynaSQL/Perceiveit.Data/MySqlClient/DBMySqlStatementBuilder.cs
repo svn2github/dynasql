@@ -125,33 +125,35 @@ namespace Perceiveit.Data.MySqlClient
         {
             if (this.StatementDepth == 1 && this._limits > 0)
             {
-                this.WriteRaw(" LIMIT ");
-                this.WriteRaw(_limits.ToString());
+                this.WriteRawSQLString(" LIMIT ");
+                this.Write(_limits);
                 if (_offset > 0)
                 {
-                    this.Writer.Write(" OFFSET ");
-                    this.Writer.Write(_offset);
+                    this.WriteRawSQLString(" OFFSET ");
+                    this.Write(_offset);
                 }
             }
             base.EndSelectStatement();
         }
 
-        public override void BeginIdentifier()
+        
+
+        public override char GetStartIdentifier()
         {
-            this.WriteRaw("`");
+           return '`';
         }
 
-        public override void EndIdentifier()
+        public override char GetEndIdentifier()
         {
-            this.WriteRaw("`");
+            return '`';
         }
 
         public override void BeginFunction(Function function, string name)
         {
             if (function == Function.LastID)
-                this.WriteRaw("LAST_INSERT_ID");
+                this.WriteRawSQLString("LAST_INSERT_ID");
             else if (function == Function.GetDate)
-                this.WriteRaw("NOW");
+                this.WriteRawSQLString("NOW");
             else
                 base.BeginFunction(function, name);
         }
@@ -160,7 +162,7 @@ namespace Perceiveit.Data.MySqlClient
         public override void WriteNativeParameterReference(string paramname)
         {
             if (this._buildingsproc)
-                this.WriteRaw(paramname);
+                this.WriteObjectName(paramname);
             else
                 base.WriteNativeParameterReference(paramname);
         }
@@ -235,7 +237,7 @@ namespace Perceiveit.Data.MySqlClient
         public override void BeginDeclareStatement(DBParam param)
         {
             this.ParameterExclusions.Add(param.Name);
-            this.WriteRaw("SET ");
+            this.WriteRawSQLString("SET ");
             bool writeType = false;
             bool writeDirection = false;
             this.WriteParameter(param, writeType, writeDirection);
@@ -243,14 +245,15 @@ namespace Perceiveit.Data.MySqlClient
             string value = GetDefaultValueForType(param.DbType);
             this.WriteOperator(Operator.Equals);
             this.WriteSpace();
-            this.WriteRaw(value);
+            //Should be safe as we return this value internally
+            this.WriteRawSQLString(value);
 
             
         }
 
         
 
-        protected virtual string GetDefaultValueForType(DbType type)
+        private string GetDefaultValueForType(DbType type)
         {
             string value;
             switch (type)
@@ -301,9 +304,8 @@ namespace Perceiveit.Data.MySqlClient
 
         public override void EndDeclareStatement()
         {
-            this.WriteRaw(";");
+            this.WriteStatementTerminator();
             this.BeginNewLine();
-            //base.EndDeclareStatement();
         }
 
         //Drop overrides for the supported syntax - DROP .... IF EXISTS
@@ -326,7 +328,7 @@ namespace Perceiveit.Data.MySqlClient
 
         private void WriteCheckExists(DBSchemaTypes type, string owner, string name)
         {
-            this.WriteRaw(" IF EXISTS ");
+            this.WriteRawSQLString(" IF EXISTS ");
         }
 
         public override void BeginCheckExists(DBSchemaTypes type, string owner, string name)
@@ -369,11 +371,11 @@ namespace Perceiveit.Data.MySqlClient
             {
                 if (!string.IsNullOrEmpty(name))
                 {
-                    this.WriteRaw("CONSTRAINT ");
+                    this.WriteRawSQLString("CONSTRAINT ");
                     this.BeginIdentifier();
-                    this.WriteRaw(name);
+                    this.WriteObjectName(name);
                     this.EndIdentifier();
-                    this.WriteRaw(" ");
+                    this.WriteSpace();
                 }
             }
             
@@ -389,16 +391,13 @@ namespace Perceiveit.Data.MySqlClient
 
         public override void EndCreate(DBSchemaTypes type, bool checknotexists)
         {
-            //We write the 
             if (type == DBSchemaTypes.Table)
-                this.WriteRaw(" ENGINE = " + this.TableEngine);
+            {
+                this.WriteRawSQLString(" ENGINE = ");
+                this.WriteObjectName(this.TableEngine);
+            }
 
             this.DecrementStatementDepth();
-
-            //if (type == DBSchemaTypes.StoredProcedure)
-            //{
-            //    this.WriteRaw(this.ProcedureDelimiter);
-            //}
             
         }
 
@@ -426,7 +425,7 @@ namespace Perceiveit.Data.MySqlClient
         }
         private void WriteCheckNotExists(DBSchemaTypes type, string owner, string name)
         {
-            this.WriteRaw(" IF NOT EXISTS ");
+            this.WriteRawSQLString(" IF NOT EXISTS ");
         }
 
         public override void BeginCheckNotExists(DBSchemaTypes type, string owner, string name)
@@ -455,22 +454,28 @@ namespace Perceiveit.Data.MySqlClient
 
             this.BeginCreate(DBSchemaTypes.Table, "");
 
-            this.BeginIdentifier();
+            
             if (string.IsNullOrEmpty(schemaTable.Catalog) == false)
             {
-                this.WriteRaw(schemaTable.Catalog);
+                this.BeginIdentifier();
+                this.WriteObjectName(schemaTable.Catalog);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
+                
             }
             if (string.IsNullOrEmpty(schemaTable.Schema) == false)
             {
-                this.WriteRaw(schemaTable.Schema);
+                this.BeginIdentifier();
+                this.WriteObjectName(schemaTable.Schema);
                 this.EndIdentifier();
                 this.AppendIdSeparator();
-                this.BeginIdentifier();
             }
-            this.WriteRaw(schemaTable.Name);
+            else if (string.IsNullOrEmpty(schemaTable.Catalog) == false)
+            {
+                this.AppendIdSeparator();
+            }
+            this.BeginIdentifier();
+            this.WriteObjectName(schemaTable.Name);
             this.EndIdentifier();
 
             this.BeginBlock();
@@ -503,7 +508,7 @@ namespace Perceiveit.Data.MySqlClient
                 index++;
 
                 if(index < sorted.Count)
-                    this.AppendReferenceSeparator();
+                    this.WriteReferenceSeparator();
             }
 
             if (pks.Count > 1 && hasauto)
@@ -511,9 +516,9 @@ namespace Perceiveit.Data.MySqlClient
 
             if (pks.Count > 0)
             {
-                this.AppendReferenceSeparator();
+                this.WriteReferenceSeparator();
                 this.BeginNewLine();
-                this.WriteRaw("PRIMARY KEY");
+                this.WriteRawSQLString("PRIMARY KEY");
                 this.BeginBlock();
 
                 index = 0;
@@ -521,13 +526,13 @@ namespace Perceiveit.Data.MySqlClient
                 foreach (DBSchemaTableColumn tc in pks)
                 {
                     this.BeginIdentifier();
-                    this.WriteRaw(tc.Name);
+                    this.WriteObjectName(tc.Name);
                     this.EndIdentifier();
 
                     index++;
 
                     if (index < pks.Count)
-                        this.AppendReferenceSeparator();
+                        this.WriteReferenceSeparator();
                 }
 
                 this.EndBlock();
@@ -547,25 +552,29 @@ namespace Perceiveit.Data.MySqlClient
             if (string.IsNullOrEmpty(tc.Name))
                 throw new ArgumentNullException("schemaTable.Columns[" + tc.OrdinalPosition + "].Name");
             this.BeginIdentifier();
-            this.WriteRaw(tc.Name);
+            this.WriteObjectName(tc.Name);
             this.EndIdentifier();
-            this.WriteRaw(" ");
+            this.WriteSpace();
 
             string options;
             string type = this.GetNativeTypeForDbType(tc.DbType, tc.Size, tc.Precision, tc.ColumnFlags, out options);
-            this.WriteRaw(type);
+
+            this.WriteRawSQLString(type);
             if (string.IsNullOrEmpty(options) == false)
-                this.WriteRaw(options);
+                this.WriteRawSQLString(options);
 
             if (tc.Nullable == false)
-                this.WriteRaw(" NOT NULL");
+                this.WriteRawSQLString(" NOT NULL");
             if (tc.AutoAssign)
-                this.WriteRaw(" AUTO_INCREMENT");
+                this.WriteRawSQLString(" AUTO_INCREMENT");
             //if (tc.PrimaryKey)
             //    this.WriteRaw(" PRIMARY KEY");
 
             if (tc.HasDefault && string.IsNullOrEmpty(tc.DefaultValue))
-                this.WriteRaw(" DEFAULT " + tc.DefaultValue);
+            {
+                this.WriteRawSQLString(" DEFAULT ");
+                this.WriteRawSQLString(tc.DefaultValue);
+            }
 
 
         }
@@ -600,9 +609,9 @@ namespace Perceiveit.Data.MySqlClient
             this.BeginCreate(DBSchemaTypes.Index, schemaIndex.IsUnique ? "UNIQUE" : "");
 
             this.BeginIdentifier();
-            this.WriteRaw(schemaIndex.Name);
+            this.WriteObjectName(schemaIndex.Name);
             this.EndIdentifier();
-            this.WriteRaw(" ON ");
+            this.WriteRawSQLString(" ON ");
             DBSchemaItemRef tbl = schemaIndex.TableReference;
 
             this.WriteSourceTable(tbl.Catalog, tbl.Schema, tbl.Name, null);
@@ -617,13 +626,13 @@ namespace Perceiveit.Data.MySqlClient
 
                 this.BeginOrderClause(col.SortOrder);
                 this.BeginIdentifier();
-                this.WriteRaw(col.ColumnName);
+                this.WriteObjectName(col.ColumnName);
                 this.EndIdentifier();
                 this.EndOrderClause(col.SortOrder);
 
                 index++;
                 if(index < sorted.Count)
-                    this.AppendReferenceSeparator();
+                    this.WriteReferenceSeparator();
             }
 
             this.EndBlock();
@@ -653,18 +662,18 @@ namespace Perceiveit.Data.MySqlClient
             if (schemaView.Columns != null && schemaView.Columns.Count > 0)
             {
                 List<DBSchemaColumn> col = this.SortColumnsByOrdinal(schemaView.Columns.GetColumns());
-                this.WriteRaw(" (");
+                this.BeginBlock();
 
                 for (int i = 0; i < col.Count; i++)
                 {
-                    this.WriteSourceField(null, null, col[i].Name, null);
+                    this.WriteSourceField(null, null, null, col[i].Name, null);
                     if (i < col.Count - 1)
-                        this.WriteRaw(", ");
+                        this.WriteReferenceSeparator();
                 }
-                this.WriteRaw(") ");
+                this.EndBlock();
             }
 
-            this.WriteRaw(" AS ");
+            this.WriteRawSQLString(" AS ");
 
             script.BuildStatement(this);
         }
@@ -707,9 +716,10 @@ namespace Perceiveit.Data.MySqlClient
         {
             string opt;
             string ntype = GetNativeTypeForDbType(type, size, -1, DBColumnFlags.Nullable, out opt);
-            this.WriteRaw("RETURNS " + ntype);
+            this.WriteRawSQLString("RETURNS ");
+            this.WriteRawSQLString(ntype);
             if (string.IsNullOrEmpty(opt) == false)
-                this.WriteRaw(opt);
+                this.WriteRawSQLString(opt);
         }
 
         #endregion
@@ -754,7 +764,7 @@ namespace Perceiveit.Data.MySqlClient
             if (schemaRoutine.Parameters != null && schemaRoutine.Parameters.Count > 0)
             {
                 List<DBSchemaParameter> param = this.SortColumnsByOrdinal(schemaRoutine.Parameters);
-                this.WriteRaw(" (");
+                this.BeginBlock();
 
 
                 for (int i = 0; i < param.Count; i++)
@@ -767,13 +777,13 @@ namespace Perceiveit.Data.MySqlClient
                         switch (p.Direction)
                         {
                             case System.Data.ParameterDirection.Input:
-                                this.WriteRaw("IN ");
+                                this.WriteRawSQLString("IN ");
                                 break;
                             case System.Data.ParameterDirection.InputOutput:
-                                this.WriteRaw("INOUT ");
+                                this.WriteRawSQLString("INOUT ");
                                 break;
                             case System.Data.ParameterDirection.Output:
-                                this.WriteRaw("OUT ");
+                                this.WriteRawSQLString("OUT ");
                                 break;
                             case System.Data.ParameterDirection.ReturnValue:
                                 //Skip the return parameters
@@ -784,17 +794,17 @@ namespace Perceiveit.Data.MySqlClient
                         }
                     }
                     this.WriteNativeParameterReference(p.InvariantName);
-                    this.WriteRaw(" ");
+                    this.WriteSpace();
                     string options;
                     string type = this.GetNativeTypeForDbType(p.DbType, p.ParameterSize, -1, DBColumnFlags.Nullable, out options);
-                    this.WriteRaw(type);
+                    this.WriteRawSQLString(type);
                     if (string.IsNullOrEmpty(options) == false)
-                        this.WriteRaw(options);
+                        this.WriteRawSQLString(options);
                     if (i < param.Count - 1)
-                        this.WriteRaw(", ");
+                        this.WriteReferenceSeparator();
 
                 }
-                this.WriteRaw(") ");
+                this.EndBlock();
 
             }
             this.BeginNewLine();
@@ -810,19 +820,19 @@ namespace Perceiveit.Data.MySqlClient
         public override void WriteColumnFlags(DBColumnFlags flags, DBClause defaultValue)
         {
             if ((flags & DBColumnFlags.PrimaryKey) > 0)
-                this.WriteRaw(" PRIMARY KEY");
+                this.WriteRawSQLString(" PRIMARY KEY");
 
             if ((flags & DBColumnFlags.Nullable) > 0)
-                this.WriteRaw(" NULL");
+                this.WriteRawSQLString(" NULL");
             else
-                this.WriteRaw(" NOT NULL");
+                this.WriteRawSQLString(" NOT NULL");
 
             if ((flags & DBColumnFlags.AutoAssign) > 0)
-                this.WriteRaw(" AUTO_INCREMENT");
+                this.WriteRawSQLString(" AUTO_INCREMENT");
 
             if ((flags & DBColumnFlags.HasDefault) > 0)
             {
-                this.WriteRaw(" DEFAULT ");
+                this.WriteRawSQLString(" DEFAULT ");
                 defaultValue.BuildStatement(this);
             }
         }
