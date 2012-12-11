@@ -565,9 +565,9 @@ namespace Perceiveit.Data.Query
             if (string.IsNullOrEmpty(this.Name))
                 return false;
             if (this.Temporary)
-                builder.WriteSourceTable(this.Owner, builder.DatabaseProperties.TemporaryTablePrefix + this.Name, this.Alias);
+                builder.WriteSourceTable(this.Catalog, this.Owner, builder.DatabaseProperties.TemporaryTablePrefix + this.Name, this.Alias);
             else
-                builder.WriteSourceTable(this.Owner, this.Name, this.Alias);
+                builder.WriteSourceTable(this.Catalog, this.Owner, this.Name, this.Alias);
 
             if (this.HasHints)
                 this.Hints.BuildStatement(builder);

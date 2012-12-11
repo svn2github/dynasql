@@ -282,6 +282,7 @@
       <Link>_Enumerations.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query\DBUseQuery.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="..\Perceiveit.Data\Errors.resx">

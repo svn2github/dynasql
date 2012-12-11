@@ -26,6 +26,11 @@ namespace Perceiveit.Data.UnitTests.SQLClient
         /// </summary>
         public const string Schema = "dbo";
 
+        /// <summary>
+        /// The name of the database
+        /// </summary>
+        public const string Catalog = "Northwind";
+
         public class Departments
         {
             public const string Table = "DSQL_DEPARTMENT";
@@ -82,6 +87,25 @@ namespace Perceiveit.Data.UnitTests.SQLClient
             public static readonly DBColumn CourseID = DBColumn.Column("CourseID", System.Data.DbType.AnsiStringFixedLength, 4);
             public static readonly DBColumn PersonID = DBColumn.Column("PersonID", System.Data.DbType.Int32);
 
+        }
+
+
+
+    }
+
+    public class OtherDatabase
+    {
+
+        public const string DbName = "Northwind2";
+
+        public class OtherPerson
+        {
+            public const string Table = "DSQL_PERSON_Two";
+            public static readonly DBColumn Id = DBColumn.Column("PersonID", System.Data.DbType.Int32, DBColumnFlags.PrimaryKey | DBColumnFlags.AutoAssign);
+            public static readonly DBColumn First = DBColumn.Column("FirstName", System.Data.DbType.String, 100);
+            public static readonly DBColumn Last = DBColumn.Column("LastName", System.Data.DbType.String, 100);
+            public static readonly DBColumn HireDate = DBColumn.Column("HireDate", System.Data.DbType.DateTime2, DBColumnFlags.Nullable);
+            public static readonly DBColumn EnrollmentDate = DBColumn.Column("EnrollmentDate", System.Data.DbType.DateTime2, DBColumnFlags.Nullable);
         }
     }
 }

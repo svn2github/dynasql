@@ -1067,6 +1067,7 @@ namespace Perceiveit.Data.UnitTests.SQLClient
         // schema interrogation
         //
 
+        #region public void SQLClient_15_ValidateTableSchema()
 
         [TestMethod()]
         public void SQLClient_15_ValidateTableSchema()
@@ -1129,6 +1130,10 @@ namespace Perceiveit.Data.UnitTests.SQLClient
             }
         }
 
+        #endregion
+
+        #region public void SQLClient_16_ValidateViewSchema()
+
 
         [TestMethod()]
         public void SQLClient_16_ValidateViewSchema()
@@ -1168,6 +1173,10 @@ namespace Perceiveit.Data.UnitTests.SQLClient
 
         }
 
+        #endregion
+
+        #region public void SQLClient_17_ValidateIndexSchema()
+
         [TestMethod()]
         public void SQLClient_17_ValidateIndexSchema()
         {
@@ -1195,6 +1204,10 @@ namespace Perceiveit.Data.UnitTests.SQLClient
 
         }
 
+        #endregion
+
+        #region public void SQLClient_18_ValidateSprocSchema()
+
         [TestMethod()]
         public void SQLClient_18_ValidateSprocSchema()
         {
@@ -1220,6 +1233,143 @@ namespace Perceiveit.Data.UnitTests.SQLClient
 
             Assert.AreEqual(0, known.Count, "Not all the known Stored Procedures were found");
 
+        }
+
+        #endregion
+
+        //
+        // secondary database
+        // 
+
+        /// <summary>
+        /// Uses a second database reference to create a table, populate with data from the original database. 
+        /// Run updates and deletions. 
+        /// And finally drop the table - checking that it was deleted.
+        /// </summary>
+        [TestMethod()]
+        public void SQLClient_19_CloneToDifferentDatabase()
+        {
+            DBDatabase db = this.Database;
+
+            //
+            //Create the table on the other database - we specify the database using the USE statement in a script
+            //
+
+            DBUseQuery use = DBQuery.Use(OtherDatabase.DbName);
+            DBCreateTableQuery create = DBQuery.Create.Table(OtherDatabase.OtherPerson.Table)
+                                                       .Add(OtherDatabase.OtherPerson.Id)
+                                                       .Add(OtherDatabase.OtherPerson.First)
+                                                       .Add(OtherDatabase.OtherPerson.Last)
+                                                       .Add(OtherDatabase.OtherPerson.EnrollmentDate);
+
+            DBScript createScript = DBQuery.Script(use
+                                            , create);
+            db.ExecuteNonQuery(createScript);
+
+            //
+            // after creating make sure it has not been created on the original database
+            //
+
+            DBQuery wrongSelect = DBQuery.SelectCount().From(Schools.Catalog, string.Empty, OtherDatabase.OtherPerson.Table);
+            try
+            {
+                db.ExecuteScalar(wrongSelect);
+                throw new InvalidOperationException("There should have been an error here - as the table should not exist on the schools catalog. One was not raised");
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                TestContext.WriteLine("Table in other database successfully created");
+            }
+
+
+            //
+            //Get the count of items in the Schools database.
+            //
+
+            DBQuery count = DBQuery.SelectCount().From(Schools.Catalog,Schools.Schema, Schools.Person.Table);
+            int origNum = Convert.ToInt32(db.ExecuteScalar(count));
+            if (origNum == 0)
+                throw new InternalTestFailureException("Cannot continue - there are no item in the original table");
+            else
+                TestContext.WriteLine("There are " + origNum + " rows to migrate");
+
+            //
+            //push all items from the known table into the new table on the other databse.
+            //
+
+            DBInsertQuery ins = DBQuery.InsertInto(OtherDatabase.DbName, string.Empty, OtherDatabase.OtherPerson.Table)
+                                        .Fields(OtherDatabase.OtherPerson.First.Name, OtherDatabase.OtherPerson.Last.Name, OtherDatabase.OtherPerson.EnrollmentDate.Name)
+                                       .Select(
+                                            //Inner select referring to the original database
+                                            DBQuery.SelectFields(Schools.Person.First.Name, Schools.Person.Last.Name, Schools.Person.EnrollmentDate.Name)
+                                                   .From(Schools.Catalog,Schools.Schema,Schools.Person.Table));
+            db.ExecuteScalar(ins);
+
+            //
+            //run a check that all the items were inserted.
+            //
+
+            DBQuery newCount = DBQuery.SelectCount().From(OtherDatabase.DbName, string.Empty, OtherDatabase.OtherPerson.Table);
+            int newNum = Convert.ToInt32(db.ExecuteScalar(newCount));
+            Assert.AreEqual(newNum, origNum);
+            TestContext.WriteLine("There are now " + newNum + " rows in the new database");
+
+            //
+            //Now run an update on the enrollment date of the other database
+            //
+
+            DBConst now = DBConst.DateTime(DateTime.Now);
+            DBQuery update = DBQuery.Update(OtherDatabase.DbName, string.Empty, OtherDatabase.OtherPerson.Table)
+                                    .Set(OtherDatabase.OtherPerson.EnrollmentDate.Name, now);
+            int updated = db.ExecuteNonQuery(update);
+            Assert.AreEqual(origNum, updated);
+            TestContext.WriteLine("Updated " + updated + " rows to the current date time");
+
+            //
+            //No delete all the rows.
+            //
+
+            DBQuery del = DBQuery.DeleteFrom(OtherDatabase.DbName, string.Empty, OtherDatabase.OtherPerson.Table);
+            int deleted = db.ExecuteNonQuery(del);
+            Assert.AreEqual(origNum, deleted);
+            TestContext.WriteLine("Deleted " + deleted + " rows from the other database table");
+
+            //
+            //Now just run a check to make sure that the orginal table was not altered
+            //and that there a no longer any rows in the new table
+            //
+
+            Assert.AreEqual(origNum, Convert.ToInt32(db.ExecuteScalar(count)), "The number of rows in the original table has changed");
+            TestContext.WriteLine("Row count on the original table remains the same");
+
+            //
+            //And then drop the other table with another script starting with use..
+            //
+            DBScript dropscript = DBQuery.Script(
+                                    DBQuery.Use(OtherDatabase.DbName),
+                                    DBQuery.Drop.Table(OtherDatabase.OtherPerson.Table).IfExists()
+                                    );
+            db.ExecuteNonQuery(dropscript);
+
+
+            //After dropping run a check to make sure the table has been dropped.
+            try
+            {
+                db.ExecuteScalar(newCount);
+                throw new InvalidOperationException("There should have been an error here - as the table no longer exists. One was not raised");
+            }
+            catch (InvalidOperationException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                TestContext.WriteLine("Table in other database successfully dropped");
+            }
         }
 
         // 
