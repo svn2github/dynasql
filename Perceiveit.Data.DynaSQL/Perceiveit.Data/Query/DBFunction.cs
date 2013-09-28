@@ -344,7 +344,9 @@ namespace Perceiveit.Data.Query
         public static DBFunction Function(string func, params DBClause[] parameters)
         {
             DBFunction f = new DBFunctionRef();
+            f.KnownFunction = Data.Function.Unknown;
             f.FunctionName = func;
+            
             if (null != parameters && parameters.Length > 0)
             {
                 foreach (DBClause clause in parameters)

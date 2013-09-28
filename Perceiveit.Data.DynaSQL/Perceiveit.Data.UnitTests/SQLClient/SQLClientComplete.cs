@@ -1376,13 +1376,104 @@ namespace Perceiveit.Data.UnitTests.SQLClient
         // cleanup - Drop any schema elements that were created
         //
 
-        #region public void SQLClient_20_TearDownSchema()
+        [TestMethod()]
+        public void SQLClient_21_CloneSchemaAndPopulate()
+        {
+            string tbl2Clone = "DQSL_COURSES";
+            string cloneTbl = tbl2Clone + "_Clone";
+
+            
+            DBDatabase db = this.Database;
+
+            //use the schema provider to extract the name and column info
+            Schema.DBSchemaProvider sch = db.GetSchemaProvider();
+            Schema.DBSchemaTable tbl = sch.GetTable(tbl2Clone);
+            
+
+            DBCreateTableQuery createClone = DBCreateTableQuery.Create.Table(tbl.Schema, cloneTbl);
+            DBDropTableQuery dropClone = DBDropTableQuery.Drop.Table(tbl.Schema, cloneTbl).IfExists();
+
+            DBInsertQuery ins = DBQuery.InsertInto(cloneTbl);
+            DBSelectQuery sel = DBSelectQuery.Select();
+
+            foreach (Schema.DBSchemaTableColumn col in tbl.Columns)
+            {
+                //append the columns to the create statement
+                if(col.Size > 0)
+                    createClone.Add(col.Name, col.DbType, col.Size, col.ColumnFlags);
+                else
+                    createClone.Add(col.Name, col.DbType, col.ColumnFlags);
+
+                //if we are not an auto assign then add the column to the select and the insert
+                if (col.AutoAssign == false)
+                {
+                    sel.Field(col.Name);
+                    ins.Field(col.Name);
+                }
+            }
+            sel = sel.From(tbl.Schema, tbl.Name);
+            //add any filtering to the select statement
+
+            //Append the select as part of the insert
+            ins.Select(sel);
+
+            //statement construction complete
+
+            //drop any existing cloned table
+            db.ExecuteNonQuery(DBQuery.Drop.Table(cloneTbl).IfExists());
+            //IF EXISTS (SELECT *
+		    //          FROM [INFORMATION_SCHEMA].[TABLES]
+		    //          WHERE  ([TABLE_NAME] = 'DQSL_COURSES_Clone') ) 
+	        //              DROP TABLE [DQSL_COURSES_Clone]
+
+            db.ExecuteNonQuery(createClone);
+            //CREATE TABLE [dbo].[DQSL_COURSES_Clone] (
+		    //              [CourseID] CHAR(4) PRIMARY KEY NOT NULL, 
+		    //              [Title] NVARCHAR(100) NOT NULL, 
+		    //              [Credits] FLOAT(4) NOT NULL, 
+		    //              [DepartmentID] INT NOT NULL, 
+		    //              [Description] NVARCHAR(1000) NULL)
+
+            //execute the insert into select from
+            db.ExecuteNonQuery(ins);
+            //INSERT INTO [DQSL_COURSES_Clone]
+	        //          ([CourseID], [Title], [Credits], [DepartmentID], [Description])
+	        //              (SELECT [CourseID], [Title], [Credits], [DepartmentID], [Description]
+		    //               FROM [dbo].[DQSL_COURSES]) 
+
+        }
+
+
+        [TestMethod()]
+        public void SQLClient_22_UpdateExpressions()
+        {
+
+            DBQuery upd = DBQuery.Update("MyTable").Set("Salary", DBField.Field("Salary") + DBConst.Int32(4000));
+            string all = upd.ToSQLString(this.Database);
+            TestContext.WriteLine("Update Statement : " + all);
+        }
+
+
+        [TestMethod()]
+        public void SQLClient_23_RoundFunction()
+        {
+            DBParam amount = DBParam.ParamWithValue("amount",10);
+            DBQuery sel = DBQuery.SelectAll()
+                                 .Where(DBFunction.Function("Round", amount, DBConst.Int32(2)), Compare.GreaterThanEqual, DBField.Field("MinAmount"))
+                                 .AndWhere(DBFunction.Function("Round", amount, DBConst.Int32(2)), Compare.LessThanEqual, DBField.Field("MaxAmount"));
+
+            
+            string all = sel.ToSQLString(this.Database);
+            TestContext.WriteLine("Update Statement : " + all);
+        }
+
+        #region public void SQLClient_100_TearDownSchema()
 
         /// <summary>
         /// Clean up all the created items. If you create anything then the corresponding drop should be in here too.
         /// </summary>
         [TestMethod()]
-        public void SQLClient_20_TearDownSchema()
+        public void SQLClient_100_TearDownSchema()
         {
             TestContext.WriteLine("Cleaning up database objects");
 
